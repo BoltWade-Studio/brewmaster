@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f060d58197dfb694185f1709f3c578a8, type: 3}
+  m_Name: String Localization Data
+  m_EditorClassIdentifier: 
+  IsEnglish: 1
+  _stringDic:
+    _pairs:
+    - _key: Play
+      _value:
+        Vietnamese: "CH\u01A0I"
+        English: PLAY
+    - _key: HTPlay
+      _value:
+        Vietnamese: "H\u01B0\u1EDBng d\u1EABn"
+        English: How to play
+    - _key: Exit
+      _value:
+        Vietnamese: "Tho\xE1t"
+        English: Exit
+    - _key: Day
+      _value:
+        Vietnamese: "Ng\xE0y"
+        English: Day
+    - _key: Confirm
+      _value:
+        Vietnamese: "Ch\u1EA5p nh\u1EADn"
+        English: Confirm
+    - _key: YourMoney
+      _value:
+        Vietnamese: "Ti\u1EC1n c\u1EE7a b\u1EA1n"
+        English: Your money
+    - _key: TimeUp
+      _value:
+        Vietnamese: "H\u1EBFt gi\u1EDD"
+        English: Time up
+    - _key: MainMenu
+      _value:
+        Vietnamese: "Trang ch\u1EE7"
+        English: Main menu
+    - _key: Resume
+      _value:
+        Vietnamese: "Ti\u1EBFp t\u1EE5c"
+        English: Resume
+    - _key: Don'tHaveEnoughMoney
+      _value:
+        Vietnamese: "Kh\xF4ng c\xF3 \u0111\u1EE7 ti\u1EC1n r\u1ED3i"
+        English: Don't Have Enough Money
+    - _key: ControlText
+      _value:
+        Vietnamese: "\u0110i l\xEAn: W / m\xFAi t\xEAn l\xEAn\n\u0110i xu\u1ED1ng
+          S / m\u0169i t\xEAn xu\u1ED1ng\nPh\u1EE5c v\u1EE5: Space"
+        English: 'Move up: W / up arrow
+
+          Move Dow: S / down arrow
+
+          Serve
+          Beer: Space'
+    - _key: DescriptionText
+      _value:
+        Vietnamese: "Ph\u1EE5c v\u1EE5 c\xE0ng nhi\u1EC1u c\xE0ng t\u1ED1t, ki\u1EBFm
+          ti\u1EC1n \u0111\u1EC3 n\xE2ng c\u1EA5p qu\xE1n bar c\u1EE7a b\u1EA1n \u0111i."
+        English: Serve as many beer as you can, gain money and upgrade your bar.
+    - _key: Shop
+      _value:
+        Vietnamese: "C\u1EEDa h\xE0ng"
+        English: Shop
+    - _key: NextDay
+      _value:
+        Vietnamese: "Qua ng\xE0y"
+        English: Next day
+    - _key: 'RentCost:'
+      _value:
+        Vietnamese: "Ti\u1EC1n thu\xEA:"
+        English: 'Rent Cost:'
+    - _key: 'Target:'
+      _value:
+        Vietnamese: "M\u1EE5c ti\xEAu:"
+        English: 'Target:'
+    - _key: 'NextTarget:'
+      _value:
+        Vietnamese: "M\u1EE5c ti\xEAu ti\u1EBFp theo:"
+        English: 'Next Target:'

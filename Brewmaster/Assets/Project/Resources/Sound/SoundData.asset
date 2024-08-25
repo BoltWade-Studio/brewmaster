@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38a9bbeaebc1e694e9315ef1940d5aa8, type: 3}
+  m_Name: SoundData
+  m_EditorClassIdentifier: 
+  soundDic:
+    _pairs:
+    - _key: BtnClick
+      _value: {fileID: 8300000, guid: da09f2ee46ba07747946f4f65e2a767b, type: 3}
+    - _key: BtnHover
+      _value: {fileID: 8300000, guid: 52eb77017bc37de47bf251a9c16bd9b9, type: 3}
+    - _key: ServeComplete
+      _value: {fileID: 8300000, guid: 7ab72472c830c1c41b57bc2cbdc9fd87, type: 3}
+    - _key: ServeFail
+      _value: {fileID: 8300000, guid: b3de2e744bce5eb4e83db64d7c881f52, type: 3}
+    - _key: Teleport
+      _value: {fileID: 8300000, guid: 3d6674f61022df740a596f152227cb32, type: 3}
+    - _key: Timer
+      _value: {fileID: 8300000, guid: 8d8dd57840415cf499088cb7a0c14774, type: 3}
+    - _key: EndLevel
+      _value: {fileID: 8300000, guid: 47abd8e584aa57c4fa292f08af3211a1, type: 3}
+    - _key: MoneySound
+      _value: {fileID: 8300000, guid: 63d1ee95bb4ebe048b61cd3d7e659ba8, type: 3}
+    - _key: ServeBeer
+      _value: {fileID: 8300000, guid: 871fb5cdb4756ed4195dd6b4caf5d39f, type: 3}
+  musicDic:
+    _pairs:
+    - _key: CrowdBGSound
+      _value: {fileID: 8300000, guid: 00526aa622097e841ace9dbd7c0d4086, type: 3}
+    - _key: PianoBGMusic
+      _value: {fileID: 8300000, guid: 7731cf2636465524caa57ebfe30d3258, type: 3}

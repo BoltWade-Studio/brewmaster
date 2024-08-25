@@ -1,0 +1,17 @@
+{
+    "name": "NOOD.UI",
+    "rootNamespace": "",
+    "references": [
+        "GUID:ab02422802cae8d448d7b12725fd4bfb",
+        "GUID:7b1ec382c05eb4449a44d7f0ac38dfcf"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
