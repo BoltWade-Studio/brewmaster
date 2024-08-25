@@ -81,13 +81,13 @@ namespace Game
 			}
 #endif
 
-			public static void EmitEvent(string eventName, string data = null)
+			public static void EmitEvent(string eventName, string jsonData = null)
 			{
 				Debug.Log("EmitEvent: " + eventName);
 #if UNITY_WEBGL && !UNITY_EDITOR
-				JsSocketConnect.EmitEvent(eventName, data);
+				JsSocketConnect.EmitEvent(eventName, jsonData);
 #else
-				socket.Emit(eventName, data);
+				socket.Emit(eventName, jsonData);
 #endif
 			}
 			public static void OnEvent(string eventName, string objectName, string methodName, Action<string> action)

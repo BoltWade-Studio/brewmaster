@@ -10,8 +10,8 @@ mergeInto(LibraryManager.library, {
             return;
         }
 
-        // var socket = io('http://localhost:5006');
-        var socket = io('https://brewmaster-socket.starkarcade.com/');
+        var socket = io('http://localhost:5006');
+        // var socket = io('https://brewmaster-socket.starkarcade.com/');
 
         socket.on('connect', () => {
             socket.isReady = true;
@@ -69,6 +69,18 @@ mergeInto(LibraryManager.library, {
         if(dataArray)
             calldataArray = JSON.parse(UTF8ToString(dataArray));
         let event = UTF8ToString(eventName);
+
+		if(event == 'twitterTest')
+		{
+			const text = "This is a pre-filled tweet text";
+			const encodedText = encodeURIComponent(text);
+			const tweetUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
+
+			// Open the URL in a new window/tab
+			console.log(tweetUrl);
+			window.open(tweetUrl, '_blank');
+			return;
+		}
 
         if(window.unitySocket && dataArray)
         {
