@@ -11,14 +11,12 @@ namespace Game
 	public static class PlayerData
 	{
 		public static string PlayerAddress = "0x000000000";
-		public static int InGamePoint = 0;
-		public static int SahPoint = 0;
+		public static int TotalPoint = 0;
 
 		public static void Reset()
 		{
 			PlayerAddress = "0x000000000";
-			InGamePoint = 0;
-			SahPoint = 0;
+			TotalPoint = 0;
 		}
 	}
 
@@ -53,22 +51,9 @@ namespace Game
 
 		void Start()
 		{
-			Utility.Socket.OnEvent("updateCoin", this.gameObject.name, nameof(OnUpdateSocketCoin), OnUpdateSocketCoin);
-			Utility.Socket.OnEvent("updateProof", this.gameObject.name, nameof(OnUpdateProof), OnUpdateProof);
-			Utility.Socket.OnEvent("updateAnonymous", this.gameObject.name, nameof(OnUpdateAnonymous), OnUpdateAnonymous);
-			// if (Application.isEditor)
-			// {
-			// 	Debug.Log("Subscribe update coin");
-			// 	SocketConnectManager.Instance.OnEvent("updateCoin", OnUpdateSocketCoin);
-			// 	SocketConnectManager.Instance.OnEvent("updateProof", OnUpdateProof);
-			// 	SocketConnectManager.Instance.OnEvent("updateAnonymous", OnUpdateAnonymous);
-			// }
-			// else
-			// {
-			// 	JsSocketConnect.OnEvent("updateCoin", this.gameObject.name, nameof(OnUpdateSocketCoin));
-			// 	JsSocketConnect.OnEvent("updateProof", this.gameObject.name, nameof(OnUpdateProof));
-			// 	JsSocketConnect.OnEvent("updateAnonymous", this.gameObject.name, nameof(OnUpdateAnonymous));
-			// }
+			Utility.Socket.OnEvent(SocketEnum.updateProof.ToString(), this.gameObject.name, nameof(OnUpdateProof), OnUpdateProof);
+			Utility.Socket.OnEvent(SocketEnum.updateAnonymous.ToString(), this.gameObject.name, nameof(OnUpdateAnonymous), OnUpdateAnonymous);
+			Utility.Socket.OnEvent(SocketEnum.totalPointCallback.ToString(), this.gameObject.name, nameof(OnUpdateTotalPoint), OnUpdateTotalPoint);
 		}
 
 
@@ -97,15 +82,8 @@ namespace Game
 		private void ConnectAnonymous()
 		{
 			// Request address and private key from server
-			Utility.Socket.EmitEvent("anonymousLogin");
-			// if (Application.isEditor)
-			// {
-			// 	SocketConnectManager.Instance.EmitEvent("anonymousLogin");
-			// }
-			// else
-			// {
-			// 	JsSocketConnect.EmitEvent("anonymousLogin");
-			// }
+			Utility.Socket.EmitEvent(SocketEnum.anonymousLogin.ToString());
+			Utility.Socket.EmitEvent(SocketEnum.requestUpdateTotalPoint.ToString());
 			isAnonymous = true;
 
 			// Hide UI
@@ -113,10 +91,10 @@ namespace Game
 			_onSuccess?.Invoke();
 		}
 
-		private void OnUpdateSocketCoin(string coin)
+		private void OnUpdateTotalPoint(string point)
 		{
-			Debug.Log("Update coin" + coin);
-			PlayerData.InGamePoint = Convert.ToInt32(coin);
+			Debug.Log("Update total point" + point);
+			PlayerData.TotalPoint = Convert.ToInt32(point);
 		}
 
 		private void OnUpdateProof(string proof)
@@ -154,21 +132,17 @@ namespace Game
 			PlayerData.PlayerAddress = JSInteropManager.GetAccount();
 			_connectWalletUI.Close();
 			_onSuccess.Invoke();
-			SyncPlayerPoint();
+			// SyncPlayerPoint()
 		}
 
 		public void Claim()
 		{
-			if (PlayerData.InGamePoint > 0)
+			if (PlayerData.TotalPoint > 0)
 			{
 				string[] datas = new string[] {
 					PlayerData.PlayerAddress
 				};
-				Utility.Socket.EmitEvent("claim", JsonConvert.SerializeObject(new ArrayWrapper { array = datas }));
-				// if (Application.isEditor)
-				// 	SocketConnectManager.Instance.EmitEvent("claim", JsonConvert.SerializeObject(new ArrayWrapper { array = datas }));
-				// else
-				// 	JsSocketConnect.EmitEvent("claim", JsonConvert.SerializeObject(new ArrayWrapper { array = datas }));
+				Utility.Socket.EmitEvent(SocketEnum.claim.ToString(), JsonConvert.SerializeObject(new ArrayWrapper { array = datas }));
 			}
 		}
 
@@ -179,14 +153,13 @@ namespace Game
 			string[] calldata = new string[1];
 			calldata[0] = PlayerData.PlayerAddress;
 			string calldataString = JsonUtility.ToJson(new ArrayWrapper { array = calldata });
-			JSInteropManager.CallContract(contractAddress, "getUserPoint", calldataString, gameObject.name, nameof(PlayerPointCallback));
+			// JSInteropManager.CallContract(contractAddress, "getUserPoint", calldataString, gameObject.name, nameof(PlayerPointCallback));
 		}
 		private void PlayerPointCallback(string response)
 		{
 			JsonResponse jsonResponse = JsonUtility.FromJson<JsonResponse>(response);
 			int balance = Convert.ToInt32(jsonResponse.result[0], 16);
-			PlayerData.SahPoint = balance;
-			UIManager.Instance.UpdatePlayerInfoPanel();
+			// UIManager.Instance.UpdatePlayerInfoPanel();
 		}
 
 		private void ClaimCallback(string response)
@@ -201,7 +174,7 @@ namespace Game
 			{
 				// user claim
 				SyncPlayerPoint();
-				Utility.Socket.EmitEvent("afterClaim");
+				Utility.Socket.EmitEvent(SocketEnum.afterClaim.ToString());
 				// if (Application.isEditor)
 				// 	SocketConnectManager.Instance.EmitEvent("afterClaim");
 				// else

@@ -53,6 +53,14 @@ mergeInto(LibraryManager.library, {
                 SendMessage(this.objectNameDic.updateSaveData, this.methodNameDic.updateSaveData, data.toString());
         });
 
+		socket.on('twitterRequestCallback', (data) => {
+			const encodedText = encodeURIComponent(data);
+			const tweetUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
+
+			// Open the URL in a new window/tab
+			window.open(tweetUrl, '_blank');
+		});
+
         window.unitySocket = socket;
     },
 
@@ -70,18 +78,6 @@ mergeInto(LibraryManager.library, {
             calldataArray = JSON.parse(UTF8ToString(dataArray));
         let event = UTF8ToString(eventName);
 
-		if(event == 'twitterTest')
-		{
-			const text = "This is a pre-filled tweet text";
-			const encodedText = encodeURIComponent(text);
-			const tweetUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
-
-			// Open the URL in a new window/tab
-			console.log(tweetUrl);
-			window.open(tweetUrl, '_blank');
-			return;
-		}
-
         if(window.unitySocket && dataArray)
         {
             window.unitySocket.emit(event, calldataArray.array);
@@ -90,6 +86,15 @@ mergeInto(LibraryManager.library, {
         if(window.unitySocket)
             window.unitySocket.emit(event);
     },
+
+	OpenTwitter:function(text)
+	{
+		const encodedText = encodeURIComponent(text);
+		const tweetUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
+
+		// Open the URL in a new window/tab
+		window.open(tweetUrl, '_blank');
+	},
 
     FreeWasmString: function (ptr) {
         _free(ptr);

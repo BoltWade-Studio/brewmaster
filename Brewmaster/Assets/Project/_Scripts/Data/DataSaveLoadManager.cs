@@ -19,18 +19,14 @@ namespace Game
 
 		protected override void ChildAwake()
 		{
+			Load();
 		}
 
 		void Start()
 		{
-			Utility.Socket.OnEvent("loadCallback", this.gameObject.name, nameof(LoadCallback), LoadCallback);
-			Load();
+			Utility.Socket.OnEvent(SocketEnum.loadCallback.ToString(), this.gameObject.name, nameof(LoadCallback), LoadCallback);
 			GameplayManager.Instance.OnEndDay += Save;
 			GameplayManager.Instance.OnNextDay += Save;
-			GameplayManager.Instance.OnEndDay += () =>
-			{
-				Debug.Log("End day");
-			};
 		}
 
 		void OnDestroy()
@@ -41,22 +37,22 @@ namespace Game
 
 		private void Save()
 		{
-			Dictionary<string, object> data = new Dictionary<string, object>
-			{
-				{"day", TimeManager.Instance.CurrentDay},
-				{"money", MoneyManager.Instance.CurrentTotalMoney},
-				{"Target", MoneyManager.Instance.CurrentTarget},
-				{"TableData", TableData}
-			};
+			// Dictionary<string, object> data = new Dictionary<string, object>
+			// {
+			// 	{"day", TimeManager.Instance.CurrentDay},
+			// 	{"money", MoneyManager.Instance.CurrentTotalMoney},
+			// 	{"Target", MoneyManager.Instance.CurrentTarget},
+			// 	{"TableData", TableData}
+			// };
 
-			Debug.Log("Save request");
-			string json = JsonConvert.SerializeObject(data);
-			_json = json;
-			Utility.Socket.EmitEvent("saveDataRequest", json);
+			// Debug.Log("Save request");
+			// string json = JsonConvert.SerializeObject(data);
+			// _json = json;
+			// Utility.Socket.EmitEvent(SocketEnum.saveDataRequest.ToString(), json);
 		}
 		private async void Load()
 		{
-			Utility.Socket.EmitEvent("loadDataRequest");
+			Utility.Socket.EmitEvent(SocketEnum.loadDataRequest.ToString());
 			_isLoaded = false;
 			await UniTask.WaitUntil(() => _isLoaded);
 		}
@@ -77,6 +73,7 @@ namespace Game
 				Money = 0;
 				TableData = new TableData();
 				Target = 100;
+				PlayerData.Reset();
 			}
 			_isLoaded = true;
 		}

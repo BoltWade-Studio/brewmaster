@@ -3,70 +3,73 @@ using UnityEngine;
 
 namespace Game
 {
-    public class MoneyManager : MonoBehaviorInstance<MoneyManager>
-    {
-        [SerializeField] private int _bonus = 40;
-        public int CurrentTarget => _currentTarget;
-        public int NextTarget => _currentTarget + _bonus;
-        public int CurrentTotalMoney => _totalMoney;
-        public int Bonus => _bonus;
-        
-        private int _totalMoney;
-        private int _currentTarget;
+	public class MoneyManager : MonoBehaviorInstance<MoneyManager>
+	{
+		[SerializeField] private int _bonus = 40;
+		public int CurrentTarget => _currentTarget;
+		public int NextTarget => _currentTarget + _bonus;
+		public int Bonus => _bonus;
 
-        protected override void ChildAwake()
-        {
-            _currentTarget = 150;
-        }
+		private int _currentTarget;
 
-        void Start()
-        {
-            _currentTarget = DataSaveLoadManager.Instance.Target;
-            _totalMoney = DataSaveLoadManager.Instance.Money;
-            GameplayManager.Instance.OnNextDay += GameplayManager_OnNextDayHandler;
-        }
+		protected override void ChildAwake()
+		{
+			_currentTarget = 150;
+		}
 
-        void OnDisable()
-        {
-            NoodyCustomCode.UnSubscribeAllEvent(GameplayManager.Instance, this);
-        }
+		void Start()
+		{
+			_currentTarget = DataSaveLoadManager.Instance.Target;
+			GameplayManager.Instance.OnNextDay += GameplayManager_OnNextDayHandler;
+		}
 
-        private void GameplayManager_OnNextDayHandler()
-        {
-            _currentTarget = NextTarget;
-            Debug.Log("Target: " + _currentTarget);
-        }
+		void OnDisable()
+		{
+			NoodyCustomCode.UnSubscribeAllEvent(GameplayManager.Instance, this);
+		}
 
-        public void CommitEndDay()
-        {
-            _totalMoney -= CurrentTarget;
-        }
+		private void GameplayManager_OnNextDayHandler()
+		{
+			_currentTarget = NextTarget;
+			Debug.Log("Target: " + _currentTarget);
+		}
 
-        public bool PayMoney(int amount)
-        {
-            if (_totalMoney >= amount)
-            {
-                _totalMoney -= amount;
-                UIManager.Instance.UpdateInDayMoney();
-                return true;
-            }
-            else
-                return false;
-        }
-        /// <summary>
-        /// If buying stuff, use PayMoney(int) instead
-        /// </summary>
-        /// <param name="amount"></param>
-        public void RemoveMoney(int amount)
-        {
-            _totalMoney -= amount;
-            UIManager.Instance.UpdateInDayMoney();
-        }
-        public void AddMoney(int amount)
-        {
-            _totalMoney += amount;
-            UIManager.Instance.UpdateInDayMoney();
-        }
-    }
+		public void CommitEndDay()
+		{
+			PlayerData.TotalPoint -= CurrentTarget;
+		}
+
+		/// <summary>
+		/// Use to buy item
+		/// </summary>
+		/// <param name="amount"></param>
+		/// <returns></returns>
+		public bool PayMoney(int amount)
+		{
+			if (PlayerData.TotalPoint >= amount)
+			{
+				PlayerData.TotalPoint -= amount;
+				UIManager.Instance.UpdateInDayMoney();
+				return true;
+			}
+			else
+				return false;
+		}
+
+		/// <summary>
+		/// If buying stuff, use PayMoney(int) instead
+		/// </summary>
+		/// <param name="amount"></param>
+		public void RemoveMoney(int amount)
+		{
+			PlayerData.TotalPoint -= amount;
+			UIManager.Instance.UpdateInDayMoney();
+		}
+		public void AddMoney(int amount)
+		{
+			PlayerData.TotalPoint += amount;
+			UIManager.Instance.UpdateInDayMoney();
+		}
+	}
 
 }
