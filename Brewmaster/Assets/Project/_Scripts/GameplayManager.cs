@@ -38,7 +38,7 @@ namespace Game
 		private void OnTimeUpHandler()
 		{
 			IsEndDay = true;
-			if (MoneyManager.Instance.CurrentTotalMoney > MoneyManager.Instance.CurrentTarget)
+			if (PlayerData.TotalPoint > MoneyManager.Instance.CurrentTarget)
 			{
 				IsWin = true;
 			}

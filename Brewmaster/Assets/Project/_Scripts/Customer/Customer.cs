@@ -67,12 +67,6 @@ namespace Game
 				if (_coinTrans != null)
 				{
 					// Trigger event to get reward coin
-					Utility.Socket.EmitEvent("coinCollect");
-					// if (Application.isEditor)
-					// 	SocketConnectManager.Instance.EmitEvent("coinCollect");
-					// else
-					// 	JsSocketConnect.EmitEvent("coinCollect");
-
 					_coinTrans.transform.DOMoveY(_coinTrans.transform.position.y + 1f, 0.5f);
 					_coinTrans.transform.DOScale(0, 0.4f);
 					NoodyCustomCode.StartDelayFunction(() => Destroy(_coinTrans.gameObject), 0.5f);
