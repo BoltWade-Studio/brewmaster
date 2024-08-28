@@ -130,6 +130,8 @@ namespace Game
 			yield return new WaitUntil(() => JSInteropManager.IsConnected());
 
 			PlayerData.PlayerAddress = JSInteropManager.GetAccount();
+			string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { PlayerData.PlayerAddress } });
+			Utility.Socket.EmitEvent("updatePlayerAddress", json);
 			_connectWalletUI.Close();
 			_onSuccess.Invoke();
 			// SyncPlayerPoint()
