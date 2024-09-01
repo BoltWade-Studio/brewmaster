@@ -10,10 +10,6 @@ namespace Game
 	{
 		void Update()
 		{
-			if (Input.GetKeyDown(KeyCode.Y))
-			{
-				Utility.Socket.EmitEvent("twitterTest", JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { "test" } }));
-			}
 		}
 	}
 }

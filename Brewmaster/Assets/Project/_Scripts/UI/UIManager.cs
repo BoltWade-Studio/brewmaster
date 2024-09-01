@@ -39,6 +39,7 @@ namespace Game
 		[SerializeField] private CustomButton _shopBtn, _nextDayBtn, _mainMenuBtn;
 		[SerializeField] private float _moneyIncreaseSpeed = 30;
 		[SerializeField] private CustomButton _shareToTwitterBtn;
+		[SerializeField] private GameObject _blockXImage;
 
 		[Header("Pause game menu")]
 		[SerializeField] private GameObject _pauseGameMenu;
@@ -85,7 +86,6 @@ namespace Game
 				PlayerPrefs.DeleteAll();
 				SceneManager.LoadScene("MainMenu");
 			};
-			_shareToTwitterBtn.OnClick += OnShareToTwitterBtnPress;
 			HideStoreMenu();
 			OnNextDayPressed += HideEndDayPanel;
 			_timeOriginalColor = _timeBG.color;
@@ -105,12 +105,27 @@ namespace Game
 			{
 				_timeBG.color = _timeOriginalColor;
 			};
+
 			GameplayManager.Instance.OnEndDay += OnEndDayHandler;
 			GameplayManager.Instance.OnNextDay += OnNextDayHandler;
 			TimeManager.OnTimePause += ShowPauseGameMenu;
 			TimeManager.OnTimeResume += HidePauseGameMenu;
 		}
 
+		void OnEnable()
+		{
+			if (ConnectWalletManager.Instance.isAnonymous)
+			{
+				_shareToTwitterBtn.GetComponent<Button>().interactable = false;
+				_blockXImage.gameObject.SetActive(true);
+			}
+			else
+			{
+				_shareToTwitterBtn.GetComponent<Button>().interactable = true;
+				_blockXImage.gameObject.SetActive(false);
+			}
+			_shareToTwitterBtn.OnClick += OnShareToTwitterBtnPress;
+		}
 
 		private void Update()
 		{
@@ -122,6 +137,7 @@ namespace Game
 			NoodyCustomCode.UnSubscribeAllEvent<GameplayManager>(this);
 			NoodyCustomCode.UnSubscribeAllEvent<TimeManager>(this);
 			NoodyCustomCode.UnSubscribeFromStatic(typeof(TimeManager), this);
+			NoodyCustomCode.UnSubscribeAllEvent(_shareToTwitterBtn, this);
 		}
 		private void OnDestroy()
 		{
@@ -252,9 +268,7 @@ namespace Game
 		}
 		private void OnShareToTwitterBtnPress()
 		{
-			// Currently will send total point directly to server. Will make the server calculate this total point in future.
-			string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { TwitterMessage.GetTwitterMessage() } });
-			JsSocketConnect.EmitEvent(SocketEnum.shareToTwitterRequest.ToString(), json);
+			TwitterShareManager.Instance.ShareToTwitter();
 			ShowTwitterInputPanel();
 		}
 		public void ShowTwitterInputPanel()

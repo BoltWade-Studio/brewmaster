@@ -4,14 +4,16 @@ mergeInto(LibraryManager.library, {
     {
         this.objectNameDic = {};
         this.methodNameDic = {};
+        this.exceptionArray = [];
+
         if(typeof io == 'undefined')
         {
             console.error('Socket.IO client library is not load');
             return;
         }
 
-        // var socket = io('http://localhost:5006');
-        var socket = io('https://brewmaster-socket.boltwade.xyz');
+        var socket = io('http://localhost:5006');
+        // var socket = io('https://brewmaster-socket.boltwade.xyz');
 
         socket.on('connect', () => {
             socket.isReady = true;
@@ -31,16 +33,12 @@ mergeInto(LibraryManager.library, {
 
         socket.on('spawnCoin', () => {
             if(this.objectNameDic.spawnCoin && this.methodNameDic.spawnCoin)
-            {
                 SendMessage(this.objectNameDic.spawnCoin, this.methodNameDic.spawnCoin, 'SpawnCoin');
-            }
         });
 
         socket.on('updateProof', (proof) => {
             if(this.objectNameDic.updateProof && this.methodNameDic.updateProof)
-            {
                 SendMessage(this.objectNameDic.updateProof , this.methodNameDic.updateProof, proof.toString());
-            }
         });
 
         socket.on('updateAnonymous', (data) => {
@@ -54,12 +52,27 @@ mergeInto(LibraryManager.library, {
         });
 
 		socket.on('twitterRequestCallback', (data) => {
+            // console.log(data);
+            // let dataString = UTF8ToString(data);
+            // let array = JSON.parse(dataString.toString());
 			const encodedText = encodeURIComponent(data);
 			const tweetUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
 
+            console.log('tweetUrl: ' + tweetUrl);
 			// Open the URL in a new window/tab
 			window.open(tweetUrl, '_blank');
 		});
+
+        socket.on('exception', (exception) => {
+            for(let i = 0; i < this.exceptionArray.length; i++)
+            {
+                SendMessage(this.exceptionArray[i].objectName, this.exceptionArray[i].methodName, exception.message);
+            }
+        });
+
+        socket.on('giftTxHash', (data) => {
+            SendMessage(this.objectNameDic.giftTxHash, this.methodNameDic.giftTxHash, data.toString());
+        });
 
         window.unitySocket = socket;
     },
@@ -71,30 +84,38 @@ mergeInto(LibraryManager.library, {
         this.methodNameDic[event] = UTF8ToString(callbackMethodName);
     },
 
-    EmitEvent:function(eventName, dataArray)
+    EmitEvent:function(eventName, jsonArray)
     {
-        let callDataArray;
-        if(dataArray)
-            calldataArray = JSON.parse(UTF8ToString(dataArray));
+        let data = UTF8ToString(jsonArray);
         let event = UTF8ToString(eventName);
 
-        if(window.unitySocket && dataArray)
+        if(window.unitySocket && data)
         {
-            window.unitySocket.emit(event, calldataArray.array);
+            window.unitySocket.emit(event, data);
             return;
         }
         if(window.unitySocket)
             window.unitySocket.emit(event);
     },
 
-	OpenTwitter:function(text)
-	{
-		const encodedText = encodeURIComponent(text);
-		const tweetUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
-
-		// Open the URL in a new window/tab
-		window.open(tweetUrl, '_blank');
-	},
+    SubscribeOnException:function(callbackObjectName, callbackMethodName)
+    {
+        let object = UTF8ToString(callbackObjectName);
+        let method = UTF8ToString(callbackMethodName);
+        const objectMethod = new Object();
+        objectMethod.objectName = object; 
+        objectMethod.methodName = method;
+        
+        this.exceptionArray.push(objectMethod);
+    },
+    UnSubscribeOnException:function(callbackObjectName, callbackMethodName)
+    {
+        let object = UTF8ToString(callbackObjectName);
+        let method = UTF8ToString(callbackMethodName);
+        _.remove(this.exceptionArray, function(e) {
+            return e.objectName == object && e.methodName == method
+        });
+    },
 
     FreeWasmString: function (ptr) {
         _free(ptr);

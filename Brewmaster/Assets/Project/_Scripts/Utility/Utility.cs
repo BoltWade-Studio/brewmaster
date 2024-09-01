@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
+using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using SocketIOClient;
 using SocketIOClient.Newtonsoft.Json;
 using UnityEngine;
+using Utils;
 
 namespace Game
 {
@@ -13,9 +14,8 @@ namespace Game
 		public static class Socket
 		{
 			private static SocketIOUnity socket;
-			private static Dictionary<string, string> _methodName = new Dictionary<string, string>();
-			private static Dictionary<string, string> _objectName = new Dictionary<string, string>();
 			private static Dictionary<string, Action<string>> _actionEventDic = new Dictionary<string, Action<string>>();
+			private static List<Action<string>> methodLists = new List<Action<string>>();
 
 #if UNITY_EDITOR
 			public static void Init()
@@ -77,6 +77,34 @@ namespace Game
 					}
 				});
 
+				socket.On("exception", (exception) =>
+				{
+					Debug.Log("on exception: " + exception.ToString());
+					Debug.Log("Count" + methodLists.Count);
+					WSError wSError;
+					wSError = JsonConvert.DeserializeObject<WSError[]>(exception.ToString())[0];
+					foreach (Action<string> action in methodLists)
+					{
+						Debug.Log("Active action");
+						try
+						{
+							action(wSError.message);
+						}
+						catch (Exception e)
+						{
+							Debug.Log("Exception: " + e.Message);
+						}
+					}
+				});
+
+				socket.On("giftTxHash", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("giftTxHash"))
+					{
+						_actionEventDic["giftTxHash"].Invoke(data.ToString());
+					}
+				});
+
 				socket.Connect();
 			}
 #endif
@@ -84,9 +112,12 @@ namespace Game
 			public static void EmitEvent(string eventName, string jsonData = null)
 			{
 				Debug.Log("EmitEvent: " + eventName);
+				jsonData = ToSocketJson(jsonData);
+
 #if UNITY_WEBGL && !UNITY_EDITOR
 				JsSocketConnect.EmitEvent(eventName, jsonData);
 #else
+
 				socket.Emit(eventName, jsonData);
 #endif
 			}
@@ -102,6 +133,42 @@ namespace Game
 					_actionEventDic.Add(eventName, action);
 #endif
 			}
+
+			public static void SubscribeOnException(string objectName, string methodName, Action<string> action)
+			{
+#if UNITY_WEBGL && !UNITY_EDITOR
+				JsSocketConnect.SubscribeOnException(objectName, methodName);
+#else
+				Debug.Log("Add method: " + methodName);
+				methodLists.Add(action);
+#endif
+			}
+
+			public static void UnSubscribeOnException(string objectName, string methodName, Action<string> action)
+			{
+#if UNITY_EDITOR && !UNITY_WEBGL
+				JsSocketConnect.UnSubscribeOnException(objectName, methodName);
+#else
+				methodLists.Remove(action);
+#endif
+			}
+
+			public static string ToSocketJson(string jsonRaw)
+			{
+				if (jsonRaw != null)
+				{
+					int startIndex = jsonRaw.IndexOf("[");
+					int length = jsonRaw.Length - startIndex - 1;
+					jsonRaw = jsonRaw.Substring(startIndex, length);
+				}
+				return jsonRaw;
+			}
 		}
 	}
+}
+
+public class WSError
+{
+	public string status;
+	public string message;
 }

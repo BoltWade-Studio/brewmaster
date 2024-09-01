@@ -1,6 +1,7 @@
 using System;
 using DG.Tweening;
 using Newtonsoft.Json;
+using NOOD;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,6 +13,7 @@ namespace Game
 	{
 		[SerializeField] private TextMeshProUGUI _playerAddressText, _ingamePointText, _sahPointText;
 		[SerializeField] private Button _claimBtn, _logOutBtn, _shareToTwitterBtn;
+		[SerializeField] private GameObject _blockXImage;
 
 		void OnEnable()
 		{
@@ -20,6 +22,7 @@ namespace Game
 			_shareToTwitterBtn.onClick.AddListener(OnShareToTwitterBtnClick);
 			GameplayManager.Instance.OnEndDay += GameplayManager_OnEndDay;
 			GameplayManager.Instance.OnNextDay += GameplayManager_OnNextDay;
+			ActiveXButton(!ConnectWalletManager.Instance.isAnonymous);
 		}
 
 		void OnDisable()
@@ -27,8 +30,7 @@ namespace Game
 			_claimBtn.onClick.RemoveListener(OnClaimBtnClick);
 			_logOutBtn.onClick.RemoveListener(OnLogOutBtnClick);
 			_shareToTwitterBtn.onClick.RemoveListener(OnShareToTwitterBtnClick);
-			GameplayManager.Instance.OnEndDay -= GameplayManager_OnEndDay;
-			GameplayManager.Instance.OnNextDay -= GameplayManager_OnNextDay;
+			NoodyCustomCode.UnSubscribeAllEvent<GameplayManager>(this);
 		}
 		void Start()
 		{
@@ -64,10 +66,6 @@ namespace Game
 			_claimBtn.interactable = !ConnectWalletManager.Instance.isAnonymous;
 			_logOutBtn.interactable = !ConnectWalletManager.Instance.isAnonymous;
 		}
-		private void UpdatePlayerAddress()
-		{
-			_playerAddressText.text = PlayerData.PlayerAddress;
-		}
 		private void OnLogOutBtnClick()
 		{
 		}
@@ -77,9 +75,13 @@ namespace Game
 		}
 		private void OnShareToTwitterBtnClick()
 		{
-			string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { TwitterMessage.GetTwitterMessage() } });
-			JsSocketConnect.EmitEvent(SocketEnum.shareToTwitterRequest.ToString(), json);
-			UIManager.Instance.ShowTwitterInputPanel();
+			TwitterShareManager.Instance.ShareToTwitter();
+		}
+
+		private void ActiveXButton(bool isActive)
+		{
+			_shareToTwitterBtn.interactable = isActive;
+			_blockXImage.SetActive(!isActive);
 		}
 
 		public void Open()
