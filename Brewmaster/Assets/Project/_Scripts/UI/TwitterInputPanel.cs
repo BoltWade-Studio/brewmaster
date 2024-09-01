@@ -1,3 +1,4 @@
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using Newtonsoft.Json;
 using TMPro;
@@ -9,38 +10,62 @@ namespace Game
 	public class TwitterInputPanel : MonoBehaviour
 	{
 		[SerializeField] private GameObject _panel;
-		[SerializeField] private CustomButton _confirmButton;
 		[SerializeField] private CustomButton _cancelButton;
-		[SerializeField] private TMP_InputField _twitterInputField;
 
+		[Header("Input Link")]
+		[SerializeField] private CustomButton _confirmButton;
+		[SerializeField] private TMP_InputField _twitterInputField;
+		[SerializeField] private TextMeshProUGUI _messageError;
+
+		[Header("Success Message")]
 		[SerializeField] private TextMeshProUGUI _title;
-		[SerializeField] private TextMeshProUGUI _message;
+		[SerializeField] private TextMeshProUGUI _SuccessMessage;
 
 		void Awake()
 		{
 			_confirmButton.OnClick += OnConfirmBtnClick;
 			_cancelButton.OnClick += OnCancelBtnClick;
 		}
-
 		void OnEnable()
 		{
-			_title.text = "Input your post link";
-			_message.gameObject.SetActive(false);
-			_confirmButton.gameObject.SetActive(true);
-			_twitterInputField.gameObject.SetActive(true);
+			ReturnToNormal();
+		}
+		void OnDestroy()
+		{
+			_confirmButton.OnClick -= OnConfirmBtnClick;
+			_cancelButton.OnClick -= OnCancelBtnClick;
 		}
 
 		#region Button Events
 		private void OnConfirmBtnClick()
 		{
-			string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { _twitterInputField.text } });
-			Utility.Socket.EmitEvent(SocketEnum.playerInputLink.ToString(), json);
+			TwitterShareManager.Instance.ConfirmTwitterInput(_twitterInputField.text, (success) => OnTwitterCallbackSuccess(success), (exception) => OnTwitterCallbackException(exception));
+		}
 
+		private void OnTwitterCallbackSuccess(string giftTxHash)
+		{
 			_title.text = "Congratulations!";
 			_confirmButton.gameObject.SetActive(false);
 			_twitterInputField.gameObject.SetActive(false);
-			_message.gameObject.SetActive(true);
+			_messageError.gameObject.SetActive(false);
+			_SuccessMessage.gameObject.SetActive(true);
 		}
+
+		private void OnTwitterCallbackException(string exception)
+		{
+			_messageError.gameObject.SetActive(true);
+			_messageError.text = exception.ToString();
+			Debug.Log("exception: " + exception.ToString());
+		}
+		private void ReturnToNormal()
+		{
+			_title.text = "Input your post link";
+			_confirmButton.gameObject.SetActive(true);
+			_twitterInputField.gameObject.SetActive(true);
+			_SuccessMessage.gameObject.SetActive(false);
+			_messageError.gameObject.SetActive(false);
+		}
+
 		private void OnCancelBtnClick()
 		{
 			Hide();
