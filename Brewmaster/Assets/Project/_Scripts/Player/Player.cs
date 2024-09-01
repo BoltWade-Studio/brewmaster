@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using NOOD;
 using NOOD.Sound;
 using UnityEngine;
+using Utils;
 
 namespace Game
 {
@@ -11,58 +13,70 @@ namespace Game
     {
         public static Action<int> OnPlayerChangePosition;
         public static Action OnPlayerChangePositionSuccess;
-        public static Action OnPlayerPressDeliverBeer;
         private int _index = 0;
+        private Vector3 standPosition = new Vector3(0, 0, 0);
+        private bool toMove = false;
         private Vector2 _input;
         private bool _isServePressed;
         private bool _isPausePressed;
 
+        private void Start()
+        {
+	        Utility.Socket.OnEvent("playerMove", this.gameObject.name, nameof(PlayerMove), PlayerMove);
+        }
+
         private void Update()
         {
-            Move();
+            GetInput();
+            // if (_index != -1)
+            // {
+	           //  OnPlayerChangePosition?.Invoke(_index);
+	           //  OnPlayerChangePositionSuccess?.Invoke();
+            //
+	           //  Vector3 standPosition = new Vector3(this.transform.position.x, 0, TableManager.Instance.GetPlayerTablePosition().z);
+	           //  transform.position = standPosition;
+	           //  _index = -1;
+            // }
+
+            if (toMove)
+			{
+				OnPlayerChangePositionSuccess?.Invoke();
+
+				transform.position = new Vector3(this.transform.position.x, 0, standPosition.z);
+				toMove = false;
+			}
         }
-        
+
+        private void PlayerMove(string data)
+        {
+	        try
+	        {
+		        List<Vector3> playerPosition = JsonConvert.DeserializeObject<List<Vector3>>(data);
+		        standPosition = playerPosition[0];
+		        // Debug.Log("PlayerMove: " + standPosition);
+		        toMove = true;
+	        }
+	        catch (Exception e)
+	        {
+		        Debug.LogError("An error occurred: " + e.Message);
+		        throw;
+	        }
+		}
+
         private void Move()
         {
-            GetInput();
             if(_isServePressed)
             {
-                BeerServeManager.Instance.ServeBeer();
-                OnPlayerPressDeliverBeer?.Invoke();
-                SoundManager.PlaySound(SoundEnum.ServeBeer);
+                // BeerServeManager.Instance.ServeBeer();
             }
             if(_isPausePressed)
             {
                 GameplayManager.Instance.OnPausePressed?.Invoke();
             }
 
-            CalculateStandIndex();
+            Vector3 newPosition = new Vector3(this.transform.position.x, 0, TableManager.Instance.GetPlayerTablePosition().z);
+            this.transform.position = newPosition;
 
-            Vector3 standPosition = new Vector3(this.transform.position.x, 0, TableManager.Instance.GetPlayerTablePosition().z);
-            this.transform.position = standPosition;
-
-        }
-
-        private int CalculateStandIndex()
-        {
-            int oldIndex = _index;
-            if(_input.y > 0)
-            {
-                // Move up
-                _index++;
-            }
-            if(_input.y < 0)
-            {
-                // Move down
-                _index--;
-            }
-            _index = Mathf.Clamp(_index, 0, TableManager.Instance.GetTableList().Count - 1);
-            OnPlayerChangePosition?.Invoke(_index);
-            if(oldIndex != _index)
-            {
-                OnPlayerChangePositionSuccess?.Invoke();
-            }
-            return _index;
         }
 
         private void GetInput()
@@ -80,7 +94,9 @@ namespace Game
             }
             if(Input.GetKeyDown(KeyCode.Space))
             {
-                _isServePressed = true;
+                // _isServePressed = true;
+                string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString() } });
+                Utility.Socket.EmitEvent("serveBeer", json);
             }
             if(Input.GetKeyDown(KeyCode.Escape))
             {
@@ -88,6 +104,11 @@ namespace Game
             }
 
             _input = new Vector2(0, y);
+            if (y != 0)
+            {
+	            string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { JsonUtility.ToJson(_input) } });
+	            Utility.Socket.EmitEvent("playerMove", json);
+            }
         }
     }
 }

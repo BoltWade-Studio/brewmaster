@@ -9,8 +9,8 @@ namespace Game
 
 		void Start()
 		{
-			// CustomerSpawner.Instance.onCustomerSpawn += CustomerSpawner_OnCustomerSpawn;
-			// Utility.Socket.OnEvent("spawnCoin", this.gameObject.name, nameof(SpawnCoin), SpawnCoin);
+			CustomerSpawner.Instance.onCustomerSpawn += CustomerSpawner_OnCustomerSpawn;
+			Utility.Socket.OnEvent("spawnCoin", this.gameObject.name, nameof(SpawnCoin), SpawnCoin);
 		}
 
 		private void SpawnCoin(string data)

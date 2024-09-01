@@ -36,7 +36,7 @@ namespace Game
         }
         #endregion
 
-        #region Upgrade Functions    
+        #region Upgrade Functions
         public Vector3 GetUpgradePosition()
         {
             return _lockSeatList.ToArray()[0].position.ToVector3XZ();
@@ -81,6 +81,15 @@ namespace Game
             _unAvailableSeatDic.Add(customer, seat);
             return seat;
         }
+
+        public List<Transform> GetAllSeats()
+		{
+			// Return all seats including locked seats and available seats
+			List<Transform> allSeats = new List<Transform>();
+			allSeats.AddRange(_availableSeats);
+			// allSeats.AddRange(_lockSeatList);
+			return allSeats;
+		}
     }
 
 }

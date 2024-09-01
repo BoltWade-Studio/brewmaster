@@ -105,6 +105,106 @@ namespace Game
 					}
 				});
 
+				socket.On("playerMove", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("playerMove"))
+					{
+						Debug.Log("playerMove: " + data.ToString());
+						_actionEventDic["playerMove"].Invoke(data.ToString());
+					}
+				});
+
+	            socket.On("spawnCustomer", (data) =>
+				{
+					Debug.Log("Receive event spawnCustomer!");
+					if(_actionEventDic.ContainsKey("spawnCustomer"))
+					{
+						// Debug.Log("spawnCustomer: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["spawnCustomer"].Invoke(useData.ToString());
+					}
+				});
+
+				socket.On("updateCustomerPosition", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("updateCustomerPosition"))
+					{
+						// Debug.Log("updateCustomerPosition: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["updateCustomerPosition"].Invoke(useData.ToString());
+					}
+				});
+
+				socket.On("updateCustomerWaitTime", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("updateCustomerWaitTime"))
+					{
+						// Debug.Log("updateCustomerWaitTime: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["updateCustomerWaitTime"].Invoke(useData.ToString());
+					}
+				});
+
+				socket.On("customerReachDestination", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("customerReachDestination"))
+					{
+						// Debug.Log("customerReachDestination: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["customerReachDestination"].Invoke(useData.ToString());
+					}
+				});
+
+				socket.On("customerReturn", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("customerReturn"))
+					{
+						// Debug.Log("customerReturn: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["customerReturn"].Invoke(useData.ToString());
+					}
+				});
+
+				socket.On("deleteCustomer", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("deleteCustomer"))
+					{
+						// Debug.Log("deleteCustomer: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["deleteCustomer"].Invoke(useData.ToString());
+					}
+				});
+
+				socket.On("serveBeer", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("serveBeer"))
+					{
+						// Debug.Log("serveBeer: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["serveBeer"].Invoke(useData.ToString());
+					}
+				});
+
+				socket.On("updateBeer", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("updateBeer"))
+					{
+						// Debug.Log("updateBeer: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["updateBeer"].Invoke(useData.ToString());
+					}
+				});
+
+				socket.On("beerCollided", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("beerCollided"))
+					{
+						// Debug.Log("beerCollided: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["beerCollided"].Invoke(useData.ToString());
+					}
+				});
+
 				socket.Connect();
 			}
 #endif

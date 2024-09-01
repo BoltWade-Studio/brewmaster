@@ -12,7 +12,7 @@ namespace Game
         void Start()
         {
             Player.OnPlayerChangePositionSuccess += Move;
-            Player.OnPlayerPressDeliverBeer += DeliverBeer;
+            BeerServeManager.OnPlayerPressDeliverBeer += DeliverBeer;
         }
         void OnDestroy()
         {
