@@ -19,12 +19,12 @@ namespace Game
 
 		protected override void ChildAwake()
 		{
+			Utility.Socket.OnEvent(SocketEnum.loadCallback.ToString(), this.gameObject.name, nameof(LoadCallback), LoadCallback);
 			Load();
 		}
 
 		void Start()
 		{
-			Utility.Socket.OnEvent(SocketEnum.loadCallback.ToString(), this.gameObject.name, nameof(LoadCallback), LoadCallback);
 			GameplayManager.Instance.OnEndDay += Save;
 			GameplayManager.Instance.OnNextDay += Save;
 		}

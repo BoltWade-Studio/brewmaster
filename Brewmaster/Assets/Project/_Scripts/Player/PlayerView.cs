@@ -17,6 +17,7 @@ namespace Game
         void OnDestroy()
         {
             NoodyCustomCode.UnSubscribeFromStatic(typeof(Player), this);
+            NoodyCustomCode.UnSubscribeFromStatic(typeof(BeerServeManager), this);
         }
 
         private void Move()
