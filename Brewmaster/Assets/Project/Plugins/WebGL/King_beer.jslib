@@ -62,7 +62,7 @@ mergeInto(LibraryManager.library, {
         socket.on('giftTxHash', (data) => {
             SendMessage(this.objectNameDic.giftTxHash, this.methodNameDic.giftTxHash, data.toString());
         });
-        
+
         socket.on('playerMove', (data) => {
         	if(this.objectNameDic.playerMove && this.methodNameDic.playerMove)
         		SendMessage(this.objectNameDic.playerMove, this.methodNameDic.playerMove, data.toString());
