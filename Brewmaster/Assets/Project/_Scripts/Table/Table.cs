@@ -26,7 +26,6 @@ namespace Game
                 _lockSeatList.Push(seat);
                 _availableSeats.Remove(seat);
             }
-            TableManager.Instance.OnCustomComplete += OnCustomerCompleteHandler;
         }
         private void OnDestroy()
         {
@@ -59,14 +58,6 @@ namespace Game
             seat.gameObject.SetActive(true);
             _availableSeats.Add(seat);
             TableManager.Instance.OnTableUpgrade?.Invoke(this);
-        }
-        public void OnCustomerCompleteHandler(Customer customer)
-        {
-            if(_unAvailableSeatDic.ContainsKey(customer))
-            {
-                _availableSeats.Add(_unAvailableSeatDic[customer]);
-                _unAvailableSeatDic.Remove(customer);
-            }
         }
         public bool IsAvailable()
         {

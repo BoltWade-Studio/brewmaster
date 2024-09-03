@@ -30,6 +30,7 @@ namespace Game
         {
             OnServerFail += OnServerFailHandler;
             OnServeComplete += OnServeCompleteHandler;
+            GameplayManager.Instance.OnEndDay += OnEndDayHandler;
         }
         void Start()
         {
@@ -86,7 +87,7 @@ namespace Game
         }
         #endregion
 
-
+        #region Event functions
         private void OnServerFailHandler(Vector3 failPosition)
         {
             Debug.Log("Remove money " + _moneyLostOnFail);
@@ -121,6 +122,7 @@ namespace Game
 				BeerDto beerDto = JsonUtility.FromJson<BeerDto>(data);
 				BeerCup beerCup = BeerList[beerDto.tableIndex].Find(b => b.id == beerDto.id);
 				Customer customer = CustomerManager.Instance.CustomerList.Find(c => c.id == beerDto.customerId);
+
 				if (beerCup != null)
 				{
 					beerCup.Collide(beerDto, customer);
@@ -151,26 +153,18 @@ namespace Game
 				Debug.LogError("Update Beer Error: " + e.Message);
 			}
 		}
-        // {
-        //
-        //     if (GameplayManager.Instance.IsEndDay == true) return;
-        //
-        //     if(_player == null)
-        //     {
-        //         _player = Player.Instance;
-        //     }
-        //     Vector3 startPosition = _player.transform.position;
-        //     startPosition.y = _tableHeight;
-        //
-        //     BeerCup beerCup = Instantiate(_beerCupPref, startPosition, Quaternion.identity).GetComponent<BeerCup>();
-        //     float moveSpeed = 5;
-        //     NoodyCustomCode.StartUpdater(beerCup, () =>
-        //     {
-        //         if (beerCup == null) return true;
-        //
-        //         beerCup.transform.position += Vector3.left * moveSpeed * TimeManager.DeltaTime;
-        //         return false;
-        //     });
-        // }
+
+		public void OnEndDayHandler()
+		{
+			foreach (List<BeerCup> beerCups in BeerList)
+			{
+				foreach (BeerCup beerCup in beerCups)
+				{
+					Destroy(beerCup.gameObject);
+				}
+				beerCups.Clear();
+			}
+		}
+		#endregion
     }
 }

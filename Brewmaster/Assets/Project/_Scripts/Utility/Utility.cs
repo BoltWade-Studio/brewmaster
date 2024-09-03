@@ -40,24 +40,6 @@ namespace Game
 					Debug.Log("socket.OnConnected");
 				};
 
-				socket.On("updateCoin", (coin) =>
-				{
-					if (_actionEventDic.ContainsKey("updateCoin"))
-					{
-						string data = JsonConvert.DeserializeObject<string[]>(coin.ToString())[0];
-						Debug.Log("Server update coin: " + data);
-						_actionEventDic["updateCoin"].Invoke(data);
-					}
-				});
-
-				socket.On("spawnCoin", (spawn) =>
-				{
-					if (_actionEventDic.ContainsKey("spawnCoin"))
-					{
-						_actionEventDic["spawnCoin"].Invoke(null);
-					}
-				});
-
 				socket.On("updateProof", (proof) =>
 				{
 					if (_actionEventDic.ContainsKey("updateProof"))
@@ -202,6 +184,32 @@ namespace Game
 						// Debug.Log("beerCollided: " + data);
 						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
 						_actionEventDic["beerCollided"].Invoke(useData.ToString());
+					}
+				});
+
+				socket.On("updateTimer", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("updateTimer"))
+					{
+						// Debug.Log("updateTimer: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["updateTimer"].Invoke(useData.ToString());
+					}
+				});
+
+				socket.On("timeUp", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("timeUp"))
+					{
+						try
+						{
+							Debug.Log("timeUp: " + data);
+							_actionEventDic["timeUp"].Invoke("");
+						}
+						catch (Exception e)
+						{
+							Debug.Log("Timeup Exception: " + e.Message);
+						}
 					}
 				});
 

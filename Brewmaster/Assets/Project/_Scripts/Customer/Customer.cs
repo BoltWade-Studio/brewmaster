@@ -13,45 +13,35 @@ namespace Game
 		#region Events
 		public Action OnCustomerEnterSeat;
 		public Action OnCustomerReturn;
+
+		private bool toUpdateTime = false;
+		public bool reachedDestination = false;
+		public bool toReturn = false;
+		public bool toDestroy = false;
+
+		private bool toMove = false;
+		private Vector3 newPosition;
+		private Vector3 newRotation;
+		private float rotateTime;
 		#endregion
 
 		#region Variable
 		[Header("Component")]
 		public int id;
 
-		private Vector3 newPosition;
-		private Vector3 newRotation;
-		private float rotateTime;
-		private bool toMove = false;
 		[SerializeField] private CustomerView _customerView;
 
 		[Header("Waiting time")]
 		[SerializeField] private WaitingUI _waitingUI;
 		private float _maxWaitingTime;
-
-		private bool toUpdateTime = false;
-		public bool reachedDestination = false;
-		public bool toReturn = false;
-		public bool toDestroy = false;
-		// [SerializeField] private float _waitLossSpeed = 1f;
-		//
 		private float _waitTimer = 0;
 
-		private Transform _coinTrans;
+		// private Transform _coinTrans;
 		#endregion
 
 		#region Unity functions
-		void OnEnable()
-		{
-			GameplayManager.Instance.OnEndDay += OnEndDayHandler;
-		}
-		void OnDisable()
-		{
-			NoodyCustomCode.UnSubscribeAllEvent<GameplayManager>(this);
-		}
 		void Start()
 		{
-			// _isReturnCalled = false;
 
 		}
 		void Update()
@@ -83,66 +73,20 @@ namespace Game
 				DestroySelf();
 				toDestroy = false;
 			}
-			// Move();
-			// if (_isWaiting)
-			// {
-			// 	UpdateWaitTimer();
-			// }
 		}
-		private void OnTriggerEnter(Collider other)
-		{
-			// if (other.transform.TryGetComponent<BeerCup>(out BeerCup beerCup) && _isServed == false && _isRequestBeer == true)
-			// {
-			// 	Destroy(other.gameObject);
-			// 	Complete();
-			// 	if (_coinTrans != null)
-			// 	{
-			// 		// Trigger event to get reward coin
-			// 		Utility.Socket.EmitEvent("coinCollect");
-			// 		// if (Application.isEditor)
-			// 		// 	SocketConnectManager.Instance.EmitEvent("coinCollect");
-			// 		// else
-			// 		// 	JsSocketConnect.EmitEvent("coinCollect");
-			//
-			// 		_coinTrans.transform.DOMoveY(_coinTrans.transform.position.y + 1f, 0.5f);
-			// 		_coinTrans.transform.DOScale(0, 0.4f);
-			// 		NoodyCustomCode.StartDelayFunction(() => Destroy(_coinTrans.gameObject), 0.5f);
-			// 	}
-			// }
-		}
+
 		#endregion
 
 		#region Event functions
-		private void OnEndDayHandler()
+		private void ReachDestination()
 		{
-			Return();
+			this.transform.DORotate(Vector3.zero, 0.5f);
+			OnCustomerEnterSeat?.Invoke();
 		}
-		#endregion
 
-		#region Private functions
-		private void Move()
+		private void Return()
 		{
-			// float distance = Vector3.Distance(this.transform.position, _targetSeat);
-			// if (distance > 0.1f)
-			// {
-			// 	Vector3 direction = _targetSeat - this.transform.position;
-			// 	direction = Vector3.Normalize(direction);
-			// 	this.transform.position += direction * _speed * TimeManager.DeltaTime;
-			// 	this.transform.DOKill(); // To stop rotate
-			// 	this.transform.forward = Vector3.Lerp(this.transform.forward, direction, TimeManager.DeltaTime * _rotateSpeed);
-			// }
-			// else
-			// {
-			// 	// Get to seat
-			// 	if (!_isRequestBeer)
-			// 	{
-			// 		this.transform.DORotate(Vector3.zero, 0.5f);
-			// 		TableManager.Instance.RequestBeer(this);
-			// 		OnCustomerEnterSeat?.Invoke();
-			// 		_isRequestBeer = true;
-			// 		_isWaiting = true;
-			// 	}
-			// }
+			OnCustomerReturn?.Invoke();
 		}
 		public void UpdateWaitTimer(float currentTime, float maxTime)
 		{
@@ -150,90 +94,29 @@ namespace Game
 			_maxWaitingTime = maxTime;
 			// Debug.Log("UpdateWaitTimer: " + currentTime + " " + maxTime);
 			toUpdateTime = true;
-			// if (_isWaiting)
-			// {
-				// _waitTimer += TimeManager.DeltaTime * _waitLossSpeed;
-				// _waitingUI.UpdateWaitingUI(currentTime / maxTime);
-			// }
-			// if (_waitTimer >= _maxWaitingTime)
-			// {
-			// 	Return(); // Return and no money
-			// }
 		}
-		public void Return()
-		{
-			// if (_isReturnCalled == true) return;
-			//
-			// _isReturnCalled = true;
-			// _isServed = true;
-			// TableManager.Instance.CustomerComplete(this); // Return seat
-			// SetTargetPosition(CustomerSpawner.Instance.transform.position); // Move out
-			OnCustomerReturn?.Invoke();
-			// NoodyCustomCode.StartUpdater(this.gameObject, () =>
-			// {
-			// 	float distance = Vector3.Distance(this.transform.position, _targetSeat);
-			// 	if (distance <= 0.1f)
-			// 	{
-			// 		DestroySelf();
-			// 		return true;
-			// 	}
-			// 	return false;
-			// });
-		}
-		public void DestroySelf()
-		{
-			_customerView.StopAllAnimation();
-			Destroy(this.gameObject, 1f);
-		}
-		#endregion
-
-		#region Public functions
-		// public void SetTargetPosition(Vector3 position)
-		// {
-		// 	// _targetSeat = position;
-		// }
-
-		private void ReachDestination()
-		{
-			this.transform.DORotate(Vector3.zero, 0.5f);
-			// TableManager.Instance.RequestBeer(this);
-			OnCustomerEnterSeat?.Invoke();
-		}
-
 		public void MoveTo(Vector3 position, Vector3 rotation, float time)
 		{
-			// Debug.Log("MoveTo: " + position);
 			newPosition = position;
 			newRotation = rotation;
 			rotateTime = time;
 			toMove = true;
 		}
 
-		public void Complete(int _money)
+		public void Complete(int money)
 		{
-			// Return();
-			// Pay money
-			TextPopup.Show("+" + _money, this.transform.position, Color.yellow);
-			MoneyManager.Instance.AddMoney(_money);
+			TextPopup.Show("+" + money, this.transform.position, Color.yellow);
+			MoneyManager.Instance.AddMoney(money);
 			BeerServeManager.Instance.OnServeComplete?.Invoke(this);
 		}
-		public void SetCoin(Transform coin)
-		{
-			_coinTrans = coin;
-		}
+		#endregion
 
-		public bool HaveCoin()
+		#region Private functions
+		private void DestroySelf()
 		{
-			return _coinTrans != null;
+			_customerView.StopAllAnimation();
+			Destroy(this.gameObject, 1f);
 		}
-
-		public void CollectCoin()
-		{
-			_coinTrans.transform.DOMoveY(_coinTrans.transform.position.y + 1f, 0.5f);
-			_coinTrans.transform.DOScale(0, 0.4f);
-			NoodyCustomCode.StartDelayFunction(() => Destroy(_coinTrans.gameObject), 0.5f);
-		}
-
 		#endregion
 	}
 }

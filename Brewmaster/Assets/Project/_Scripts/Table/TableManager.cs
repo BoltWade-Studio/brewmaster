@@ -23,7 +23,7 @@ namespace Game
 	}
 
 	[Serializable]
-	public class TableListDto
+	public class InitializedGameDataDto
 	{
 		public List<SeatListDto> tableList = new List<SeatListDto>();
 		public List<Vector3> tablePositionList = new List<Vector3>();
@@ -34,8 +34,6 @@ namespace Game
     public class TableManager : MonoBehaviorInstance<TableManager>
     {
         public Action<Table> OnTableUpgrade;
-        public Action<Customer> OnCustomComplete;
-        public Action<Customer> OnCustomerRequestBeer;
         [SerializeField] private List<Table> _tableList = new List<Table>();
         [SerializeField] private bool _unlockAllSeats;
         private int _currentTableIndex = 0;
@@ -56,32 +54,6 @@ namespace Game
             }
 
             OnTableUpgrade += OnTableUpgradeHandler;
-
-            TableListDto seatPositionList = new TableListDto();
-            foreach(Table table in _tableList)
-			{
-				SeatListDto seatListDto = new SeatListDto();
-				foreach(Transform seat in table.GetAllSeats())
-				{
-					seatListDto.seatPositionList.Add(seat.position);
-					if (seatListDto.seatPositionList.Count == table.AvailableSeatNumber)
-					{
-						break;
-					}
-				}
-				// Debug.Log("Seat List: " + JsonUtility.ToJson(seatListDto));
-				seatPositionList.tableList.Add(seatListDto);
-				seatPositionList.tablePositionList.Add(table.transform.position);
-			}
-
-            seatPositionList.customerSpawnPosition = CustomerSpawner.Instance.transform.position;
-            seatPositionList.playerPosition = Player.Instance.transform.position;
-
-            string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { JsonUtility.ToJson(seatPositionList) } });
-            // json = Utility.Socket.ToSocketJson(json);
-            // Debug.Log("Seat Position List: " + json);
-
-            Utility.Socket.EmitEvent("initGame", json);
         }
         void OnEnable()
         {
@@ -114,33 +86,6 @@ namespace Game
         public List<Table> GetTableList()
         {
             return _tableList;
-        }
-        public Vector3 GetPlayerTablePosition()
-        {
-            return _tableList[_currentTableIndex].transform.position;
-        }
-        public Table GetTable(int index)
-        {
-            try
-            {
-                return _tableList[index];
-            }catch
-            {
-                Debug.LogError("table index out of range");
-                return null;
-            }
-        }
-        public Table GetPlayerTable()
-        {
-            return _tableList[_currentTableIndex];
-        }
-        public void CustomerComplete(Customer customer)
-        {
-            OnCustomComplete?.Invoke(customer);
-        }
-        public void RequestBeer(Customer customer)
-        {
-            OnCustomerRequestBeer?.Invoke(customer);
         }
     }
 

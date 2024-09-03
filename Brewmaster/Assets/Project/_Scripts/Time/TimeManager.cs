@@ -1,7 +1,9 @@
 using System;
+using Newtonsoft.Json;
 using NOOD;
 using NOOD.Sound;
 using UnityEngine;
+using Utils;
 
 namespace Game
 {
@@ -43,6 +45,7 @@ namespace Game
 		private int _day = 1;
 		private bool _isWarned, _isTimeUp;
 		private bool _isPause;
+		private float lastUpdate = 0;
 		#endregion
 
 		#region Unity functions
@@ -60,36 +63,68 @@ namespace Game
 			if (DataSaveLoadManager.Instance)
 				_day = DataSaveLoadManager.Instance.Day;
 			ResetTime();
+
+			Utility.Socket.OnEvent("updateTimer", this.gameObject.name, nameof(UpdateTimer), UpdateTimer);
+			Utility.Socket.OnEvent("timeUp", this.gameObject.name, nameof(TimeUp), TimeUp);
+		}
+
+		private void UpdateTimer(string data)
+		{
+			try
+			{
+				// data consists of a float number
+				float timeLeft = float.Parse(data); // in seconds
+				_hour = Mathf.Floor(timeLeft / 60);
+				_minute = timeLeft % 60;
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("An error occurred: " + e.Message);
+				throw;
+			}
+		}
+
+		private void TimeUp(string data)
+		{
+			Debug.Log("TimeUp Invoked!");
+			_isTimeUp = true;
 		}
 
 		private void Update()
 		{
-			if (_isTimeUp == false)
-				_minute -= DeltaTime * _timeMultipler * TimeScale;
-			if (_minute >= 59)
+			if (Time.time - lastUpdate > 1f / GameSetting.FPS)
 			{
-				_hour++;
-				_minute = 0;
+				lastUpdate = Time.time;
+				// Send time to server (in minutes)
+				string json = JsonConvert.SerializeObject(new ArrayWrapper
+					{ array = new string[] { Time.time.ToString() } });
+				Utility.Socket.EmitEvent("updateTimer", json);
 			}
-			if (_minute < 0)
+			// if (_isTimeUp == false)
+			// 	_minute -= DeltaTime * _timeMultipler * TimeScale;
+			// if (_minute >= 59)
+			// {
+			// 	_hour++;
+			// 	_minute = 0;
+			// }
+			// if (_minute < 0)
+			// {
+			// 	_hour--;
+			// 	_minute = 59;
+			// }
+
+			if (_isTimeUp)
 			{
-				_hour--;
-				_minute = 59;
+				Debug.Log("TimeUp Invoked!");
+				OnTimeUp?.Invoke();
+				_isTimeUp = false;
+				SoundManager.PlaySound(SoundEnum.EndLevel);
 			}
+
 			if (_hour == 0 && _isWarned == false)
 			{
 				// Warning
 				Warning();
-			}
-			if (_hour < 0 && GameplayManager.Instance.IsEndDay == false)
-			{
-				// Stop level
-				if (_isTimeUp == false)
-				{
-					OnTimeUp?.Invoke();
-					_isTimeUp = true;
-					SoundManager.PlaySound(SoundEnum.EndLevel);
-				}
 			}
 		}
 		void OnDestroy()
@@ -103,9 +138,17 @@ namespace Game
 		{
 			_isPause = !_isPause;
 			if (_isPause)
+			{
 				TimeScale = 0;
+				string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString() } });
+				Utility.Socket.EmitEvent("pauseGame", json);
+			}
 			else
+			{
 				TimeScale = 1;
+				string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString() } });
+				Utility.Socket.EmitEvent("resumeGame", json);
+			}
 		}
 		private void ResetTimeScale()
 		{

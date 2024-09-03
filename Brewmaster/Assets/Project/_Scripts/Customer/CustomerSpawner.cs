@@ -16,24 +16,11 @@ namespace Game
 		[SerializeField] private float _spawnTime;
 		private List<CustomerDto> toSpawn = new List<CustomerDto>();
 
+		#region Unity functions
 		private void Start()
 		{
 			StartCoroutine(SpawnerCustomer());
 			Utility.Socket.OnEvent("spawnCustomer", this.gameObject.name, nameof(SpawnCustomer), SpawnCustomer);
-		}
-
-		private void SpawnCustomer(string data)
-		{
-			Debug.Log("Spawn customer");
-			try
-			{
-				CustomerDto customerDto = JsonUtility.FromJson<CustomerDto>(data);
-				toSpawn.Add(customerDto);
-			}
-			catch (Exception e)
-			{
-				Debug.LogError("Spawning Error: " + e.Message);
-			}
 		}
 
 		private void Update()
@@ -51,34 +38,34 @@ namespace Game
 				onCustomerSpawn?.Invoke(customer);
 			}
 		}
+		#endregion
 
+		#region Event functions
+		private void SpawnCustomer(string data)
+		{
+			Debug.Log("Spawn customer");
+			try
+			{
+				CustomerDto customerDto = JsonUtility.FromJson<CustomerDto>(data);
+				toSpawn.Add(customerDto);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError("Spawning Error: " + e.Message);
+			}
+		}
+		#endregion
+
+		#region Coroutine
 		IEnumerator SpawnerCustomer()
 		{
 			while (true)
 			{
 				yield return new WaitForSeconds(_spawnTime);
 				Utility.Socket.EmitEvent("spawnCustomer");
-
-				// List<Table> availableTable = TableManager.Instance.GetTableList().Where(table => table.IsAvailable() == true).ToList();
-				// if (availableTable != null && availableTable.Count > 0 && GameplayManager.Instance.IsEndDay == false)
-				// {
-				// 	Customer customer = Instantiate(_customerPref, this.transform.position, Quaternion.identity).GetComponent<Customer>();
-				//
-				// 	// Get random seat
-				// 	int r = UnityEngine.Random.Range(0, availableTable.Count - 1);
-				// 	Transform seat = availableTable[r].GetSeatForCustomer(customer);
-				// 	// Check if seat valid
-				// 	customer.SetTargetPosition(seat.position);
-				// 	onCustomerSpawn?.Invoke(customer);
-				//
-				// 	// emit socket event to server
-				// 	if (GameplayManager.Instance.IsPlaying)
-				// 	{
-				// 		Utility.Socket.EmitEvent("spawnCustomer");
-				// 	}
-				// }
 			}
 		}
+		#endregion
 	}
 
 }

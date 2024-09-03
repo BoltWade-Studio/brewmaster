@@ -17,9 +17,9 @@ namespace Game
         private Vector3 standPosition = new Vector3(0, 0, 0);
         private bool toMove = false;
         private Vector2 _input;
-        private bool _isServePressed;
         private bool _isPausePressed;
 
+        #region Unity functions
         private void Start()
         {
 	        Utility.Socket.OnEvent("playerMove", this.gameObject.name, nameof(PlayerMove), PlayerMove);
@@ -28,15 +28,11 @@ namespace Game
         private void Update()
         {
             GetInput();
-            // if (_index != -1)
-            // {
-	           //  OnPlayerChangePosition?.Invoke(_index);
-	           //  OnPlayerChangePositionSuccess?.Invoke();
-            //
-	           //  Vector3 standPosition = new Vector3(this.transform.position.x, 0, TableManager.Instance.GetPlayerTablePosition().z);
-	           //  transform.position = standPosition;
-	           //  _index = -1;
-            // }
+
+            if(_isPausePressed)
+            {
+	            GameplayManager.Instance.OnPausePressed?.Invoke();
+            }
 
             if (toMove)
 			{
@@ -46,7 +42,9 @@ namespace Game
 				toMove = false;
 			}
         }
+        #endregion
 
+        #region Event functions
         private void PlayerMove(string data)
         {
 	        try
@@ -62,26 +60,11 @@ namespace Game
 		        throw;
 	        }
 		}
+        #endregion
 
-        private void Move()
-        {
-            if(_isServePressed)
-            {
-                // BeerServeManager.Instance.ServeBeer();
-            }
-            if(_isPausePressed)
-            {
-                GameplayManager.Instance.OnPausePressed?.Invoke();
-            }
-
-            Vector3 newPosition = new Vector3(this.transform.position.x, 0, TableManager.Instance.GetPlayerTablePosition().z);
-            this.transform.position = newPosition;
-
-        }
-
+        #region Private functions
         private void GetInput()
         {
-            _isServePressed = false;
             _isPausePressed = false;
             float y = 0;
             if(Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
@@ -94,7 +77,6 @@ namespace Game
             }
             if(Input.GetKeyDown(KeyCode.Space))
             {
-                // _isServePressed = true;
                 string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString() } });
                 Utility.Socket.EmitEvent("serveBeer", json);
             }
@@ -110,5 +92,6 @@ namespace Game
 	            Utility.Socket.EmitEvent("playerMove", json);
             }
         }
+        #endregion
     }
 }

@@ -25,17 +25,6 @@ mergeInto(LibraryManager.library, {
                 SendMessage(this.objectNameDic.updateBrushPosition, this.methodNameDic.updateBrushPosition);
         });
 
-        socket.on('updateCoin', (coin) => {
-            if(this.objectNameDic.updateCoin && this.methodNameDic.updateCoin)
-                SendMessage(this.objectNameDic.updateCoin.toString(), this.methodNameDic.updateCoin.toString(), coin.toString());
-
-        });
-
-        socket.on('spawnCoin', () => {
-            if(this.objectNameDic.spawnCoin && this.methodNameDic.spawnCoin)
-                SendMessage(this.objectNameDic.spawnCoin, this.methodNameDic.spawnCoin, 'SpawnCoin');
-        });
-
         socket.on('updateProof', (proof) => {
             if(this.objectNameDic.updateProof && this.methodNameDic.updateProof)
                 SendMessage(this.objectNameDic.updateProof , this.methodNameDic.updateProof, proof.toString());
@@ -73,6 +62,66 @@ mergeInto(LibraryManager.library, {
         socket.on('giftTxHash', (data) => {
             SendMessage(this.objectNameDic.giftTxHash, this.methodNameDic.giftTxHash, data.toString());
         });
+        
+        socket.on('playerMove', (data) => {
+        	if(this.objectNameDic.playerMove && this.methodNameDic.playerMove)
+        		SendMessage(this.objectNameDic.playerMove, this.methodNameDic.playerMove, data.toString());
+		});
+
+		socket.on('spawnCustomer', (data) => {
+			if(this.objectNameDic.spawnCustomer && this.methodNameDic.spawnCustomer)
+				SendMessage(this.objectNameDic.spawnCustomer, this.methodNameDic.spawnCustomer, data.toString());
+		});
+
+		socket.on('updateCustomerPosition', (data) => {
+			if(this.objectNameDic.updateCustomerPosition && this.methodNameDic.updateCustomerPosition)
+				SendMessage(this.objectNameDic.updateCustomerPosition, this.methodNameDic.updateCustomerPosition, data.toString());
+		});
+
+		socket.on('updateCustomerWaitTime', (data) => {
+			if(this.objectNameDic.updateCustomerWaitTime && this.methodNameDic.updateCustomerWaitTime)
+				SendMessage(this.objectNameDic.updateCustomerWaitTime, this.methodNameDic.updateCustomerWaitTime, data.toString());
+		});
+
+		socket.on('customerReachDestination', (data) => {
+			if(this.objectNameDic.customerReachDestination && this.methodNameDic.customerReachDestination)
+				SendMessage(this.objectNameDic.customerReachDestination, this.methodNameDic.customerReachDestination, data.toString());
+		});
+
+		socket.on('customerReturn', (data) => {
+			if(this.objectNameDic.customerReturn && this.methodNameDic.customerReturn)
+				SendMessage(this.objectNameDic.customerReturn, this.methodNameDic.customerReturn, data.toString());
+		});
+
+		socket.on('deleteCustomer', (data) => {
+			if(this.objectNameDic.deleteCustomer && this.methodNameDic.deleteCustomer)
+				SendMessage(this.objectNameDic.deleteCustomer, this.methodNameDic.deleteCustomer, data.toString());
+		});
+
+		socket.on('serveBeer', (data) => {
+			if(this.objectNameDic.serveBeer && this.methodNameDic.serveBeer)
+				SendMessage(this.objectNameDic.serveBeer, this.methodNameDic.serveBeer, data.toString());
+		});
+
+		socket.on('updateBeer', (data) => {
+			if(this.objectNameDic.updateBeer && this.methodNameDic.updateBeer)
+				SendMessage(this.objectNameDic.updateBeer, this.methodNameDic.updateBeer, data.toString());
+		});
+
+		socket.on('beerCollided', (data) => {
+			if(this.objectNameDic.beerCollided && this.methodNameDic.beerCollided)
+				SendMessage(this.objectNameDic.beerCollided, this.methodNameDic.beerCollided, data.toString());
+		});
+
+		socket.on('updateTimer', (data) => {
+			if(this.objectNameDic.updateTimer && this.methodNameDic.updateTimer)
+				SendMessage(this.objectNameDic.updateTimer, this.methodNameDic.updateTimer, data.toString());
+		});
+
+		socket.on('timeUp', (data) => {
+			if(this.objectNameDic.timeUp && this.methodNameDic.timeUp)
+				SendMessage(this.objectNameDic.timeUp, this.methodNameDic.timeUp, data.toString());
+		});
 
         window.unitySocket = socket;
     },
@@ -103,9 +152,9 @@ mergeInto(LibraryManager.library, {
         let object = UTF8ToString(callbackObjectName);
         let method = UTF8ToString(callbackMethodName);
         const objectMethod = new Object();
-        objectMethod.objectName = object; 
+        objectMethod.objectName = object;
         objectMethod.methodName = method;
-        
+
         this.exceptionArray.push(objectMethod);
     },
     UnSubscribeOnException:function(callbackObjectName, callbackMethodName)

@@ -13,8 +13,10 @@ namespace Game
 		public List<Customer> CustomerList = new List<Customer>();
 		private float lastSpawnTime = 0;
 
+		#region Unity Functions
 		private void Start()
 		{
+			GameplayManager.Instance.OnEndDay += OnEndDayHandler;
 			Utility.Socket.OnEvent("updateCustomerPosition", this.gameObject.name, nameof(UpdateCustomerPosition), UpdateCustomerPosition);
 			Utility.Socket.OnEvent("updateCustomerWaitTime", this.gameObject.name, nameof(UpdateCustomerWaitTime),
 				UpdateCustomerWaitTime);
@@ -40,17 +42,16 @@ namespace Game
 				}
 			}
 		}
+		#endregion
 
+		#region Public Functions
 		public void AddCustomer(Customer customer)
 		{
 			CustomerList.Add(customer);
 		}
+		#endregion
 
-		public void RemoveCustomer(Customer customer)
-		{
-			CustomerList.Remove(customer);
-		}
-
+		#region Event Handlers
 		public void UpdateCustomerPosition(string data)
 		{
 			try
@@ -139,6 +140,12 @@ namespace Game
 				Debug.LogError("Delete Customer Error: " + e.Message);
 			}
 		}
+
+		public void OnEndDayHandler()
+		{
+			// CustomerList.Clear();
+		}
+		#endregion
 
 	}
 }
