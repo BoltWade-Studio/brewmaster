@@ -12,10 +12,10 @@ namespace Game
 {
     public class BeerServeManager : MonoBehaviorInstance<BeerServeManager>
     {
-        public Action<Vector3> OnServerFail;
+        public Action<Vector3, int> OnServerFail;
         public Action<Customer> OnServeComplete;
 
-        [SerializeField] private int _moneyLostOnFail = 20;
+        // [SerializeField] private int _moneyLostOnFail = 20;
         [SerializeField] private Transform _beerCupPref;
         [SerializeField] private float _tableHeight = 0.8f;
         private Player _player;
@@ -88,10 +88,10 @@ namespace Game
         #endregion
 
         #region Event functions
-        private void OnServerFailHandler(Vector3 failPosition)
+        private void OnServerFailHandler(Vector3 failPosition, int _moneyLostOnFail)
         {
-            Debug.Log("Remove money " + _moneyLostOnFail);
-            MoneyManager.Instance.RemoveMoney(_moneyLostOnFail);
+            // Debug.Log("Remove money " + _moneyLostOnFail);
+            // MoneyManager.Instance.RemoveMoney(_moneyLostOnFail);
             TextPopup.Show("-" + _moneyLostOnFail, failPosition, Color.red);
             SoundManager.PlaySound(SoundEnum.ServeFail, failPosition);
             FlashingUI.Instance.Flash(Color.red);

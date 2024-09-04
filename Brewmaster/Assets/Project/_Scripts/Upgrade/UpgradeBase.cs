@@ -10,18 +10,17 @@ namespace Game
     public abstract class UpgradeBase : MonoBehaviour
     {
 	    public Table _table;
-        [HideInInspector] public int Price;
-        [HideInInspector] public float PriceMultipler;
+	    [HideInInspector] public int Price;
 
         [SerializeField] protected UpgradeUI _upgradeUI;
         [SerializeField] protected UpgradeAction _upgradeAction;
         protected int _upgradeTime = 1;
         public bool toUpgrade = false;
+        public bool toUpdatePrice = false;
 
         #region Unity functions
         protected void Awake()
         {
-            PriceMultipler = 2f;
             HideUI();
             ChildAwake();
         }
@@ -51,17 +50,30 @@ namespace Game
                 UIManager.Instance.OnStorePhrase += OnStorePhraseHandler;
                 UIManager.Instance.OnStorePhrase += OnStorePhaseHandler;
             }
+
+            if (UpgradeManager.Instance)
+			{
+				UpgradeManager.Instance.AddUpgradeBase(this);
+			}
+
             ChildStart();
-            UpgradeManager.Instance.AddUpgradeBase(this);
         }
 
         private void Update()
         {
 	        if(toUpgrade)
 	        {
+		        toUpgrade = false;
+		        _upgradeUI.UpdateMoneyText();
 		        _upgradeAction.Invoke();
-				toUpgrade = false;
+		        _upgradeAction.OnComplete.Invoke();
 			}
+
+	        if (toUpdatePrice)
+	        {
+		        toUpdatePrice = false;
+		        _upgradeUI.UpdateMoneyText();
+	        }
         }
 
         protected virtual void ChildStart(){}
@@ -110,7 +122,6 @@ namespace Game
         public virtual void UpdatePrice()
         {
             UpdateUpgradeTime();
-            Price = (int) (_upgradeTime * PriceMultipler) + 50;
             Save();
         }
 

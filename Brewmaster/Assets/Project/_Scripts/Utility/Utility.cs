@@ -227,9 +227,19 @@ namespace Game
 				{
 					if (_actionEventDic.ContainsKey("upgradeTableCallback"))
 					{
-						Debug.Log("upgradeTableCallback: " + data);
+						// Debug.Log("upgradeTableCallback: " + data);
 						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
 						_actionEventDic["upgradeTableCallback"].Invoke(useData.ToString());
+					}
+				});
+
+				socket.On("updateUpgradePrice", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("updateUpgradePrice"))
+					{
+						Debug.Log("updateUpgradePrice: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["updateUpgradePrice"].Invoke(useData.ToString());
 					}
 				});
 

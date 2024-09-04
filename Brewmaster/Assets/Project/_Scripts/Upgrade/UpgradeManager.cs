@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using NOOD;
 using UnityEngine;
 
@@ -13,6 +14,8 @@ namespace Game
         private void Start()
         {
 	        Utility.Socket.OnEvent("upgradeTableCallback", this.gameObject.name, nameof(UpgradeCallback), UpgradeCallback);
+	        Utility.Socket.OnEvent("updateUpgradePrice", this.gameObject.name, nameof(UpdateUpgradePrice), UpdateUpgradePrice);
+	        Utility.Socket.EmitEvent("updateUpgradePrice");
         }
 
         private void Update()
@@ -29,9 +32,26 @@ namespace Game
             _upgradeBaseList = new List<UpgradeBase>();
         }
 
+        public void UpdateUpgradePrice(string data)
+        {
+	        // Debug.Log("UpdateUpgradePrice: " + data);
+
+	        var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
+
+	        foreach (var _upgradeBase in _upgradeBaseList)
+	        {
+		        if (_upgradeBase._table.TableIndex == int.Parse(dict["i"]))
+		        {
+			        // Debug.Log("Found Table to Update Price! " + dict["message"]);
+			        _upgradeBase.Price = int.Parse(dict["message"]);
+			        _upgradeBase.toUpdatePrice = true;
+		        }
+	        }
+        }
+
         public void UpgradeCallback(string data)
         {
-	        Debug.Log("UpgradeCallback: " + data);
+	        // Debug.Log("UpgradeCallback: " + data);
 
 	        if (data == "fail")
 	        {
@@ -39,11 +59,14 @@ namespace Game
 		        return;
 	        }
 
+	        var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
+
 	        foreach (var _upgradeBase in _upgradeBaseList)
 	        {
-		        if (_upgradeBase._table.TableIndex == int.Parse(data))
+		        if (_upgradeBase._table.TableIndex == int.Parse(dict["tableIndex"]))
 		        {
-			        Debug.Log("Found Table to Upgrade!");
+			        // Debug.Log("Found Table to Upgrade!");
+			        _upgradeBase.Price = int.Parse(dict["message"]);
 			        _upgradeBase.toUpgrade = true;
 		        }
 	        }
@@ -51,6 +74,7 @@ namespace Game
 
         public void AddUpgradeBase(UpgradeBase upgradeBase)
 		{
+			// Debug.Log("AddUpgradeBase: " + upgradeBase._table.TableIndex);
 			_upgradeBaseList.Add(upgradeBase);
 		}
     }

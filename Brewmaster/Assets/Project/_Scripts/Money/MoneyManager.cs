@@ -58,17 +58,17 @@ namespace Game
 		/// </summary>
 		/// <param name="amount"></param>
 		/// <returns></returns>
-		public bool PayMoney(int amount)
-		{
-			if (PlayerData.TotalPoint >= amount)
-			{
-				PlayerData.TotalPoint -= amount;
-				UIManager.Instance.UpdateInDayMoney();
-				return true;
-			}
-			else
-				return false;
-		}
+		// public bool PayMoney(int amount)
+		// {
+		// 	if (PlayerData.TotalPoint >= amount)
+		// 	{
+		// 		PlayerData.TotalPoint -= amount;
+		// 		UIManager.Instance.UpdateInDayMoney();
+		// 		return true;
+		// 	}
+		// 	else
+		// 		return false;
+		// }
 
 		/// <summary>
 		/// If buying stuff, use PayMoney(int) instead

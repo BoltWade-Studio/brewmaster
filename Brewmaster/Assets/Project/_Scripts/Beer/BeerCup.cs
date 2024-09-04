@@ -27,7 +27,7 @@ namespace Game
 		        if (_beerDto.punished)
 		        {
 			        Debug.Log("Collider");
-			        BeerServeManager.Instance.OnServerFail?.Invoke(this.transform.position);
+			        BeerServeManager.Instance.OnServerFail?.Invoke(this.transform.position, _beerDto.earnedMoney);
 		        }
 		        else
 		        {	if (_customer == null)

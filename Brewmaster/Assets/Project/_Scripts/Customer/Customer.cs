@@ -106,7 +106,7 @@ namespace Game
 		public void Complete(int money)
 		{
 			TextPopup.Show("+" + money, this.transform.position, Color.yellow);
-			MoneyManager.Instance.AddMoney(money);
+			// MoneyManager.Instance.AddMoney(money);
 			BeerServeManager.Instance.OnServeComplete?.Invoke(this);
 		}
 		#endregion
