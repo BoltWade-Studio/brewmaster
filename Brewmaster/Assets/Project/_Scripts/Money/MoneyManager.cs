@@ -1,5 +1,8 @@
+using System;
+using Newtonsoft.Json;
 using NOOD;
 using UnityEngine;
+using Utils;
 
 namespace Game
 {
@@ -12,6 +15,8 @@ namespace Game
 
 		private int _currentTarget;
 
+		public bool toUpdatePoint = false;
+
 		protected override void ChildAwake()
 		{
 			_currentTarget = 150;
@@ -21,6 +26,15 @@ namespace Game
 		{
 			_currentTarget = DataSaveLoadManager.Instance.Target;
 			GameplayManager.Instance.OnNextDay += GameplayManager_OnNextDayHandler;
+		}
+
+		private void Update()
+		{
+			if (toUpdatePoint)
+			{
+				UIManager.Instance.UpdateInDayMoney();
+				toUpdatePoint = false;
+			}
 		}
 
 		void OnDisable()
@@ -62,13 +76,17 @@ namespace Game
 		/// <param name="amount"></param>
 		public void RemoveMoney(int amount)
 		{
-			PlayerData.TotalPoint -= amount;
-			UIManager.Instance.UpdateInDayMoney();
+			string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { (-amount).ToString() } });
+			Utility.Socket.EmitEvent("updateTotalPoint", json);
+			// PlayerData.TotalPoint -= amount;
+			// UIManager.Instance.UpdateInDayMoney();
 		}
 		public void AddMoney(int amount)
 		{
-			PlayerData.TotalPoint += amount;
-			UIManager.Instance.UpdateInDayMoney();
+			string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { (amount).ToString() } });
+			Utility.Socket.EmitEvent("updateTotalPoint", json);
+			// PlayerData.TotalPoint += amount;
+			// UIManager.Instance.UpdateInDayMoney();
 		}
 	}
 

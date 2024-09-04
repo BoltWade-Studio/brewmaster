@@ -95,6 +95,7 @@ namespace Game
 		{
 			Debug.Log("Update total point" + point);
 			PlayerData.TotalPoint = Convert.ToInt32(point);
+			MoneyManager.Instance.toUpdatePoint = true;
 		}
 
 		private void OnUpdateProof(string proof)

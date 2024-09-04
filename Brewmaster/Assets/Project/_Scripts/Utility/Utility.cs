@@ -197,6 +197,16 @@ namespace Game
 					}
 				});
 
+				socket.On("totalPointCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("totalPointCallback"))
+					{
+						// Debug.Log("updateTotalPoint: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["totalPointCallback"].Invoke(useData.ToString());
+					}
+				});
+
 				socket.On("timeUp", (data) =>
 				{
 					if (_actionEventDic.ContainsKey("timeUp"))
@@ -210,6 +220,16 @@ namespace Game
 						{
 							Debug.Log("Timeup Exception: " + e.Message);
 						}
+					}
+				});
+
+				socket.On("upgradeTableCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("upgradeTableCallback"))
+					{
+						Debug.Log("upgradeTableCallback: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["upgradeTableCallback"].Invoke(useData.ToString());
 					}
 				});
 

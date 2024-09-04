@@ -14,6 +14,7 @@ namespace Game
         private Stack<Transform> _lockSeatList = new Stack<Transform>();
         private Dictionary<Customer, Transform> _unAvailableSeatDic = new Dictionary<Customer, Transform>();
         private bool _unlockAllSeats;
+        public int TableIndex;
 
         #region Unity Functions
         private void Start()

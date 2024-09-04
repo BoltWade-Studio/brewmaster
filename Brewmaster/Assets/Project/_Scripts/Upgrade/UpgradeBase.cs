@@ -1,17 +1,22 @@
+using System;
+using Newtonsoft.Json;
 using NOOD;
 using UnityEditor;
 using UnityEngine;
+using Utils;
 
 namespace Game
 {
     public abstract class UpgradeBase : MonoBehaviour
     {
+	    public Table _table;
         [HideInInspector] public int Price;
         [HideInInspector] public float PriceMultipler;
-    
+
         [SerializeField] protected UpgradeUI _upgradeUI;
         [SerializeField] protected UpgradeAction _upgradeAction;
         protected int _upgradeTime = 1;
+        public bool toUpgrade = false;
 
         #region Unity functions
         protected void Awake()
@@ -47,7 +52,18 @@ namespace Game
                 UIManager.Instance.OnStorePhrase += OnStorePhaseHandler;
             }
             ChildStart();
+            UpgradeManager.Instance.AddUpgradeBase(this);
         }
+
+        private void Update()
+        {
+	        if(toUpgrade)
+	        {
+		        _upgradeAction.Invoke();
+				toUpgrade = false;
+			}
+        }
+
         protected virtual void ChildStart(){}
         protected void OnDisable()
         {
@@ -73,14 +89,20 @@ namespace Game
 
         private void OnUpgradeButtonClickHandler()
         {
-            UpgradeManager.Instance.Upgrade(this);
+	        string json = JsonConvert.SerializeObject(new ArrayWrapper
+	        {
+		        array = new string[]
+		        {
+			        _table.TableIndex.ToString(),
+			        JsonUtility.ToJson(_table.GetUpgradePosition())
+
+		        }
+	        });
+	        Debug.Log("Upgrading Table " + json);
+	        Utility.Socket.EmitEvent("upgradeTable", json);
         }
 
         protected virtual void OnStorePhaseHandler(){}
-        public void Upgrade()
-        {
-            _upgradeAction.Invoke();
-        }
 
         /// <summary>
         /// Update price base on own setting of the child upgradeTime

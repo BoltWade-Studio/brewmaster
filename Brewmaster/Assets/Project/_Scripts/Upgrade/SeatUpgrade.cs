@@ -5,8 +5,6 @@ namespace Game
 {
     public class SeatUpgrade : UpgradeBase
     {
-        private Table _table;
-
         protected override void ChildAwake()
         {
             _table = this.GetComponent<Table>();
