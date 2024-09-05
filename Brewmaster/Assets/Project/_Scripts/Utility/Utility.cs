@@ -91,8 +91,9 @@ namespace Game
 				{
 					if (_actionEventDic.ContainsKey("playerMove"))
 					{
-						Debug.Log("playerMove: " + data.ToString());
-						_actionEventDic["playerMove"].Invoke(data.ToString());
+						// Debug.Log("playerMove: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["playerMove"].Invoke(useData.ToString());
 					}
 				});
 

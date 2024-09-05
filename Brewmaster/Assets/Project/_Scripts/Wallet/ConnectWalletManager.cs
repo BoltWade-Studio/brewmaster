@@ -93,7 +93,7 @@ namespace Game
 
 		private void OnUpdateTotalPoint(string point)
 		{
-			Debug.Log("Update total point" + point);
+			// Debug.Log("Update total point" + point);
 			PlayerData.TotalPoint = Convert.ToInt32(point);
 			MoneyManager.Instance.toUpdatePoint = true;
 		}

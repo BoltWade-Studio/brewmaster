@@ -49,9 +49,8 @@ namespace Game
         {
 	        try
 	        {
-		        List<Vector3> playerPosition = JsonConvert.DeserializeObject<List<Vector3>>(data);
-		        standPosition = playerPosition[0];
-		        // Debug.Log("PlayerMove: " + standPosition);
+		        standPosition = JsonConvert.DeserializeObject<Vector3>(data);
+		        Debug.Log("PlayerMove: " + standPosition);
 		        toMove = true;
 	        }
 	        catch (Exception e)

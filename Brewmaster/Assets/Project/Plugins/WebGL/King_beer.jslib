@@ -64,53 +64,65 @@ mergeInto(LibraryManager.library, {
         });
 
         socket.on('playerMove', (data) => {
+        	let dataString = JSON.stringify(data).toString();
+        	console.log(dataString);
         	if(this.objectNameDic.playerMove && this.methodNameDic.playerMove)
-        		SendMessage(this.objectNameDic.playerMove, this.methodNameDic.playerMove, data.toString());
+        		SendMessage(this.objectNameDic.playerMove, this.methodNameDic.playerMove, dataString);
 		});
 
 		socket.on('spawnCustomer', (data) => {
+			console.log(data);
+			let dataString = JSON.stringify(data).toString();
 			if(this.objectNameDic.spawnCustomer && this.methodNameDic.spawnCustomer)
-				SendMessage(this.objectNameDic.spawnCustomer, this.methodNameDic.spawnCustomer, data.toString());
+				SendMessage(this.objectNameDic.spawnCustomer, this.methodNameDic.spawnCustomer, dataString);
 		});
 
 		socket.on('updateCustomerPosition', (data) => {
+			let dataString = JSON.stringify(data).toString();
 			if(this.objectNameDic.updateCustomerPosition && this.methodNameDic.updateCustomerPosition)
-				SendMessage(this.objectNameDic.updateCustomerPosition, this.methodNameDic.updateCustomerPosition, data.toString());
+				SendMessage(this.objectNameDic.updateCustomerPosition, this.methodNameDic.updateCustomerPosition, dataString);
 		});
 
 		socket.on('updateCustomerWaitTime', (data) => {
+			let dataString = JSON.stringify(data).toString();
 			if(this.objectNameDic.updateCustomerWaitTime && this.methodNameDic.updateCustomerWaitTime)
-				SendMessage(this.objectNameDic.updateCustomerWaitTime, this.methodNameDic.updateCustomerWaitTime, data.toString());
+				SendMessage(this.objectNameDic.updateCustomerWaitTime, this.methodNameDic.updateCustomerWaitTime, dataString);
 		});
 
 		socket.on('customerReachDestination', (data) => {
+			let dataString = JSON.stringify(data).toString();
 			if(this.objectNameDic.customerReachDestination && this.methodNameDic.customerReachDestination)
-				SendMessage(this.objectNameDic.customerReachDestination, this.methodNameDic.customerReachDestination, data.toString());
+				SendMessage(this.objectNameDic.customerReachDestination, this.methodNameDic.customerReachDestination, dataString);
 		});
 
 		socket.on('customerReturn', (data) => {
+			let dataString = JSON.stringify(data).toString();
 			if(this.objectNameDic.customerReturn && this.methodNameDic.customerReturn)
-				SendMessage(this.objectNameDic.customerReturn, this.methodNameDic.customerReturn, data.toString());
+				SendMessage(this.objectNameDic.customerReturn, this.methodNameDic.customerReturn, dataString);
 		});
 
 		socket.on('deleteCustomer', (data) => {
+			let dataString = JSON.stringify(data).toString();
 			if(this.objectNameDic.deleteCustomer && this.methodNameDic.deleteCustomer)
-				SendMessage(this.objectNameDic.deleteCustomer, this.methodNameDic.deleteCustomer, data.toString());
+				SendMessage(this.objectNameDic.deleteCustomer, this.methodNameDic.deleteCustomer, dataString);
 		});
 
 		socket.on('serveBeer', (data) => {
+			let dataString = JSON.stringify(data).toString();
 			if(this.objectNameDic.serveBeer && this.methodNameDic.serveBeer)
-				SendMessage(this.objectNameDic.serveBeer, this.methodNameDic.serveBeer, data.toString());
+				SendMessage(this.objectNameDic.serveBeer, this.methodNameDic.serveBeer, dataString);
 		});
 
 		socket.on('updateBeer', (data) => {
+			let dataString = JSON.stringify(data).toString();
 			if(this.objectNameDic.updateBeer && this.methodNameDic.updateBeer)
-				SendMessage(this.objectNameDic.updateBeer, this.methodNameDic.updateBeer, data.toString());
+				SendMessage(this.objectNameDic.updateBeer, this.methodNameDic.updateBeer, dataString);
 		});
 
 		socket.on('beerCollided', (data) => {
+			let dataString = JSON.stringify(data).toString();
 			if(this.objectNameDic.beerCollided && this.methodNameDic.beerCollided)
-				SendMessage(this.objectNameDic.beerCollided, this.methodNameDic.beerCollided, data.toString());
+				SendMessage(this.objectNameDic.beerCollided, this.methodNameDic.beerCollided, dataString);
 		});
 
 		socket.on('updateTimer', (data) => {
@@ -118,9 +130,26 @@ mergeInto(LibraryManager.library, {
 				SendMessage(this.objectNameDic.updateTimer, this.methodNameDic.updateTimer, data.toString());
 		});
 
+		socket.on('totalPointCallback', (data) => {
+			if(this.objectNameDic.totalPointCallback && this.methodNameDic.totalPointCallback)
+				SendMessage(this.objectNameDic.totalPointCallback, this.methodNameDic.totalPointCallback, data.toString());
+		});
+
 		socket.on('timeUp', (data) => {
 			if(this.objectNameDic.timeUp && this.methodNameDic.timeUp)
-				SendMessage(this.objectNameDic.timeUp, this.methodNameDic.timeUp, data.toString());
+				SendMessage(this.objectNameDic.timeUp, this.methodNameDic.timeUp, '');
+		});
+
+		socket.on('upgradeTableCallback', (data) => {
+			let dataString = JSON.stringify(data).toString();
+			if(this.objectNameDic.upgradeTableCallback && this.methodNameDic.upgradeTableCallback)
+				SendMessage(this.objectNameDic.upgradeTableCallback, this.methodNameDic.upgradeTableCallback, dataString);
+		});
+
+		socket.on('updateUpgradePrice', (data) => {
+			let dataString = JSON.stringify(data).toString();
+			if(this.objectNameDic.updateUpgradePrice && this.methodNameDic.updateUpgradePrice)
+				SendMessage(this.objectNameDic.updateUpgradePrice, this.methodNameDic.updateUpgradePrice, dataString);
 		});
 
         window.unitySocket = socket;

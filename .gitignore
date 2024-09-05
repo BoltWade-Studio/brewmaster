@@ -74,5 +74,5 @@ ignore.conf
 UpDownBar/Recordings/
 /node_modules
 UpDownBarWebGL.zip
-UpDownBarWebGL/Build
+Brewmaster/Build
 UpDownBarWebGL

@@ -51,9 +51,9 @@ namespace Game
 
         public void UpgradeCallback(string data)
         {
-	        // Debug.Log("UpgradeCallback: " + data);
+	        Debug.Log("UpgradeCallback: " + data);
 
-	        if (data == "fail")
+	        if (data.Contains("fail"))
 	        {
 		        _showNotiNotEnoughMoney = true;
 		        return;
