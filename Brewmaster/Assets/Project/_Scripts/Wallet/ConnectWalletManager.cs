@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using NOOD;
 using StarkSharp.Settings;
@@ -8,17 +9,6 @@ using Utils;
 
 namespace Game
 {
-	public static class PlayerData
-	{
-		public static string PlayerAddress = "0x000000000";
-		public static int TotalPoint = 0;
-
-		public static void Reset()
-		{
-			PlayerAddress = "0x000000000";
-			TotalPoint = 0;
-		}
-	}
 
 	public class ProofClass
 	{
@@ -37,7 +27,7 @@ namespace Game
 
 		private ConnectWalletUI _connectWalletUI;
 		private Action _onSuccess;
-		private string contractAddress = "0x7bd89ba87f34b47facaeb4d408dadd1915d16a6c828d7ba55692eb705f0a5cc";
+		private string contractAddress = "0x76f7bf89ee554e8e182be67600e006fc543339f6074d04ce5c86515525539bd";
 
 		protected override void ChildAwake()
 		{
@@ -53,14 +43,12 @@ namespace Game
 		{
 			Utility.Socket.OnEvent(SocketEnum.updateProof.ToString(), this.gameObject.name, nameof(OnUpdateProof), OnUpdateProof);
 			Utility.Socket.OnEvent(SocketEnum.updateAnonymous.ToString(), this.gameObject.name, nameof(OnUpdateAnonymous), OnUpdateAnonymous);
-			Utility.Socket.OnEvent(SocketEnum.totalPointCallback.ToString(), this.gameObject.name, nameof(OnUpdateTotalPoint), OnUpdateTotalPoint);
 		}
 
 
 		public void StartConnectWallet(Action onSuccess)
 		{
 			_onSuccess = onSuccess;
-			PlayerData.Reset();
 			_gameUITransform = GameObject.FindGameObjectWithTag("MainMenuCanvas").transform;
 			_connectWalletUI = Instantiate<ConnectWalletUI>(_connectWalletUIPref, _gameUITransform);
 			_connectWalletUI.Open();
@@ -71,31 +59,24 @@ namespace Game
 
 		private void ConnectArgentX()
 		{
-			StartCoroutine(WalletConnectAsync(JSInteropManager.ConnectWalletArgentX));
+			WalletConnectAsync(JSInteropManager.ConnectWalletArgentX);
 			isAnonymous = false;
 		}
 		private void ConnectBraavos()
 		{
-			StartCoroutine(WalletConnectAsync(JSInteropManager.ConnectWalletBraavos));
+			WalletConnectAsync(JSInteropManager.ConnectWalletBraavos);
 			isAnonymous = false;
 		}
 		private void ConnectAnonymous()
 		{
 			// Request address and private key from server
 			Utility.Socket.EmitEvent(SocketEnum.anonymousLogin.ToString());
-			Utility.Socket.EmitEvent(SocketEnum.requestUpdateTotalPoint.ToString());
+			Utility.Socket.EmitEvent(SocketEnum.requestUpdatePlayerTreasury.ToString());
 			isAnonymous = true;
 
 			// Hide UI
 			_connectWalletUI.Close();
 			_onSuccess?.Invoke();
-		}
-
-		private void OnUpdateTotalPoint(string point)
-		{
-			// Debug.Log("Update total point" + point);
-			PlayerData.TotalPoint = Convert.ToInt32(point);
-			MoneyManager.Instance.toUpdatePoint = true;
 		}
 
 		private void OnUpdateProof(string proof)
@@ -122,20 +103,27 @@ namespace Game
 			Debug.Log("Update anonymous: " + data);
 			string[] dataArray = JsonConvert.DeserializeObject<string[]>(data);
 
-			PlayerData.PlayerAddress = dataArray[0];
+			// PlayerData.PlayerAddress = dataArray[0];
 		}
 
-		private IEnumerator WalletConnectAsync(Action walletAction)
+		private async void WalletConnectAsync(Action walletAction)
 		{
-			walletAction?.Invoke();
-			yield return new WaitUntil(() => JSInteropManager.IsConnected());
+			string playerAddress;
+			if (Application.isEditor)
+			{
+				playerAddress = Utility.Socket.StringToSocketJson("0x0449A464Bce984F1d1d987B3a1Ff91bE490da7115f9776c1c7FED2ba3c5d14C0");
+			}
+			else
+			{
+				walletAction?.Invoke();
+				await UniTask.WaitUntil(() => JSInteropManager.IsConnected());
+				playerAddress = Utility.Socket.StringToSocketJson(JSInteropManager.GetAccount());
+			}
 
-			PlayerData.PlayerAddress = JSInteropManager.GetAccount();
-			string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { PlayerData.PlayerAddress } });
-			Utility.Socket.EmitEvent("updatePlayerAddress", json);
+			Utility.Socket.EmitEvent(SocketEnum.updatePlayerAddress.ToString(), playerAddress);
+			await DataSaveLoadManager.Instance.LoadData();
 			_connectWalletUI.Close();
-			_onSuccess.Invoke();
-			// SyncPlayerPoint()
+			_onSuccess?.Invoke();
 		}
 
 		public void Claim()
@@ -178,10 +166,6 @@ namespace Game
 				// user claim
 				SyncPlayerPoint();
 				Utility.Socket.EmitEvent(SocketEnum.afterClaim.ToString());
-				// if (Application.isEditor)
-				// 	SocketConnectManager.Instance.EmitEvent("afterClaim");
-				// else
-				// 	JsSocketConnect.EmitEvent("afterClaim");
 			}
 		}
 	}

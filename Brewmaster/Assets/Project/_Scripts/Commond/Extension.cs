@@ -6,7 +6,7 @@ namespace Game.Extension
 {
     public static class Vector3Extension
     {
-        public static Vector3 ToVector3XZ (this Vector3 source)
+        public static Vector3 ToVector3XZ(this Vector3 source)
         {
             return new Vector3(source.x, 0, source.z);
         }
@@ -36,6 +36,19 @@ namespace Game.Extension
         public static KeyValuePair<TKey, TValue> GetPair<TKey, TValue>(this IDictionary<TKey, TValue> source, TKey key)
         {
             return new KeyValuePair<TKey, TValue>(key, source[key]);
+        }
+    }
+
+    public static class JsonExtension
+    {
+        public static string RemoveUnWantChar(this string source)
+        {
+            source = source.Replace("\\", "");
+            source = source.Replace("\"{", "{");
+            source = source.Replace("}\"", "}");
+            source = source.Replace("\"[", "[");
+            source = source.Replace("]\"", "]");
+            return source;
         }
     }
 }

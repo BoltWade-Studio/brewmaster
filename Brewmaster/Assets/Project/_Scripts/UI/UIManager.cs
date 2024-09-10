@@ -34,7 +34,7 @@ namespace Game
 		[Header("End day menu")]
 		[SerializeField] private GameObject _endDayMenu;
 		[SerializeField] private TextMeshProUGUI _totalMoney;
-		[SerializeField] private TextMeshProUGUI _targetMoney, _profitMoney, _bonusMoney;
+		// [SerializeField] private TextMeshProUGUI _targetMoney, _profitMoney, _bonusMoney;
 		[SerializeField] private TextMeshProUGUI _resultText;
 		[SerializeField] private CustomButton _shopBtn, _nextDayBtn, _mainMenuBtn;
 		[SerializeField] private float _moneyIncreaseSpeed = 30;
@@ -170,7 +170,7 @@ namespace Game
 		}
 		public void UpdateInDayMoney()
 		{
-			_moneyText.text = PlayerData.TotalPoint.ToString();
+			_moneyText.text = PlayerData.PlayerTreasury.ToString();
 		}
 		public void UpdateTime()
 		{
@@ -198,29 +198,21 @@ namespace Game
 		{
 			ShowEndDayPanel(true);
 		}
-		private async void ShowEndDayPanel(bool isUpdate = false)
+		private void ShowEndDayPanel(bool isUpdate = false)
 		{
 			if (isUpdate)
 			{
-				await PlayMoneyAnimation(PlayerData.TotalPoint);
-				MoneyManager.Instance.CommitEndDay();
+				PlayMoneyAnimation(PlayerData.PlayerTreasury);
 			}
-			if (GameplayManager.Instance.IsWin)
-			{
-				_mainMenuBtn.gameObject.SetActive(false);
-				_shopBtn.gameObject.SetActive(true);
-				_nextDayBtn.gameObject.SetActive(true);
-			}
-			else
-			{
-				_mainMenuBtn.gameObject.SetActive(true);
-				_shopBtn.gameObject.SetActive(false);
-				_nextDayBtn.gameObject.SetActive(false);
-			}
-			SoundManager.PlaySound(SoundEnum.MoneySound);
+
+			_mainMenuBtn.gameObject.SetActive(true);
+			_shopBtn.gameObject.SetActive(true);
+			_nextDayBtn.gameObject.SetActive(true);
+
 			_ingameMenu.SetActive(false);
 			_endDayMenu.SetActive(true);
 			_endDayMenu.transform.DOScale(Vector3.one, 0.7f);
+			SoundManager.PlaySound(SoundEnum.MoneySound);
 			EventSystem.current.SetSelectedGameObject(null);
 		}
 		private void HideEndDayPanel()
@@ -228,14 +220,11 @@ namespace Game
 			_ingameMenu.SetActive(true);
 			_endDayMenu.transform.DOScale(Vector3.zero, 0.7f).OnComplete(() => _endDayMenu.SetActive(false));
 		}
-		private async UniTask PlayMoneyAnimation(int money)
+		private async void PlayMoneyAnimation(int money)
 		{
 			float time = 0;
 			float temp = 0;
 
-			_targetMoney.text = MoneyManager.Instance.CurrentTarget.ToString();
-			_profitMoney.text = (PlayerData.TotalPoint - MoneyManager.Instance.CurrentTarget).ToString();
-			_bonusMoney.text = MoneyManager.Instance.Bonus.ToString();
 			_resultText.gameObject.SetActive(false);
 
 			// Show currentTotalMoney
@@ -248,16 +237,9 @@ namespace Game
 			}
 
 			_resultText.gameObject.SetActive(true);
-			if (GameplayManager.Instance.IsWin)
-			{
-				_resultText.text = "CONGRATULATION";
-				_resultText.color = Color.green;
-			}
-			else
-			{
-				_resultText.text = "YOU LOSE";
-				_resultText.color = Color.red;
-			}
+
+			_resultText.text = "CONGRATULATION";
+			_resultText.color = Color.green;
 		}
 		private void ActiveStorePhrase()
 		{

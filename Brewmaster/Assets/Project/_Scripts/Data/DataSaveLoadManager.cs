@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using NOOD;
@@ -10,72 +11,39 @@ namespace Game
 {
 	public class DataSaveLoadManager : MonoBehaviorInstance<DataSaveLoadManager>
 	{
-		public TableData TableData;
 		public int Day;
-		public int Money;
-		public int Target;
-		private bool _isLoaded = false;
-		public string _json;
+		public TableData TableData;
 
 		protected override void ChildAwake()
 		{
-			Utility.Socket.OnEvent(SocketEnum.loadCallback.ToString(), this.gameObject.name, nameof(LoadCallback), LoadCallback);
-			Load();
+			base.ChildAwake();
+			Day = 0;
+			TableData = new TableData();
 		}
 
-		void Start()
+		public async UniTask LoadData()
 		{
-			GameplayManager.Instance.OnEndDay += Save;
-			GameplayManager.Instance.OnNextDay += Save;
-		}
+			string jsonData = await TransactionManager.Instance.GetPlayerPub();
 
-		void OnDestroy()
-		{
-			GameplayManager.Instance.OnEndDay -= Save;
-			GameplayManager.Instance.OnNextDay -= Save;
-		}
+			PlayerData.PlayerDataClass = JsonConvert.DeserializeObject<PlayerDataClass>(jsonData);
 
-		private void Save()
-		{
-			// Dictionary<string, object> data = new Dictionary<string, object>
-			// {
-			// 	{"day", TimeManager.Instance.CurrentDay},
-			// 	{"money", MoneyManager.Instance.CurrentTotalMoney},
-			// 	{"Target", MoneyManager.Instance.CurrentTarget},
-			// 	{"TableData", TableData}
-			// };
-
-			// Debug.Log("Save request");
-			// string json = JsonConvert.SerializeObject(data);
-			// _json = json;
-			// Utility.Socket.EmitEvent(SocketEnum.saveDataRequest.ToString(), json);
-		}
-		private async void Load()
-		{
-			Utility.Socket.EmitEvent(SocketEnum.loadDataRequest.ToString());
-			_isLoaded = false;
-			await UniTask.WaitUntil(() => _isLoaded);
-		}
-
-		private void LoadCallback(string json)
-		{
-			if (string.IsNullOrEmpty(json) == false)
+			// Create new pub if scale is 0
+			if (PlayerData.PlayerScale.Count() == 0)
 			{
-				Dictionary<string, object> data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
-				Day = (int)data["day"];
-				Money = (int)data["money"];
-				TableData = (TableData)data["TableData"];
-				Target = (int)data["Target"];
+				if (Application.isEditor == false)
+				{
+					await TransactionManager.Instance.CreatePub();
+					jsonData = await TransactionManager.Instance.GetPlayerPub();
+					PlayerData.PlayerDataClass = JsonConvert.DeserializeObject<PlayerDataClass>(jsonData);
+				}
 			}
-			else
+
+			// Play game
+			TableData = new TableData();
+			for (int i = 0; i < PlayerData.PlayerScale.Count(); i++)
 			{
-				Day = 1;
-				Money = 0;
-				TableData = new TableData();
-				Target = 100;
-				PlayerData.Reset();
+				TableData.SeatNumberList.Add(PlayerData.PlayerScale[i].Stools);
 			}
-			_isLoaded = true;
 		}
 	}
 }

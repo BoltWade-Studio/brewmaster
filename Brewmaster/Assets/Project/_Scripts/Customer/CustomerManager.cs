@@ -10,19 +10,19 @@ namespace Game
 {
 	public class CustomerManager : MonoBehaviorInstance<CustomerManager>
 	{
-		public List<Customer> CustomerList = new List<Customer>();
+		[HideInInspector] public List<Customer> CustomerList = new List<Customer>();
 		private float lastSpawnTime = 0;
 
 		#region Unity Functions
 		private void Start()
 		{
 			GameplayManager.Instance.OnEndDay += OnEndDayHandler;
-			Utility.Socket.OnEvent("updateCustomerPosition", this.gameObject.name, nameof(UpdateCustomerPosition), UpdateCustomerPosition);
-			Utility.Socket.OnEvent("updateCustomerWaitTime", this.gameObject.name, nameof(UpdateCustomerWaitTime),
+			Utility.Socket.OnEvent(SocketEnum.updateCustomerPosition.ToString(), this.gameObject.name, nameof(UpdateCustomerPosition), UpdateCustomerPosition);
+			Utility.Socket.OnEvent(SocketEnum.updateCustomerWaitTime.ToString(), this.gameObject.name, nameof(UpdateCustomerWaitTime),
 				UpdateCustomerWaitTime);
-			Utility.Socket.OnEvent("customerReachDestination", this.gameObject.name, nameof(CustomerReachDestination), CustomerReachDestination);
-			Utility.Socket.OnEvent("customerReturn", this.gameObject.name, nameof(CustomerReturn), CustomerReturn);
-			Utility.Socket.OnEvent("deleteCustomer", this.gameObject.name, nameof(DeleteCustomer), DeleteCustomer);
+			Utility.Socket.OnEvent(SocketEnum.customerReachDestination.ToString(), this.gameObject.name, nameof(CustomerReachDestination), CustomerReachDestination);
+			Utility.Socket.OnEvent(SocketEnum.customerReturn.ToString(), this.gameObject.name, nameof(CustomerReturn), CustomerReturn);
+			Utility.Socket.OnEvent(SocketEnum.deleteCustomer.ToString(), this.gameObject.name, nameof(DeleteCustomer), DeleteCustomer);
 		}
 
 		private void Update()
@@ -32,7 +32,7 @@ namespace Game
 				float time = Time.time - lastSpawnTime;
 				lastSpawnTime = Time.time;
 				string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { time.ToString() } });
-				Utility.Socket.EmitEvent("updateCustomer", json);
+				Utility.Socket.EmitEvent(SocketEnum.updateCustomer.ToString(), json);
 			}
 			else
 			{

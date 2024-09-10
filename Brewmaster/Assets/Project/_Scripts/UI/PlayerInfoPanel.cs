@@ -40,8 +40,8 @@ namespace Game
 
 		void Update()
 		{
-			if (!_ingamePointText.text.Equals(PlayerData.TotalPoint.ToString()))
-				_ingamePointText.text = PlayerData.TotalPoint.ToString();
+			if (!_ingamePointText.text.Equals(PlayerData.PlayerTreasury.ToString()))
+				_ingamePointText.text = PlayerData.PlayerTreasury.ToString();
 			if (!_playerAddressText.text.Equals(PlayerData.PlayerAddress))
 				_playerAddressText.text = PlayerData.PlayerAddress;
 		}

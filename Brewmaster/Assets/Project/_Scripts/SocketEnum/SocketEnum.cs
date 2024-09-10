@@ -1,25 +1,47 @@
 public enum SocketEnum
 {
+	initGame,
+	anonymousLogin,
+
+	#region Update enum
 	updateProof,
 	updateAnonymous,
-	totalPointCallback,
-	loadCallback,
-	anonymousLogin,
-	requestUpdateTotalPoint,
-	saveDataRequest,
-	loadDataRequest,
-	claim,
-	afterClaim,
-	shareToTwitterRequest,
-	playerInputLink,
-	playerMove,
-	spawnCustomer,
+	updatePlayerAddress,
+	updateCustomer,
 	updateCustomerPosition,
 	updateCustomerWaitTime,
+	updateTablePositions,
+	updateSeatPositions,
+	requestUpdatePlayerTreasury,
+	#endregion
+
+	#region Callback enum
+	loadCallback,
+	updateTreasuryCallback,
+	sendContractCallback,
+	getEntryCallback,
+	getPlayerPubCallback,
+	#endregion
+
+	#region Claim
+	claim,
+	afterClaim,
+	#endregion
+
+	shareToTwitterRequest,
+	playerInputLink,
+
+	saveDataRequest,
+	loadDataRequest,
+	playerMove,
+	spawnCustomer,
 	customerReachDestination,
 	customerReturn,
 	deleteCustomer,
 	serveBeer,
 	updateBeer,
-	beerCollided
+	beerCollided,
+	getEntry,
+	getPlayerPub,
 }
+

@@ -14,7 +14,6 @@ namespace Game
 		public Action OnPausePressed;
 		public bool IsEndDay;
 		public bool IsPlaying;
-		public bool IsWin { get; private set; }
 
 		void Start()
 		{
@@ -45,14 +44,6 @@ namespace Game
 		private void OnTimeUpHandler()
 		{
 			IsEndDay = true;
-			if (PlayerData.TotalPoint > MoneyManager.Instance.CurrentTarget)
-			{
-				IsWin = true;
-			}
-			else
-			{
-				IsWin = false;
-			}
 			OnEndDay?.Invoke();
 		}
 		private void OnNextDayPressHandler()
@@ -66,10 +57,10 @@ namespace Game
 		private void InitializeGame()
 		{
 			InitializedGameDataDto data = new InitializedGameDataDto();
-			foreach(Table table in TableManager.Instance.GetTableList())
+			foreach (Table table in TableManager.Instance.GetTableList())
 			{
 				SeatListDto seatListDto = new SeatListDto();
-				foreach(Transform seat in table.GetAllSeats())
+				foreach (Transform seat in table.GetAllSeats())
 				{
 					seatListDto.seatPositionList.Add(seat.position);
 					if (seatListDto.seatPositionList.Count == table.AvailableSeatNumber)
@@ -86,9 +77,9 @@ namespace Game
 			data.playerPosition = Player.Instance.transform.position;
 
 			string json = JsonConvert.SerializeObject(new ArrayWrapper
-				{ array = new string[] { JsonUtility.ToJson(data) } });
+			{ array = new string[] { JsonUtility.ToJson(data) } });
 
-			Utility.Socket.EmitEvent("initGame", json);
+			Utility.Socket.EmitEvent(SocketEnum.initGame.ToString(), json);
 		}
 		#endregion
 	}

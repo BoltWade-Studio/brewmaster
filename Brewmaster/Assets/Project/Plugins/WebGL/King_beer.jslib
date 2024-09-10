@@ -20,11 +20,6 @@ mergeInto(LibraryManager.library, {
             console.log('Socket.IO connected');
         });
 
-        socket.on('updateBrushPosition', () => {
-            if(this.objectNameDic.updateBrushPosition && this.methodNameDic.updateBrushPosition)
-                SendMessage(this.objectNameDic.updateBrushPosition, this.methodNameDic.updateBrushPosition);
-        });
-
         socket.on('updateProof', (proof) => {
             if(this.objectNameDic.updateProof && this.methodNameDic.updateProof)
                 SendMessage(this.objectNameDic.updateProof , this.methodNameDic.updateProof, proof.toString());
@@ -41,9 +36,6 @@ mergeInto(LibraryManager.library, {
         });
 
 		socket.on('twitterRequestCallback', (data) => {
-            // console.log(data);
-            // let dataString = UTF8ToString(data);
-            // let array = JSON.parse(dataString.toString());
 			const encodedText = encodeURIComponent(data);
 			const tweetUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
 
@@ -151,6 +143,19 @@ mergeInto(LibraryManager.library, {
 			if(this.objectNameDic.updateUpgradePrice && this.methodNameDic.updateUpgradePrice)
 				SendMessage(this.objectNameDic.updateUpgradePrice, this.methodNameDic.updateUpgradePrice, dataString);
 		});
+
+        socket.on('getEntryCallback', (data) => {
+            // use this data to call actual transaction
+			if(this.objectNameDic.getEntryCallback && this.methodNameDic.getEntryCallback)
+                SendMessage(this.objectNameDic.getEntryCallback, this.methodNameDic.getEntryCallback, data)
+        });
+
+        socket.on('getPlayerPubCallback', (data) => {
+			if(this.objectNameDic.getPlayerPubCallback && this.methodNameDic.getPlayerPubCallback)
+            {
+                SendMessage(this.objectNameDic.getPlayerPubCallback, this.methodNameDic.getPlayerPubCallback, data)
+            }
+        });
 
         window.unitySocket = socket;
     },

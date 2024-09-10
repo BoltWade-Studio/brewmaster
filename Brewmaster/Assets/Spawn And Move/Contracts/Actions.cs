@@ -10,16 +10,18 @@ using System.Linq;
 using Enum = Dojo.Starknet.Enum;
 
 // System definitions for `dojo_examples::actions::actions` contract
-public class Actions : MonoBehaviour {
+public class Actions : MonoBehaviour
+{
     // The address of this contract
     public FieldElement contractAddress;
 
-    
+
     // Call the `dojo_init` system with the specified Account and calldata
     // Returns the transaction hash. Use `WaitForTransaction` to wait for the transaction to be confirmed.
-    public async Task<FieldElement> dojo_init(Account account) {
+    public async Task<FieldElement> dojo_init(Account account)
+    {
         List<dojo.FieldElement> calldata = new List<dojo.FieldElement>();
-        
+
 
         return await account.ExecuteRaw(new dojo.Call[] {
             new dojo.Call{
@@ -29,15 +31,16 @@ public class Actions : MonoBehaviour {
             }
         });
     }
-            
 
-    
+
+
     // Call the `spawn` system with the specified Account and calldata
     // Returns the transaction hash. Use `WaitForTransaction` to wait for the transaction to be confirmed.
-    public async Task<FieldElement> spawn(Account account) {
+    public async Task<FieldElement> spawn(Account account)
+    {
         List<dojo.FieldElement> calldata = new List<dojo.FieldElement>();
-        
-        
+
+
         return await account.ExecuteRaw(new dojo.Call[] {
             new dojo.Call{
                 to = contractAddress.Inner,
@@ -46,12 +49,13 @@ public class Actions : MonoBehaviour {
             }
         });
     }
-            
 
-    
+
+
     // Call the `move` system with the specified Account and calldata
     // Returns the transaction hash. Use `WaitForTransaction` to wait for the transaction to be confirmed.
-    public async Task<FieldElement> move(Account account, Direction direction) {
+    public async Task<FieldElement> move(Account account, Direction direction)
+    {
         List<dojo.FieldElement> calldata = new List<dojo.FieldElement>();
         calldata.Add(new FieldElement(Enum.GetIndex(direction)).Inner);
 
@@ -63,22 +67,22 @@ public class Actions : MonoBehaviour {
             }
         });
     }
-            
 
-    
+
+
     // Call the `set_player_config` system with the specified Account and calldata
     // Returns the transaction hash. Use `WaitForTransaction` to wait for the transaction to be confirmed.
-    public async Task<FieldElement> set_player_config(Account account, string name) {
-        List<dojo.FieldElement> calldata = new List<dojo.FieldElement>();
-        calldata.AddRange(ByteArray.Serialize(name).Select(f => f.Inner));
+    // public async Task<FieldElement> set_player_config(Account account, string name) {
+    //     List<dojo.FieldElement> calldata = new List<dojo.FieldElement>();
+    //     calldata.AddRange(ByteArray.Serialize(name).Select(f => f.Inner));
 
-        return await account.ExecuteRaw(new dojo.Call[] {
-            new dojo.Call{
-                to = contractAddress.Inner,
-                selector = "set_player_config",
-                calldata = calldata.ToArray()
-            }
-        });
-    }
-            
+    //     return await account.ExecuteRaw(new dojo.Call[] {
+    //         new dojo.Call{
+    //             to = contractAddress.Inner,
+    //             selector = "set_player_config",
+    //             calldata = calldata.ToArray()
+    //         }
+    //     });
+    // }
+
 }
