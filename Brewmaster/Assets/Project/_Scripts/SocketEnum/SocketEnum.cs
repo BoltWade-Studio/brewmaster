@@ -13,9 +13,12 @@ public enum SocketEnum
 	updateTablePositions,
 	updateSeatPositions,
 	requestUpdatePlayerTreasury,
+	updateUpgradePrice,
+	updateIsMainMenu,
 	#endregion
 
 	#region Callback enum
+	updateUpgradePriceCallback,
 	loadCallback,
 	updateTreasuryCallback,
 	sendContractCallback,
@@ -25,11 +28,30 @@ public enum SocketEnum
 
 	#region Claim
 	claim,
-	afterClaim,
+	claimCallback,
 	#endregion
 
-	shareToTwitterRequest,
+	#region Upgrade 
+	getPriceForAddStool,
+	getPriceForAddStoolCallback,
+	upgradeTable,
+	upgradeTableCallback,
+	getCanUpgradeTable,
+	getCanUpgradeTableCallback,
+	#endregion
+
+	#region Get temp point
+	getPointBeforeClaim,
+	getPointBeforeClaimCallback,
+	#endregion
+
+	shareToTwitterRequest, // do not delete, used but not see reference
 	playerInputLink,
+
+	#region Get twitter message
+	getTwitterMessage,
+	getTwitterMessageCallback,
+	#endregion
 
 	saveDataRequest,
 	loadDataRequest,

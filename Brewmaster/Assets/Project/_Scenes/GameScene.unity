@@ -362,7 +362,7 @@ GameObject:
   - component: {fileID: 90068356}
   - component: {fileID: 90068355}
   m_Layer: 5
-  m_Name: Money
+  m_Name: Point
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1741,6 +1741,8 @@ Transform:
   - {fileID: 1411786017}
   - {fileID: 1564367913}
   - {fileID: 1740254086}
+  - {fileID: 1583885502}
+  - {fileID: 619529589}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &354867193
@@ -2655,7 +2657,7 @@ GameObject:
   - component: {fileID: 529065289}
   - component: {fileID: 529065288}
   m_Layer: 5
-  m_Name: GoldTitle
+  m_Name: TreasuryTitle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3052,6 +3054,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &619529588
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 619529589}
+  - component: {fileID: 619529590}
+  m_Layer: 0
+  m_Name: LoadingUIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &619529589
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 619529588}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 345125114}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &619529590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 619529588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 36740978c3394427986fbe6b43c93ad8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _loadingUIPref: {fileID: 3256142594105389554, guid: 424ac87c91998476b91378f3ce422168,
+    type: 3}
 --- !u!1 &638020336
 GameObject:
   m_ObjectHideFlags: 0
@@ -3647,6 +3695,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IsEndDay: 0
   IsPlaying: 1
+  IsMainMenu: 0
 --- !u!1 &785809832
 GameObject:
   m_ObjectHideFlags: 0
@@ -5011,7 +5060,7 @@ GameObject:
   - component: {fileID: 1003815425}
   - component: {fileID: 1003815426}
   m_Layer: 5
-  m_Name: Money
+  m_Name: Treasury
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5581,15 +5630,7 @@ MonoBehaviour:
   _pauseGameBtn: {fileID: 1305348137}
   _playerInfo: {fileID: 1775464681}
   _playerInfoPanel: {fileID: 56523455724336352}
-  _endDayMenu: {fileID: 1591954821}
-  _totalMoney: {fileID: 1003815426}
-  _resultText: {fileID: 842170667}
-  _shopBtn: {fileID: 2025046846}
-  _nextDayBtn: {fileID: 1500474634}
-  _mainMenuBtn: {fileID: 1347084460}
-  _moneyIncreaseSpeed: 10
-  _shareToTwitterBtn: {fileID: 1987318486}
-  _blockXImage: {fileID: 801873409}
+  _endDayPanel: {fileID: 1591954825}
   _pauseGameMenu: {fileID: 1742408539}
   _pMoneyText: {fileID: 2030278537}
   _pDayText: {fileID: 578070061}
@@ -5597,7 +5638,7 @@ MonoBehaviour:
   _pToMainMenuBtn: {fileID: 94347925}
   _transitionSetting: {fileID: 11400000, guid: 2eec88d4ca6df24419aab2fd6b04c543, type: 2}
   _storeMenu: {fileID: 973974228}
-  _confirmButton: {fileID: 1928675518}
+  _storeConfirmBtn: {fileID: 1928675518}
   _twitterInputPanel: {fileID: 1124732205}
 --- !u!1 &1075749211
 GameObject:
@@ -8061,7 +8102,51 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b50742f1810fa9449a86422de226de19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _coinPref: {fileID: 7223906277408349827, guid: 0c5d8179746692e4d92dc0aa2e368e9e,
+--- !u!1 &1583885501
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1583885502}
+  - component: {fileID: 1583885503}
+  m_Layer: 0
+  m_Name: PopupManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1583885502
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1583885501}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 345125114}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1583885503
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1583885501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 916d5ba79c6ba4bd099509b1478282ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _yesNoPopupPref: {fileID: 4328969311755912959, guid: 3f5ed71d7347a4ac1b0fc1a2e4962ae7,
     type: 3}
 --- !u!1 &1591954821
 GameObject:
@@ -8074,6 +8159,8 @@ GameObject:
   - component: {fileID: 1591954822}
   - component: {fileID: 1591954824}
   - component: {fileID: 1591954823}
+  - component: {fileID: 1591954825}
+  - component: {fileID: 1591954826}
   m_Layer: 5
   m_Name: EndGame
   m_TagString: Untagged
@@ -8140,6 +8227,43 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1591954821}
   m_CullTransparentMesh: 1
+--- !u!114 &1591954825
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1591954821}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 605a5005e55c64e21b61da34225516ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _endDayMenu: {fileID: 686757383}
+  _twitterInputPanel: {fileID: 1124732205}
+  _canvasGroup: {fileID: 1591954826}
+  _treasuryText: {fileID: 1003815426}
+  _pointText: {fileID: 90068355}
+  _resultText: {fileID: 842170667}
+  _shopBtn: {fileID: 2025046846}
+  _claimBtn: {fileID: 312455877}
+  _nextDayBtn: {fileID: 1500474634}
+  _mainMenuBtn: {fileID: 1347084460}
+  _shareToTwitterBtn: {fileID: 1987318486}
+  _blockXImage: {fileID: 801873409}
+  _moneyIncreaseSpeed: 30
+--- !u!225 &1591954826
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1591954821}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &1603683762
 GameObject:
   m_ObjectHideFlags: 0
@@ -9634,7 +9758,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1812526712}
   m_Layer: 5
-  m_Name: IndayMoney
+  m_Name: IndayTreasury
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

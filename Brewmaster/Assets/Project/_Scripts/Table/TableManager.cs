@@ -43,49 +43,52 @@ namespace Game
         private TableData _tableData;
 
         #region Unity Functions
+        protected override void ChildAwake()
+        {
+            base.ChildAwake();
+            foreach (Table table in _tableList)
+            {
+                table.SetIsUnlockAllSeats(_unlockAllSeats);
+            }
+        }
         void Start()
         {
-            _tableData = DataSaveLoadManager.Instance.TableData;
-            string[] tablePosStrings = new string[_tableList.Count];
-            string[] totalSeatArray = new string[_tableList.Count];
-            for (int i = 0; i < _tableList.Count; i++)
-            {
-                string[] tableSeatArray = new string[_tableList[i].AllSeats.Count];
-                if (i >= _tableData.SeatNumberList.Count)
-                {
-                    _tableData.SeatNumberList.Add(1);
-                }
-                _tableList[i].AvailableSeatNumber = _tableData.SeatNumberList[i];
-                tablePosStrings[i] = JsonConvert.SerializeObject(_tableList[i].transform.position);
+            UpdatePositionsToServer();
 
-                for (int j = 0; j < _tableList[i].AllSeats.Count; j++)
+            Debug.Log("AAA Update table manger start");
+            try
+            {
+                if (GameplayManager.Instance.IsMainMenu == false)
                 {
-                    tableSeatArray[j] = JsonConvert.SerializeObject(_tableList[i].AllSeats[j].position);
+                    _tableData = DataSaveLoadManager.Instance.TableData;
                 }
-                totalSeatArray[i] = JsonConvert.SerializeObject(tableSeatArray).RemoveUnWantChar();
+                for (int i = 0; i < _tableList.Count; i++)
+                {
+                    if (GameplayManager.Instance.IsMainMenu == false)
+                    {
+                        _tableList[i].TableIndex = PlayerData.PlayerScale[i].TableIndex;
+                        _tableList[i].AvailableSeatNumber = PlayerData.PlayerScale[i].Stools;
+                        _tableList[i].LoadSeat();
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log("AAA error: " + e.Message);
             }
 
-            // Update table pos to server
-            string tablePosStr = JsonConvert.SerializeObject(tablePosStrings).RemoveUnWantChar();
-            Utility.Socket.EmitEvent(SocketEnum.updateTablePositions.ToString(), tablePosStr);
-
-            // Update seat pos to server
-            string seatJson = JsonConvert.SerializeObject(totalSeatArray).RemoveUnWantChar();
-            Utility.Socket.EmitEvent(SocketEnum.updateSeatPositions.ToString(), seatJson);
 
             OnTableUpgrade += OnTableUpgradeHandler;
         }
         void OnEnable()
         {
             Player.OnPlayerChangePosition += OnPlayerChangePositionHandler;
-            foreach (Table table in _tableList)
-            {
-                table.SetIsUnlockAllSeats(_unlockAllSeats);
-            }
+            GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
         }
         void OnDisable()
         {
             Player.OnPlayerChangePosition -= OnPlayerChangePositionHandler;
+            GameEvent.Instance.OnLoadDataSuccess -= OnLoadDataSuccessHandler;
         }
         void OnDestroy()
         {
@@ -93,6 +96,49 @@ namespace Game
         }
         #endregion
 
+        private void UpdatePositionsToServer()
+        {
+            Debug.Log("AAA Update position to server");
+            string[] tablePosStrings = new string[_tableList.Count];
+            string[] totalSeatPosArray = new string[_tableList.Count];
+            for (int i = 0; i < _tableList.Count; i++)
+            {
+                tablePosStrings[i] = JsonConvert.SerializeObject(_tableList[i].transform.position);
+
+                // Get Seats positions
+                string[] tableSeatArray = new string[_tableList[i].AllSeats.Count];
+                for (int j = 0; j < _tableList[i].AllSeats.Count; j++)
+                {
+                    tableSeatArray[j] = JsonConvert.SerializeObject(_tableList[i].AllSeats[j].position);
+                }
+                totalSeatPosArray[i] = JsonConvert.SerializeObject(tableSeatArray).RemoveUnWantChar();
+            }
+
+            // Update table pos to server
+            string tablePosStr = JsonConvert.SerializeObject(tablePosStrings).RemoveUnWantChar();
+            Utility.Socket.EmitEvent(SocketEnum.updateTablePositions.ToString(), tablePosStr);
+
+            // Update seat pos to server
+            string seatJson = JsonConvert.SerializeObject(totalSeatPosArray).RemoveUnWantChar();
+            Utility.Socket.EmitEvent(SocketEnum.updateSeatPositions.ToString(), seatJson);
+        }
+
+        private void OnLoadDataSuccessHandler()
+        {
+            if (GameplayManager.Instance.IsMainMenu == false)
+            {
+                _tableData = DataSaveLoadManager.Instance.TableData;
+            }
+            for (int i = 0; i < _tableList.Count; i++)
+            {
+                if (GameplayManager.Instance.IsMainMenu == false)
+                {
+                    _tableList[i].TableIndex = PlayerData.PlayerScale[i].TableIndex;
+                    _tableList[i].AvailableSeatNumber = PlayerData.PlayerScale[i].Stools;
+                    _tableList[i].LoadSeat();
+                }
+            }
+        }
         private void OnTableUpgradeHandler(Table table)
         {
             int index = _tableList.IndexOf(table);

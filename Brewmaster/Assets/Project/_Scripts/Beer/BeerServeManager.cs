@@ -30,7 +30,7 @@ namespace Game
 		{
 			OnServerFail += OnServerFailHandler;
 			OnServeComplete += OnServeCompleteHandler;
-			GameplayManager.Instance.OnEndDay += OnEndDayHandler;
+			GameEvent.Instance.OnEndDay += OnEndDayHandler;
 		}
 		void Start()
 		{

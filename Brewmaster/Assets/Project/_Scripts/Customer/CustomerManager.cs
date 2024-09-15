@@ -16,7 +16,7 @@ namespace Game
 		#region Unity Functions
 		private void Start()
 		{
-			GameplayManager.Instance.OnEndDay += OnEndDayHandler;
+			GameEvent.Instance.OnEndDay += OnEndDayHandler;
 			Utility.Socket.OnEvent(SocketEnum.updateCustomerPosition.ToString(), this.gameObject.name, nameof(UpdateCustomerPosition), UpdateCustomerPosition);
 			Utility.Socket.OnEvent(SocketEnum.updateCustomerWaitTime.ToString(), this.gameObject.name, nameof(UpdateCustomerWaitTime),
 				UpdateCustomerWaitTime);

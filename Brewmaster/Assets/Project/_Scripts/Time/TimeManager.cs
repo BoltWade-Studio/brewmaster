@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using NOOD;
 using NOOD.Sound;
@@ -11,7 +12,6 @@ namespace Game
 	{
 		#region Events
 		public Action OnTimeWarning;
-		public Action OnTimeUp;
 		public static Action OnTimePause;
 		public static Action OnTimeResume;
 		#endregion
@@ -55,10 +55,7 @@ namespace Game
 		}
 		void Start()
 		{
-			if (UIManager.Instance)
-				UIManager.Instance.OnNextDayPressed += NextDay;
-			GameplayManager.Instance.OnNextDay += ResetTimeScale;
-			GameplayManager.Instance.OnNextDay += ResetTime;
+			GameEvent.Instance.OnNextDay += OnNextDayHandler;
 			GameplayManager.Instance.OnPausePressed += PauseGame;
 			if (DataSaveLoadManager.Instance)
 				_day = DataSaveLoadManager.Instance.Day;
@@ -67,6 +64,30 @@ namespace Game
 			Utility.Socket.OnEvent("updateTimer", this.gameObject.name, nameof(UpdateTimer), UpdateTimer);
 			Utility.Socket.OnEvent("timeUp", this.gameObject.name, nameof(TimeUp), TimeUp);
 		}
+
+		private void Update()
+		{
+			if (Time.time - lastUpdate > 1f / GameSetting.FPS)
+			{
+				lastUpdate = Time.time;
+				// Send time to server (in minutes)
+				string json = JsonConvert.SerializeObject(new ArrayWrapper
+				{ array = new string[] { Time.time.ToString() } });
+				Utility.Socket.EmitEvent("updateTimer", json);
+			}
+
+			if (_hour == 0 && _isWarned == false)
+			{
+				// Warning
+				Warning();
+			}
+		}
+		void OnDestroy()
+		{
+			NoodyCustomCode.UnSubscribeAllEvent<UIManager>(this);
+			NoodyCustomCode.UnSubscribeAllEvent<GameplayManager>(this);
+		}
+		#endregion
 
 		private void UpdateTimer(string data)
 		{
@@ -84,55 +105,14 @@ namespace Game
 			}
 		}
 
-		private void TimeUp(string data)
+		private async void TimeUp(string data)
 		{
+			await UniTask.SwitchToMainThread();
 			Debug.Log("TimeUp Invoked!");
 			_isTimeUp = true;
+			GameEvent.Instance.OnTimeUp?.Invoke();
+			SoundManager.PlaySound(SoundEnum.EndLevel);
 		}
-
-		private void Update()
-		{
-			if (Time.time - lastUpdate > 1f / GameSetting.FPS)
-			{
-				lastUpdate = Time.time;
-				// Send time to server (in minutes)
-				string json = JsonConvert.SerializeObject(new ArrayWrapper
-					{ array = new string[] { Time.time.ToString() } });
-				Utility.Socket.EmitEvent("updateTimer", json);
-			}
-			// if (_isTimeUp == false)
-			// 	_minute -= DeltaTime * _timeMultipler * TimeScale;
-			// if (_minute >= 59)
-			// {
-			// 	_hour++;
-			// 	_minute = 0;
-			// }
-			// if (_minute < 0)
-			// {
-			// 	_hour--;
-			// 	_minute = 59;
-			// }
-
-			if (_isTimeUp)
-			{
-				Debug.Log("TimeUp Invoked!");
-				OnTimeUp?.Invoke();
-				_isTimeUp = false;
-				SoundManager.PlaySound(SoundEnum.EndLevel);
-			}
-
-			if (_hour == 0 && _isWarned == false)
-			{
-				// Warning
-				Warning();
-			}
-		}
-		void OnDestroy()
-		{
-			NoodyCustomCode.UnSubscribeAllEvent<UIManager>(this);
-			NoodyCustomCode.UnSubscribeAllEvent<GameplayManager>(this);
-		}
-		#endregion
 
 		private void PauseGame()
 		{
@@ -162,9 +142,11 @@ namespace Game
 			_isTimeUp = false;
 			_isWarned = false;
 		}
-		private void NextDay()
+		private void OnNextDayHandler()
 		{
 			_day += 1;
+			ResetTimeScale();
+			ResetTime();
 		}
 		private void Warning()
 		{

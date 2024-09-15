@@ -48,6 +48,8 @@ namespace Game.Extension
             source = source.Replace("}\"", "}");
             source = source.Replace("\"[", "[");
             source = source.Replace("]\"", "]");
+            source = source.Replace("\n", "");
+            source = source.Replace("\"\"", "\"");
             return source;
         }
     }

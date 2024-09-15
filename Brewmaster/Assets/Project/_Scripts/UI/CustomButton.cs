@@ -9,19 +9,29 @@ using NOOD;
 
 namespace Game
 {
+    [RequireComponent(typeof(Button))]
     public class CustomButton : MonoBehaviour, IPointerEnterHandler, IPointerClickHandler
     {
+        public Action OnClick;
+        public Action OnHover;
+
         [SerializeField] private string _textId;
         [SerializeField] private TextMeshProUGUI _textMeshProUGUI;
 
         private Button _button;
-        public Action OnClick;
-        public Action OnHover;
+        public bool IsInteractable
+        {
+            get => _button.interactable;
+            set
+            {
+                _button.interactable = value;
+            }
+        }
 
         private void Awake()
         {
             _button = GetComponent<Button>();
-            _button.onClick.AddListener(() => 
+            _button.onClick.AddListener(() =>
             {
                 OnClick?.Invoke();
             });
@@ -55,11 +65,11 @@ namespace Game
         }
         private void UpdateText()
         {
-            if(_textMeshProUGUI)
+            if (_textMeshProUGUI)
             {
                 _textMeshProUGUI.text = _textId.GetText();
             }
-        }    
+        }
         #endregion
 
         #region Show hide

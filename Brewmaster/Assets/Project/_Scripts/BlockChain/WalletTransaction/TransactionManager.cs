@@ -2,26 +2,39 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using EasyTransition;
+using Game.Extension;
 using Newtonsoft.Json;
 using NOOD;
 using UnityEngine;
 using Utils;
+using Debug = Game.DevelopDebug;
 
 namespace Game
 {
     public class TransactionManager : MonoBehaviorInstance<TransactionManager>
     {
+        private Dictionary<TransactionID, string> _transactionJsonDataDic = new Dictionary<TransactionID, string>();
         private Dictionary<TransactionID, string> _transactionEntryDic = new Dictionary<TransactionID, string>();
         private bool _gettingData;
         private bool _sending;
-        private Dictionary<TransactionID, string> _transactionJsonDataDic = new Dictionary<TransactionID, string>();
 
         void Start()
         {
             Utility.Socket.OnEvent(SocketEnum.getEntryCallback.ToString(), this.gameObject.name, nameof(GetEntryCallback), GetEntryCallback);
+            Utility.Socket.OnEvent(SocketEnum.claimCallback.ToString(), this.gameObject.name, nameof(ClaimCallback), ClaimCallback);
             Utility.Socket.OnEvent(SocketEnum.getPlayerPubCallback.ToString(), this.gameObject.name, nameof(GetPlayerPubCallback), GetPlayerPubCallback);
+            Utility.Socket.OnEvent(SocketEnum.getPriceForAddStoolCallback.ToString(), this.gameObject.name, nameof(GetStoolPriceCallback), GetStoolPriceCallback);
+        }
+
+        void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.C))
+            {
+                Claim();
+            }
         }
 
         #region Private
@@ -37,10 +50,6 @@ namespace Game
             await UniTask.WaitUntil(() => _transactionEntryDic.ContainsKey(transactionID));
             return _transactionEntryDic[transactionID];
         }
-
-        #endregion
-
-        #region Callback functions
         private void GetEntryCallback(string data)
         {
             Debug.Log("AAA GetEntryCallback: " + data);
@@ -63,6 +72,19 @@ namespace Game
                 Debug.Log("AAA GetEntryCallback error: " + e.Message);
             }
         }
+        #endregion
+
+        #region GetPlayerPub
+        public async UniTask<string> GetPlayerPub()
+        {
+            _gettingData = true;
+            Utility.Socket.EmitEvent(SocketEnum.getPlayerPub.ToString());
+
+            await UniTask.WaitUntil(() => _gettingData == false);
+            await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.GET_PLAYER_PUB));
+
+            return _transactionJsonDataDic[TransactionID.GET_PLAYER_PUB];
+        }
         private async void GetPlayerPubCallback(string data)
         {
             await UniTask.SwitchToMainThread();
@@ -78,36 +100,9 @@ namespace Game
 
             _gettingData = false;
         }
-        private void CreatePubCallback(string data)
-        {
-            _sending = false;
-        }
-        private void SendContractCallback(string data)
-        {
-            _sending = false;
-        }
         #endregion
 
-        #region Read data
-        public async UniTask<string> GetPlayerPub()
-        {
-            _gettingData = true;
-            Utility.Socket.EmitEvent(SocketEnum.getPlayerPub.ToString());
-            await UniTask.WaitUntil(() => _gettingData == false);
-            await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.GET_PLAYER_PUB));
-
-            return _transactionJsonDataDic[TransactionID.GET_PLAYER_PUB];
-        }
-        #endregion
-
-        #region Write data
-        public async UniTask UpdateSystemManager()
-        {
-            // SendContract to JSInteropManager
-            _sending = true;
-            JSInteropManager.SendTransactionArgentX("contractAddress", "entryPoint", "callData", this.gameObject.name, nameof(SendContractCallback));
-            await UniTask.WaitUntil(() => _sending == false);
-        }
+        #region CreatePlayerPub
         public async UniTask CreatePub()
         {
             // SendContract to JSInteropManager
@@ -120,7 +115,120 @@ namespace Game
             JSInteropManager.SendTransaction(contractAddress, createPubEntry, json, this.gameObject.name, nameof(CreatePubCallback));
             await UniTask.WaitUntil(() => _sending == false);
         }
+        private void CreatePubCallback(string data)
+        {
+            _sending = false;
+        }
         #endregion
+
+        #region Claim and ClosingUpPub
+        public async UniTask Claim()
+        {
+            _sending = true;
+            LoadingUIManager.Instance.Show("Getting claim data");
+            Utility.Socket.EmitEvent(SocketEnum.claim.ToString());
+            await UniTask.WaitUntil(() => _sending == false);
+        }
+        private async void ClaimCallback(string dataArray)
+        {
+            string jsonData = "";
+            object[] strings = JsonConvert.DeserializeObject<object[]>(dataArray);
+            string[] strings1 = new string[strings.Length];
+            for (int i = 0; i < strings.Length; i++)
+            {
+                strings1[i] = JsonConvert.SerializeObject(strings[i]);
+            }
+            jsonData = JsonConvert.SerializeObject(new ArrayWrapper { array = strings1 });
+            jsonData = jsonData.RemoveUnWantChar();
+
+            if (Application.isEditor == false)
+            {
+                string contractAddress = await GetContractEntry(TransactionID.CONTRACT_ADDRESS);
+                string closingUpPubEntry = await GetContractEntry(TransactionID.CLOSING_UP_PUB);
+
+                LoadingUIManager.Instance.ChangeLoadingMessage("Sending data");
+                JSInteropManager.SendTransaction(contractAddress, closingUpPubEntry, jsonData, this.gameObject.name, nameof(ClosingUpPubCallback));
+            }
+            Debug.Log("claimCallback: " + jsonData);
+        }
+        private async void ClosingUpPubCallback(string data)
+        {
+            await UniTask.SwitchToMainThread();
+            Debug.Log("ClosedUpPubCallback: " + data);
+            if (data != "Player abort" && data != "")
+            {
+                LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for transaction update");
+                await UniTask.WaitForSeconds(30f);
+                GameEvent.Instance.OnClaimSuccess?.Invoke();
+            }
+            LoadingUIManager.Instance.Hide();
+            _sending = false;
+        }
+        #endregion
+
+        #region Get Stool Price
+        public async UniTask<int> GetStoolPrice()
+        {
+            _gettingData = true;
+            Utility.Socket.EmitEvent(SocketEnum.getPriceForAddStool.ToString());
+            await UniTask.WaitUntil(() => _gettingData == false);
+            await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.GET_PRICE_FOR_ADD_STOOL));
+            return JsonConvert.DeserializeObject<int>(_transactionJsonDataDic[TransactionID.GET_PRICE_FOR_ADD_STOOL]);
+        }
+        private void GetStoolPriceCallback(string data)
+        {
+            if (_transactionEntryDic.ContainsKey(TransactionID.GET_PRICE_FOR_ADD_STOOL))
+            {
+                _transactionJsonDataDic[TransactionID.GET_PRICE_FOR_ADD_STOOL] = data;
+            }
+            else
+            {
+                _transactionJsonDataDic.Add(TransactionID.GET_PRICE_FOR_ADD_STOOL, data);
+            }
+            _gettingData = false;
+        }
+        #endregion
+
+        #region Upgrade
+        public async UniTask<bool> AddStool(int tableIndex)
+        {
+            _sending = true;
+            if (Application.isEditor == false)
+            {
+                string contractAddress = await GetContractEntry(TransactionID.CONTRACT_ADDRESS);
+                string addStoolEntry = await GetContractEntry(TransactionID.ADD_STOOL);
+
+                JSInteropManager.SendTransaction(contractAddress, addStoolEntry, JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { tableIndex.ToString() } }), this.gameObject.name, nameof(AddStoolCallback));
+                await UniTask.WaitUntil(() => _sending == false);
+                await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.ADD_STOOL));
+                return _transactionJsonDataDic[TransactionID.ADD_STOOL].Contains("User Abort") == false;
+            }
+            return true;
+        }
+        private async void AddStoolCallback(string data)
+        {
+            await UniTask.SwitchToMainThread();
+            if (_transactionJsonDataDic.ContainsKey(TransactionID.ADD_STOOL))
+            {
+                _transactionJsonDataDic[TransactionID.ADD_STOOL] = data;
+            }
+            else
+                _transactionJsonDataDic.Add(TransactionID.ADD_STOOL, data);
+            _sending = false;
+        }
+        #endregion        
+
+        private void SendContractCallback(string data)
+        {
+            _sending = false;
+        }
+        public async UniTask UpdateSystemManager()
+        {
+            // SendContract to JSInteropManager
+            _sending = true;
+            JSInteropManager.SendTransactionArgentX("contractAddress", "entryPoint", "callData", this.gameObject.name, nameof(SendContractCallback));
+            await UniTask.WaitUntil(() => _sending == false);
+        }
     }
 
     public enum TransactionID
@@ -137,7 +245,7 @@ namespace Game
         CREATE_PUB,
         ADD_STOOL,
         ADD_TABLE,
-        CLOSING_PUB,
+        CLOSING_UP_PUB,
         UPGRADE
     }
 }

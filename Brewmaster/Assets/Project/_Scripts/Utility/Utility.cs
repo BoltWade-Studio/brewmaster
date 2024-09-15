@@ -266,10 +266,30 @@ namespace Game
 						_actionEventDic["updateTreasuryCallback"].Invoke(data.GetValue<string>());
 					}
 				});
-
+				socket.On("claimCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("claimCallback"))
+					{
+						_actionEventDic["claimCallback"].Invoke(data.GetValue<string>());
+					}
+				});
+				socket.On("getPointBeforeClaimCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("getPointBeforeClaimCallback"))
+					{
+						_actionEventDic["getPointBeforeClaimCallback"].Invoke(data.GetValue<string>());
+					}
+				});
 				socket.Connect();
 			}
+
 #endif
+			public static void Disconnect()
+			{
+#if UNITY_EDITOR
+				socket.Disconnect();
+#endif
+			}
 
 			public static void EmitEvent(string eventName, string jsonData = null)
 			{

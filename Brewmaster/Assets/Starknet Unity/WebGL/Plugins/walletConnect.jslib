@@ -21,7 +21,14 @@ mergeInto(LibraryManager.library,{
 	{
 		if (window.starknet_argentX)
 		{
-			await window.starknet_argentX.enable();
+			try
+			{
+				await window.starknet_argentX.enable();
+			}
+			catch(e)
+			{
+				console.log(e.message);
+			}
 		}
 	},
 
@@ -29,7 +36,19 @@ mergeInto(LibraryManager.library,{
 	{
 		if (window.starknet_braavos)
 		{
-			await window.starknet_braavos.enable();
+			try
+			{
+				await window.starknet_braavos.enable();
+			}
+			catch(e)
+			{
+				console.log("error braavos: ");
+				console.log(e.message);
+			}
+		}
+		else
+		{
+			console.log("don't have braavos");
 		}
 	},
 

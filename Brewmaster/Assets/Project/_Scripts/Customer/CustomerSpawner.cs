@@ -19,7 +19,7 @@ namespace Game
 		#region Unity functions
 		private void Start()
 		{
-			StartCoroutine(SpawnerCustomer());
+			StartCoroutine(SpawnCustomer());
 			Utility.Socket.OnEvent("spawnCustomer", this.gameObject.name, nameof(SpawnCustomer), SpawnCustomer);
 		}
 
@@ -57,7 +57,7 @@ namespace Game
 		#endregion
 
 		#region Coroutine
-		IEnumerator SpawnerCustomer()
+		IEnumerator SpawnCustomer()
 		{
 			while (true)
 			{

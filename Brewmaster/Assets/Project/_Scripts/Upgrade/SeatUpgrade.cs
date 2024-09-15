@@ -5,6 +5,7 @@ namespace Game
 {
     public class SeatUpgrade : UpgradeBase
     {
+        #region Unity functions
         protected override void ChildAwake()
         {
             _table = this.GetComponent<Table>();
@@ -28,10 +29,11 @@ namespace Game
             base.ChildOnDisable();
             _upgradeAction.OnComplete -= OnUpgradeCompleteHandler;
         }
+        #endregion
 
         public void OnUpgradeCompleteHandler()
         {
-            if(CheckAllUpgradeComplete())
+            if (CheckAllUpgradeComplete())
             {
                 HideUI();
             }

@@ -3,21 +3,14 @@ using NOOD;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
-using UnityEngine.EventSystems;
-using NOOD.Sound;
 using EasyTransition;
-using Cysharp.Threading.Tasks;
-using UnityEngine.SceneManagement;
-using Newtonsoft.Json;
-using Utils;
+using UnityEngine.Serialization;
 
 namespace Game
 {
 	public class UIManager : MonoBehaviorInstance<UIManager>
 	{
 		#region Events
-		public Action OnStorePhrase;
 		public Action OnNextDayPressed;
 		#endregion
 
@@ -31,15 +24,8 @@ namespace Game
 		[SerializeField] private PlayerInfoPanel _playerInfoPanel;
 		private Color _timeOriginalColor;
 
-		[Header("End day menu")]
-		[SerializeField] private GameObject _endDayMenu;
-		[SerializeField] private TextMeshProUGUI _totalMoney;
-		// [SerializeField] private TextMeshProUGUI _targetMoney, _profitMoney, _bonusMoney;
-		[SerializeField] private TextMeshProUGUI _resultText;
-		[SerializeField] private CustomButton _shopBtn, _nextDayBtn, _mainMenuBtn;
-		[SerializeField] private float _moneyIncreaseSpeed = 30;
-		[SerializeField] private CustomButton _shareToTwitterBtn;
-		[SerializeField] private GameObject _blockXImage;
+		[Header("EndDay")]
+		[SerializeField] private EndDayPanel _endDayPanel;
 
 		[Header("Pause game menu")]
 		[SerializeField] private GameObject _pauseGameMenu;
@@ -49,7 +35,8 @@ namespace Game
 
 		[Header("Store")]
 		[SerializeField] private GameObject _storeMenu;
-		[SerializeField] private CustomButton _confirmButton;
+		[FormerlySerializedAs("_confirmButton")]
+		[SerializeField] private CustomButton _storeConfirmBtn;
 
 		[Header("Twitter")]
 		[SerializeField] private TwitterInputPanel _twitterInputPanel;
@@ -59,35 +46,18 @@ namespace Game
 		#region Unity functions
 		protected override void ChildAwake()
 		{
-			_endDayMenu.SetActive(false);
 			_pauseGameMenu.SetActive(false);
 			_playerInfo.OnClick += OnPlayerInfoClickHandler;
 			_pauseGameBtn.OnClick += OnPauseButtonClickHandler;
 			_pResumeBtn.OnClick += OnResumeClickHandler;
-			_shopBtn.OnClick += () =>
+			_storeConfirmBtn.OnClick += () =>
 			{
-				ActiveStorePhrase();
-				_isStorePhrase = true;
-			};
-			_pToMainMenuBtn.OnClick += OnMainMenuClickHandler;
-			_nextDayBtn.OnClick += () =>
-			{
-				OnNextDayPressed?.Invoke();
-				UpdateDayText();
-			};
-			_confirmButton.OnClick += () =>
-			{
-				ShowEndDayPanel(false);
+				GameEvent.Instance.OnNextDay?.Invoke();
 				HideStoreMenu();
 				_isStorePhrase = false;
 			};
-			_mainMenuBtn.OnClick += () =>
-			{
-				PlayerPrefs.DeleteAll();
-				SceneManager.LoadScene("MainMenu");
-			};
+
 			HideStoreMenu();
-			OnNextDayPressed += HideEndDayPanel;
 			_timeOriginalColor = _timeBG.color;
 			_twitterInputPanel.Hide();
 		}
@@ -101,30 +71,22 @@ namespace Game
 			{
 				_timeBG.color = Color.red;
 			};
-			GameplayManager.Instance.OnNextDay += () =>
+			GameEvent.Instance.OnNextDay += () =>
 			{
 				_timeBG.color = _timeOriginalColor;
 			};
 
-			GameplayManager.Instance.OnEndDay += OnEndDayHandler;
-			GameplayManager.Instance.OnNextDay += OnNextDayHandler;
 			TimeManager.OnTimePause += ShowPauseGameMenu;
 			TimeManager.OnTimeResume += HidePauseGameMenu;
+			GameEvent.Instance.OnEndDay += OnEndDayHandler;
+			GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
+			GameEvent.Instance.OnStorePhase += OnStorePaseHandler;
 		}
+
 
 		void OnEnable()
 		{
-			if (ConnectWalletManager.Instance.isAnonymous)
-			{
-				_shareToTwitterBtn.GetComponent<Button>().interactable = false;
-				_blockXImage.gameObject.SetActive(true);
-			}
-			else
-			{
-				_shareToTwitterBtn.GetComponent<Button>().interactable = true;
-				_blockXImage.gameObject.SetActive(false);
-			}
-			_shareToTwitterBtn.OnClick += OnShareToTwitterBtnPress;
+			RegisterEvent();
 		}
 
 		private void Update()
@@ -134,16 +96,29 @@ namespace Game
 		}
 		void OnDisable()
 		{
-			NoodyCustomCode.UnSubscribeAllEvent<GameplayManager>(this);
-			NoodyCustomCode.UnSubscribeAllEvent<TimeManager>(this);
-			NoodyCustomCode.UnSubscribeFromStatic(typeof(TimeManager), this);
-			NoodyCustomCode.UnSubscribeAllEvent(_shareToTwitterBtn, this);
+			UnRegisterEvent();
 		}
 		private void OnDestroy()
 		{
-			OnNextDayPressed -= HideEndDayPanel;
-			_shopBtn.OnClick -= ActiveStorePhrase;
-			_endDayMenu.transform.DOKill();
+		}
+		#endregion
+
+		private void RegisterEvent()
+		{
+		}
+		private void UnRegisterEvent()
+		{
+			NoodyCustomCode.UnSubscribeAllEvent(GameEvent.Instance, this);
+			NoodyCustomCode.UnSubscribeAllEvent<GameplayManager>(this);
+			NoodyCustomCode.UnSubscribeAllEvent<TimeManager>(this);
+			NoodyCustomCode.UnSubscribeFromStatic(typeof(TimeManager), this);
+		}
+
+		#region Event functions
+		private void OnStorePaseHandler()
+		{
+			ShowStoreMenu();
+			_isStorePhrase = true;
 		}
 		#endregion
 
@@ -189,73 +164,19 @@ namespace Game
 		}
 		#endregion
 
-		#region End game
-		private void OnNextDayHandler()
-		{
-			UpdateInDayMoney();
-		}
-		private void OnEndDayHandler()
-		{
-			ShowEndDayPanel(true);
-		}
-		private void ShowEndDayPanel(bool isUpdate = false)
-		{
-			if (isUpdate)
-			{
-				PlayMoneyAnimation(PlayerData.PlayerTreasury);
-			}
-
-			_mainMenuBtn.gameObject.SetActive(true);
-			_shopBtn.gameObject.SetActive(true);
-			_nextDayBtn.gameObject.SetActive(true);
-
-			_ingameMenu.SetActive(false);
-			_endDayMenu.SetActive(true);
-			_endDayMenu.transform.DOScale(Vector3.one, 0.7f);
-			SoundManager.PlaySound(SoundEnum.MoneySound);
-			EventSystem.current.SetSelectedGameObject(null);
-		}
-		private void HideEndDayPanel()
-		{
-			_ingameMenu.SetActive(true);
-			_endDayMenu.transform.DOScale(Vector3.zero, 0.7f).OnComplete(() => _endDayMenu.SetActive(false));
-		}
-		private async void PlayMoneyAnimation(int money)
-		{
-			float time = 0;
-			float temp = 0;
-
-			_resultText.gameObject.SetActive(false);
-
-			// Show currentTotalMoney
-			while (temp != money)
-			{
-				await UniTask.Yield();
-				time += Time.unscaledDeltaTime * _moneyIncreaseSpeed;
-				temp = Mathf.Lerp(0, money, time / SoundManager.GetSoundLength(SoundEnum.MoneySound));
-				_totalMoney.text = temp.ToString();
-			}
-
-			_resultText.gameObject.SetActive(true);
-
-			_resultText.text = "CONGRATULATION";
-			_resultText.color = Color.green;
-		}
-		private void ActiveStorePhrase()
-		{
-			UpdateInDayMoney();
-			HideEndDayPanel();
-			ShowStoreMenu();
-			OnStorePhrase?.Invoke();
-		}
-		private void OnShareToTwitterBtnPress()
-		{
-			TwitterShareManager.Instance.ShareToTwitter();
-			ShowTwitterInputPanel();
-		}
+		#region EndDay
 		public void ShowTwitterInputPanel()
 		{
-			_twitterInputPanel.Show();
+			_endDayPanel.ShowTwitterInputPanel();
+		}
+		public void OnEndDayHandler()
+		{
+			_endDayPanel.Show(true);
+		}
+
+		private void OnLoadDataSuccessHandler()
+		{
+			UpdateInDayMoney();
 		}
 		#endregion
 
@@ -288,7 +209,7 @@ namespace Game
 		private void UpdatePauseText()
 		{
 			_pDayText.text = TimeManager.Instance.CurrentDay.ToString("00");
-			_pMoneyText.text = PlayerData.TotalPoint.ToString("0");
+			_pMoneyText.text = PlayerData.PlayerPoint.ToString("0");
 		}
 		#endregion
 

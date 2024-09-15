@@ -183,11 +183,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e3e128cace9a68547b7109a433b95240, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  reachedDestination: 0
+  toReturn: 0
+  toDestroy: 0
+  id: 0
   _customerView: {fileID: 143391324809832687}
   _waitingUI: {fileID: 1574903796223326089}
-  _maxWaitingTime: 5
-  _waitLossSpeed: 1
-  _money: 5
 --- !u!114 &143391324809832687
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,4 +1,6 @@
 using System;
+using System.Net.Sockets;
+using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using NOOD;
 using UnityEditor;
@@ -9,83 +11,53 @@ namespace Game
 {
     public abstract class UpgradeBase : MonoBehaviour
     {
-	    public Table _table;
-	    [HideInInspector] public int Price;
+        [HideInInspector] public Table _table;
+        [HideInInspector] public int Price;
+
+        [SerializeField] private int _defaultPrice = 50;
 
         [SerializeField] protected UpgradeUI _upgradeUI;
         [SerializeField] protected UpgradeAction _upgradeAction;
         protected int _upgradeTime = 1;
-        public bool toUpgrade = false;
-        public bool toUpdatePrice = false;
+        private bool _canUpgrade;
+        private bool _isGettingData;
 
         #region Unity functions
         protected void Awake()
         {
             HideUI();
             ChildAwake();
+            Price = _defaultPrice;
         }
-        protected virtual void ChildAwake(){}
+        protected virtual void ChildAwake() { }
         protected void OnEnable()
         {
             _upgradeUI.OnUpgradeButtonClick += OnUpgradeButtonClickHandler;
-            if(GameplayManager.Instance)
-            {
-                GameplayManager.Instance.OnNextDay += HideUI;
-            }
-            if(UIManager.Instance)
-            {
-                UIManager.Instance.OnStorePhrase += OnStorePhraseHandler;
-                UIManager.Instance.OnStorePhrase += OnStorePhaseHandler;
-            }
+            GameEvent.Instance.OnNextDay += HideUI;
+            GameEvent.Instance.OnStorePhase += OnStorePhraseHandler;
+            GameEvent.Instance.OnStorePhase += OnStorePhaseHandler;
             ChildOnEnable();
         }
         protected void Start()
         {
-            if(GameplayManager.Instance)
-            {
-                GameplayManager.Instance.OnNextDay += HideUI;
-            }
-            if(UIManager.Instance)
-            {
-                UIManager.Instance.OnStorePhrase += OnStorePhraseHandler;
-                UIManager.Instance.OnStorePhrase += OnStorePhaseHandler;
-            }
-
             if (UpgradeManager.Instance)
-			{
-				UpgradeManager.Instance.AddUpgradeBase(this);
-			}
+            {
+                UpgradeManager.Instance.AddUpgradeBase(this);
+            }
+            Utility.Socket.OnEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
 
             ChildStart();
         }
 
-        private void Update()
-        {
-	        if(toUpgrade)
-	        {
-		        toUpgrade = false;
-		        _upgradeUI.UpdateMoneyText();
-		        _upgradeAction.Invoke();
-		        _upgradeAction.OnComplete.Invoke();
-			}
-
-	        if (toUpdatePrice)
-	        {
-		        toUpdatePrice = false;
-		        _upgradeUI.UpdateMoneyText();
-	        }
-        }
-
-        protected virtual void ChildStart(){}
+        protected virtual void ChildStart() { }
         protected void OnDisable()
         {
             _upgradeUI.OnUpgradeButtonClick -= OnUpgradeButtonClickHandler;
-            NoodyCustomCode.UnSubscribeAllEvent<GameplayManager>(this);
-            NoodyCustomCode.UnSubscribeAllEvent<UIManager>(this);
+            NoodyCustomCode.UnSubscribeAllEvent(GameEvent.Instance, this);
             ChildOnDisable();
         }
-        protected virtual void ChildOnDisable(){}
-        protected virtual void ChildOnEnable(){}
+        protected virtual void ChildOnDisable() { }
+        protected virtual void ChildOnEnable() { }
         #endregion
 
         #region Abstract functions
@@ -99,35 +71,74 @@ namespace Game
         protected abstract void UpdateUpgradeTime();
         #endregion
 
-        private void OnUpgradeButtonClickHandler()
+        private async void OnUpgradeButtonClickHandler()
         {
-	        string json = JsonConvert.SerializeObject(new ArrayWrapper
-	        {
-		        array = new string[]
-		        {
-			        _table.TableIndex.ToString(),
-			        JsonUtility.ToJson(_table.GetUpgradePosition())
+            string json = JsonConvert.SerializeObject(new ArrayWrapper
+            {
+                array = new string[]
+                {
+                    _table.TableIndex.ToString(),
+                    JsonUtility.ToJson(_table.GetUpgradePosition())
+                }
+            });
+            Debug.Log("Upgrading Table " + json);
 
-		        }
-	        });
-	        Debug.Log("Upgrading Table " + json);
-	        Utility.Socket.EmitEvent("upgradeTable", json);
+            LoadingUIManager.Instance.Show("Checking condition");
+            Utility.Socket.EmitEvent("getCanUpgradeTable");
+            _isGettingData = true;
+            await UniTask.WaitUntil(() => _isGettingData == false);
+            LoadingUIManager.Instance.Hide();
+            if (_canUpgrade)
+            {
+                bool result = await TransactionManager.Instance.AddStool(_table.TableIndex);
+                if (result)
+                {
+                    LoadingUIManager.Instance.Show("Upgrading");
+                    Utility.Socket.EmitEvent(SocketEnum.upgradeTable.ToString(), json);
+                }
+            }
+            else
+            {
+                NotifyManager.Instance.Show("Don't have enough money");
+            }
         }
 
-        protected virtual void OnStorePhaseHandler(){}
+        private async void CanUpgradeTableCallback(string data)
+        {
+            await UniTask.SwitchToMainThread();
+            if (data == "True")
+            {
+                _canUpgrade = true;
+            }
+            else
+            {
+                _canUpgrade = false;
+            }
+            _isGettingData = false;
+        }
+
+        protected virtual void OnStorePhaseHandler() { }
+
+        public virtual void Upgrade()
+        {
+            LoadingUIManager.Instance.Hide();
+            _upgradeAction.Invoke();
+            _upgradeAction.OnComplete.Invoke();
+            _upgradeUI.UpdateMoneyText();
+        }
 
         /// <summary>
         /// Update price base on own setting of the child upgradeTime
         /// </summary>
         public virtual void UpdatePrice()
         {
-            UpdateUpgradeTime();
-            Save();
+            _upgradeUI.gameObject.SetActive(true);
+            _upgradeUI.UpdateMoneyText();
         }
 
         public void OnStorePhraseHandler()
         {
-            if(CheckAllUpgradeComplete() == false)
+            if (CheckAllUpgradeComplete() == false)
                 ShowUI();
         }
 

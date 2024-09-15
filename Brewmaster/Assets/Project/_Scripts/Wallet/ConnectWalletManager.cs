@@ -3,9 +3,8 @@ using System.Collections;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using NOOD;
-using StarkSharp.Settings;
 using UnityEngine;
-using Utils;
+using Debug = Game.DevelopDebug;
 
 namespace Game
 {
@@ -23,7 +22,7 @@ namespace Game
 		[SerializeField] private Transform _gameUITransform;
 		[SerializeField] private ConnectWalletUI _connectWalletUIPref;
 
-		public bool isAnonymous = false;
+		public bool IsAnonymous = false;
 
 		private ConnectWalletUI _connectWalletUI;
 		private Action _onSuccess;
@@ -41,13 +40,17 @@ namespace Game
 
 		void Start()
 		{
-			Utility.Socket.OnEvent(SocketEnum.updateProof.ToString(), this.gameObject.name, nameof(OnUpdateProof), OnUpdateProof);
 			Utility.Socket.OnEvent(SocketEnum.updateAnonymous.ToString(), this.gameObject.name, nameof(OnUpdateAnonymous), OnUpdateAnonymous);
 		}
 
+		void OnDestroy()
+		{
+			Utility.Socket.Disconnect();
+		}
 
 		public void StartConnectWallet(Action onSuccess)
 		{
+			Debug.Log("StartConnectWallet");
 			_onSuccess = onSuccess;
 			_gameUITransform = GameObject.FindGameObjectWithTag("MainMenuCanvas").transform;
 			_connectWalletUI = Instantiate<ConnectWalletUI>(_connectWalletUIPref, _gameUITransform);
@@ -60,42 +63,24 @@ namespace Game
 		private void ConnectArgentX()
 		{
 			WalletConnectAsync(JSInteropManager.ConnectWalletArgentX);
-			isAnonymous = false;
+			IsAnonymous = false;
 		}
 		private void ConnectBraavos()
 		{
+			Debug.Log("Connect Braavos");
 			WalletConnectAsync(JSInteropManager.ConnectWalletBraavos);
-			isAnonymous = false;
+			IsAnonymous = false;
 		}
 		private void ConnectAnonymous()
 		{
 			// Request address and private key from server
 			Utility.Socket.EmitEvent(SocketEnum.anonymousLogin.ToString());
 			Utility.Socket.EmitEvent(SocketEnum.requestUpdatePlayerTreasury.ToString());
-			isAnonymous = true;
+			IsAnonymous = true;
 
 			// Hide UI
 			_connectWalletUI.Close();
 			_onSuccess?.Invoke();
-		}
-
-		private void OnUpdateProof(string proof)
-		{
-			Settings.apiurl = "https://starknet-mainnet.public.blastapi.io/rpc/v0_7";
-			ProofClass proofClass = JsonConvert.DeserializeObject<ProofClass>(proof);
-			string[] calldata = new string[2];
-			calldata[0] = proofClass.point.ToString();
-			calldata[1] = proofClass.timestamp.ToString();
-			string proofArray = $",[\"{proofClass.proof[0]}\", \"{proofClass.proof[1]}\"]";
-
-			string callDataString = JsonUtility.ToJson(new ArrayWrapper { array = calldata });
-			callDataString = callDataString.Replace("]}", "");
-			callDataString = callDataString + proofArray + "]}";
-
-			Debug.Log("Proof data: " + callDataString);
-
-			// Debug.Log("callDataString: " + callDataString);
-			JSInteropManager.SendTransaction(contractAddress, "rewardPoint", callDataString, gameObject.name, nameof(ClaimCallback));
 		}
 
 		private void OnUpdateAnonymous(string data)
@@ -108,13 +93,19 @@ namespace Game
 
 		private async void WalletConnectAsync(Action walletAction)
 		{
+			LoadingUIManager.Instance.Show();
 			string playerAddress;
 			if (Application.isEditor)
 			{
-				playerAddress = Utility.Socket.StringToSocketJson("0x0449A464Bce984F1d1d987B3a1Ff91bE490da7115f9776c1c7FED2ba3c5d14C0");
+				playerAddress = Utility.Socket.StringToSocketJson("0x062e41e7D4db7fc8e9911A846b328FD09902Ac33ADFE9cA2E32063C68D76f521");
 			}
 			else
 			{
+				if (!JSInteropManager.IsWalletAvailable())
+				{
+					JSInteropManager.AskToInstallWallet();
+					await UniTask.WaitUntil(() => JSInteropManager.IsWalletAvailable());
+				}
 				walletAction?.Invoke();
 				await UniTask.WaitUntil(() => JSInteropManager.IsConnected());
 				playerAddress = Utility.Socket.StringToSocketJson(JSInteropManager.GetAccount());
@@ -123,50 +114,8 @@ namespace Game
 			Utility.Socket.EmitEvent(SocketEnum.updatePlayerAddress.ToString(), playerAddress);
 			await DataSaveLoadManager.Instance.LoadData();
 			_connectWalletUI.Close();
+			LoadingUIManager.Instance.Hide();
 			_onSuccess?.Invoke();
-		}
-
-		public void Claim()
-		{
-			if (PlayerData.TotalPoint > 0)
-			{
-				string[] datas = new string[] {
-					PlayerData.PlayerAddress
-				};
-				Utility.Socket.EmitEvent(SocketEnum.claim.ToString(), JsonConvert.SerializeObject(new ArrayWrapper { array = datas }));
-			}
-		}
-
-		public void SyncPlayerPoint()
-		{
-			Settings.apiurl = "https://starknet-mainnet.public.blastapi.io/rpc/v0_7";
-
-			string[] calldata = new string[1];
-			calldata[0] = PlayerData.PlayerAddress;
-			string calldataString = JsonUtility.ToJson(new ArrayWrapper { array = calldata });
-			// JSInteropManager.CallContract(contractAddress, "getUserPoint", calldataString, gameObject.name, nameof(PlayerPointCallback));
-		}
-		private void PlayerPointCallback(string response)
-		{
-			JsonResponse jsonResponse = JsonUtility.FromJson<JsonResponse>(response);
-			int balance = Convert.ToInt32(jsonResponse.result[0], 16);
-			// UIManager.Instance.UpdatePlayerInfoPanel();
-		}
-
-		private void ClaimCallback(string response)
-		{
-			Debug.Log("claim response: " + response);
-			if (response == "User abort" || response == "Execute failed")
-			{
-				// user decline
-				Debug.Log("Response: " + response);
-			}
-			else
-			{
-				// user claim
-				SyncPlayerPoint();
-				Utility.Socket.EmitEvent(SocketEnum.afterClaim.ToString());
-			}
 		}
 	}
 }

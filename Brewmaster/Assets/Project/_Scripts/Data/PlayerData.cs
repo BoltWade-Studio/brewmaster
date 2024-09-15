@@ -10,7 +10,7 @@ namespace Game
         public static string PlayerAddress => PlayerDataClass.Player;
         public static Scale[] PlayerScale => PlayerDataClass.Scale;
         public static int PlayerTreasury => PlayerDataClass.Treasury;
-        public static int TotalPoint => PlayerDataClass.Points;
+        public static int PlayerPoint => PlayerDataClass.Points;
         public static long CreatedAt => PlayerDataClass.CreatedAt;
     }
 

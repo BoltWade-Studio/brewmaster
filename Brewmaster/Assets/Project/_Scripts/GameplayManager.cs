@@ -9,53 +9,47 @@ namespace Game
 {
 	public class GameplayManager : MonoBehaviorInstance<GameplayManager>
 	{
-		public Action OnEndDay;
-		public Action OnNextDay;
 		public Action OnPausePressed;
 		public bool IsEndDay;
 		public bool IsPlaying;
 
+		public bool IsMainMenu;
+
 		void Start()
 		{
-			if (TimeManager.Instance)
-			{
-				TimeManager.Instance.OnTimeUp += OnTimeUpHandler;
-			}
-			if (UIManager.Instance)
-			{
-				UIManager.Instance.OnNextDayPressed += OnNextDayPressHandler;
-			}
+			GameEvent.Instance.OnTimeUp += OnTimeUpHandler;
+			GameEvent.Instance.OnNextDay += OnNextDayHandler;
+
 			SoundManager.InitSoundManager();
 			SoundManager.PlayMusic(MusicEnum.PianoBGMusic);
 			SoundManager.PlayMusic(MusicEnum.CrowdBGSound);
 			TimeManager.TimeScale = 1;
-			OnNextDay += InitializeGame;
 
+			Utility.Socket.EmitEvent(SocketEnum.updateIsMainMenu.ToString(), Utility.Socket.StringToSocketJson(IsMainMenu.ToString()));
 			InitializeGame();
 		}
 
 		void OnDestroy()
 		{
-			NoodyCustomCode.UnSubscribeAllEvent<TimeManager>(this);
-			NoodyCustomCode.UnSubscribeAllEvent<UIManager>(this);
+			NoodyCustomCode.UnSubscribeAllEvent(GameEvent.Instance, this);
 		}
 
 		#region Event functions
 		private void OnTimeUpHandler()
 		{
 			IsEndDay = true;
-			OnEndDay?.Invoke();
+			GameEvent.Instance.OnEndDay?.Invoke();
 		}
-		private void OnNextDayPressHandler()
+		private void OnNextDayHandler()
 		{
-			IsEndDay = false;
-			OnNextDay?.Invoke();
+			InitializeGame();
 		}
 		#endregion
 
 		#region Private functions
 		private void InitializeGame()
 		{
+			IsEndDay = false;
 			InitializedGameDataDto data = new InitializedGameDataDto();
 			foreach (Table table in TableManager.Instance.GetTableList())
 			{
@@ -68,7 +62,6 @@ namespace Game
 						break;
 					}
 				}
-				// Debug.Log("Seat List: " + JsonUtility.ToJson(seatListDto));
 				data.tableList.Add(seatListDto);
 				data.tablePositionList.Add(table.transform.position);
 			}

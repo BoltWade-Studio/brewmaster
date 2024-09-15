@@ -156,6 +156,27 @@ mergeInto(LibraryManager.library, {
                 SendMessage(this.objectNameDic.getPlayerPubCallback, this.methodNameDic.getPlayerPubCallback, data)
             }
         });
+        socket.on('updateTreasuryCallback', (data) =>
+        {
+			if(this.objectNameDic.updateTreasuryCallback && this.methodNameDic.updateTreasuryCallback)
+            {
+                SendMessage(this.objectNameDic.updateTreasuryCallback, this.methodNameDic.updateTreasuryCallback, data)
+            }
+        });
+        socket.on('claimCallback', (data) =>
+        {
+			if(this.objectNameDic.claimCallback && this.methodNameDic.claimCallback)
+            {
+                SendMessage(this.objectNameDic.claimCallback, this.methodNameDic.claimCallback, data)
+            }
+        });
+        socket.on('getPointBeforeClaimCallback', (data) =>
+        {
+			if(this.objectNameDic.getPointBeforeClaimCallback && this.methodNameDic.getPointBeforeClaimCallback)
+            {
+                SendMessage(this.objectNameDic.getPointBeforeClaimCallback, this.methodNameDic.getPointBeforeClaimCallback, data)
+            }
+        });
 
         window.unitySocket = socket;
     },

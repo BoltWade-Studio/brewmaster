@@ -18,7 +18,6 @@ namespace Game
 		private async void OnUpdatePlayerTreasury(string point)
 		{
 			await UniTask.SwitchToMainThread();
-			Debug.Log("update treasury: " + point);
 			PlayerData.PlayerDataClass.Treasury = JsonConvert.DeserializeObject<int>(point);
 			UIManager.Instance.UpdateInDayMoney();
 		}

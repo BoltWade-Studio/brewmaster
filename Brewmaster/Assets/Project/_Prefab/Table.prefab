@@ -304,12 +304,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72e402dfe1460544c9585a8bba315b62, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _availableSeats:
+  _allSeats:
   - {fileID: 6732946831639159529}
   - {fileID: 2457014162040920348}
   - {fileID: 6000171238255609342}
   - {fileID: 373057479262530211}
   AvailableSeatNumber: 1
+  TableIndex: 0
 --- !u!114 &6895554189794984334
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -322,9 +323,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8cd664276d45eb34787ee7ef4d175dae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _table: {fileID: 0}
   Price: 10
-  PriceMultipler: 100
   _upgradeUI: {fileID: 841606241086375274}
+  toUpgrade: 0
+  toUpdatePrice: 0
 --- !u!1 &7209804661226426739
 GameObject:
   m_ObjectHideFlags: 0
