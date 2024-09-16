@@ -34,7 +34,7 @@ namespace Game
 
         public void ChangeLoadingMessage(string message)
         {
-            _message = message;
+            _message = message + "...";
         }
         public void Show(string message = null)
         {

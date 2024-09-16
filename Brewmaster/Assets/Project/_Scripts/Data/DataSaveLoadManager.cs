@@ -55,8 +55,12 @@ namespace Game
 				{
 					// Create new pub with sendTransaction
 					await TransactionManager.Instance.CreatePub();
+					LoadingUIManager.Instance.Show("Updating contract");
+					await UniTask.WaitForSeconds(30f);
+					LoadingUIManager.Instance.ChangeLoadingMessage("Getting data");
 					jsonData = await TransactionManager.Instance.GetPlayerPub();
 					PlayerData.PlayerDataClass = JsonConvert.DeserializeObject<PlayerDataClass>(jsonData);
+					LoadingUIManager.Instance.Hide();
 				}
 			}
 

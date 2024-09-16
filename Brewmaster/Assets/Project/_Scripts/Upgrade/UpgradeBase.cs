@@ -73,20 +73,14 @@ namespace Game
 
         private async void OnUpgradeButtonClickHandler()
         {
-            string json = JsonConvert.SerializeObject(new ArrayWrapper
-            {
-                array = new string[]
-                {
-                    _table.TableIndex.ToString(),
-                    JsonUtility.ToJson(_table.GetUpgradePosition())
-                }
-            });
+            string json = Utility.Socket.StringToSocketJson(_table.TableIndex.ToString());
             Debug.Log("Upgrading Table " + json);
 
-            LoadingUIManager.Instance.Show("Checking condition");
-            Utility.Socket.EmitEvent("getCanUpgradeTable");
             _isGettingData = true;
+            LoadingUIManager.Instance.Show("Checking condition");
+            Utility.Socket.EmitEvent("getCanUpgradeTable", json);
             await UniTask.WaitUntil(() => _isGettingData == false);
+            Debug.Log("_isGettingData: " + _isGettingData);
             LoadingUIManager.Instance.Hide();
             if (_canUpgrade)
             {
@@ -106,13 +100,14 @@ namespace Game
         private async void CanUpgradeTableCallback(string data)
         {
             await UniTask.SwitchToMainThread();
-            if (data == "True")
+            Debug.Log("Can upgrade table: " + data);
+            try
             {
-                _canUpgrade = true;
+                _canUpgrade = JsonConvert.DeserializeObject<bool>(data);
             }
-            else
+            catch (Exception e)
             {
-                _canUpgrade = false;
+                Debug.LogError("CanUpgradeCallback: " + e.Message);
             }
             _isGettingData = false;
         }

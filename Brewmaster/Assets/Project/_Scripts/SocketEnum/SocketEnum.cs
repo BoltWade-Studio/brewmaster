@@ -12,6 +12,8 @@ public enum SocketEnum
 	updateCustomerWaitTime,
 	updateTablePositions,
 	updateSeatPositions,
+	updateTablePositionCallback,
+	updateSeatPositionsCallback,
 	requestUpdatePlayerTreasury,
 	updateUpgradePrice,
 	updateIsMainMenu,

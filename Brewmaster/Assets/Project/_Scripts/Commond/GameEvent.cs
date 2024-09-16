@@ -35,5 +35,6 @@ namespace Game
         public Action OnClaimFail;
         public Action OnLoadDataSuccess;
         public Action OnUpgradeComplete;
+        public Action OnUpdatePosComplete;
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using Game.Extension;
 using Newtonsoft.Json;
 using NOOD;
@@ -41,6 +42,7 @@ namespace Game
         [SerializeField] private bool _unlockAllSeats;
         private int _currentTableIndex = 0;
         private TableData _tableData;
+        private bool _isTableUpdateComplete, _isSeatUpdateComplete;
 
         #region Unity Functions
         protected override void ChildAwake()
@@ -53,19 +55,26 @@ namespace Game
         }
         void Start()
         {
+            Utility.Socket.OnEvent(SocketEnum.updateTablePositionCallback.ToString(), this.gameObject.name, nameof(UpdateTablePositionCallback), UpdateTablePositionCallback);
+            Utility.Socket.OnEvent(SocketEnum.updateSeatPositionsCallback.ToString(), this.gameObject.name, nameof(UpdateSeatPositionCallback), UpdateSeatPositionCallback);
+
             UpdatePositionsToServer();
 
             Debug.Log("AAA Update table manger start");
+
             try
             {
-                if (GameplayManager.Instance.IsMainMenu == false)
-                {
-                    _tableData = DataSaveLoadManager.Instance.TableData;
-                }
+                // if (GameplayManager.Instance.IsMainMenu == false)
+                // {
+                //     _tableData = DataSaveLoadManager.Instance.TableData;
+                // }
+                Debug.Log("client table count: " + _tableList.Count);
+                Debug.Log("server table count: " + PlayerData.PlayerScale.Count());
                 for (int i = 0; i < _tableList.Count; i++)
                 {
                     if (GameplayManager.Instance.IsMainMenu == false)
                     {
+                        Debug.Log("index: " + i + " table index: " + PlayerData.PlayerScale[i].TableIndex);
                         _tableList[i].TableIndex = PlayerData.PlayerScale[i].TableIndex;
                         _tableList[i].AvailableSeatNumber = PlayerData.PlayerScale[i].Stools;
                         _tableList[i].LoadSeat();
@@ -77,18 +86,17 @@ namespace Game
                 Debug.Log("AAA error: " + e.Message);
             }
 
-
             OnTableUpgrade += OnTableUpgradeHandler;
         }
         void OnEnable()
         {
             Player.OnPlayerChangePosition += OnPlayerChangePositionHandler;
-            GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
+            // GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
         }
         void OnDisable()
         {
             Player.OnPlayerChangePosition -= OnPlayerChangePositionHandler;
-            GameEvent.Instance.OnLoadDataSuccess -= OnLoadDataSuccessHandler;
+            // GameEvent.Instance.OnLoadDataSuccess -= OnLoadDataSuccessHandler;
         }
         void OnDestroy()
         {
@@ -96,6 +104,7 @@ namespace Game
         }
         #endregion
 
+        #region Update pos to server
         private void UpdatePositionsToServer()
         {
             Debug.Log("AAA Update position to server");
@@ -114,6 +123,7 @@ namespace Game
                 totalSeatPosArray[i] = JsonConvert.SerializeObject(tableSeatArray).RemoveUnWantChar();
             }
 
+
             // Update table pos to server
             string tablePosStr = JsonConvert.SerializeObject(tablePosStrings).RemoveUnWantChar();
             Utility.Socket.EmitEvent(SocketEnum.updateTablePositions.ToString(), tablePosStr);
@@ -122,27 +132,50 @@ namespace Game
             string seatJson = JsonConvert.SerializeObject(totalSeatPosArray).RemoveUnWantChar();
             Utility.Socket.EmitEvent(SocketEnum.updateSeatPositions.ToString(), seatJson);
         }
-
-        private void OnLoadDataSuccessHandler()
+        private async void UpdateTablePositionCallback(string data)
         {
-            if (GameplayManager.Instance.IsMainMenu == false)
+            await UniTask.SwitchToMainThread();
+            Debug.Log("Update table position callback: ");
+            _isTableUpdateComplete = true;
+            if (_isSeatUpdateComplete)
             {
-                _tableData = DataSaveLoadManager.Instance.TableData;
-            }
-            for (int i = 0; i < _tableList.Count; i++)
-            {
-                if (GameplayManager.Instance.IsMainMenu == false)
-                {
-                    _tableList[i].TableIndex = PlayerData.PlayerScale[i].TableIndex;
-                    _tableList[i].AvailableSeatNumber = PlayerData.PlayerScale[i].Stools;
-                    _tableList[i].LoadSeat();
-                }
+                Debug.Log("OnComplete");
+                GameEvent.Instance.OnUpdatePosComplete?.Invoke();
             }
         }
+        private async void UpdateSeatPositionCallback(string data)
+        {
+            await UniTask.SwitchToMainThread();
+            Debug.Log("Update seat position callback: ");
+            _isSeatUpdateComplete = true;
+            if (_isTableUpdateComplete)
+            {
+                Debug.Log("OnComplete");
+                GameEvent.Instance.OnUpdatePosComplete?.Invoke();
+            }
+        }
+        #endregion
+
+        // private void OnLoadDataSuccessHandler()
+        // {
+        //     if (GameplayManager.Instance.IsMainMenu == false)
+        //     {
+        //         _tableData = DataSaveLoadManager.Instance.TableData;
+        //     }
+        //     for (int i = 0; i < _tableList.Count; i++)
+        //     {
+        //         if (GameplayManager.Instance.IsMainMenu == false)
+        //         {
+        //             _tableList[i].TableIndex = PlayerData.PlayerScale[i].TableIndex;
+        //             _tableList[i].AvailableSeatNumber = PlayerData.PlayerScale[i].Stools;
+        //             _tableList[i].LoadSeat();
+        //         }
+        //     }
+        // }
         private void OnTableUpgradeHandler(Table table)
         {
-            int index = _tableList.IndexOf(table);
-            _tableData.SeatNumberList[index] += 1;
+            // int index = _tableList.IndexOf(table);
+            // _tableData.SeatNumberList[index] += 1;
         }
         private void OnPlayerChangePositionHandler(int index)
         {

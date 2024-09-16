@@ -280,6 +280,22 @@ namespace Game
 						_actionEventDic["getPointBeforeClaimCallback"].Invoke(data.GetValue<string>());
 					}
 				});
+				socket.On("updateSeatPositionsCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("updateSeatPositionsCallback"))
+					{
+						Debug.Log("updateSeatPositionsCallback: " + data);
+						_actionEventDic["updateSeatPositionsCallback"].Invoke("");
+					}
+				});
+				socket.On("updateTablePositionCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("updateTablePositionCallback"))
+					{
+						Debug.Log("updateTablePositionsCallback: " + data);
+						_actionEventDic["updateTablePositionCallback"].Invoke("");
+					}
+				});
 				socket.Connect();
 			}
 
