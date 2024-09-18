@@ -1,5 +1,6 @@
 using System;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using NOOD;
@@ -44,7 +45,6 @@ namespace Game
             {
                 UpgradeManager.Instance.AddUpgradeBase(this);
             }
-            Utility.Socket.OnEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
 
             ChildStart();
         }
@@ -71,54 +71,68 @@ namespace Game
         protected abstract void UpdateUpgradeTime();
         #endregion
 
-        private async void OnUpgradeButtonClickHandler()
+        private void OnUpgradeButtonClickHandler()
+        {
+            PerformUpgrade();
+        }
+
+        private void PerformUpgrade()
         {
             string json = Utility.Socket.StringToSocketJson(_table.TableIndex.ToString());
-            Debug.Log("Upgrading Table " + json);
+            Debug.Log("Upgrading Table " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
 
-            _isGettingData = true;
+            Utility.Socket.OnEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
             LoadingUIManager.Instance.Show("Checking condition");
-            Utility.Socket.EmitEvent("getCanUpgradeTable", json);
-            await UniTask.WaitUntil(() => _isGettingData == false);
-            Debug.Log("_isGettingData: " + _isGettingData);
-            LoadingUIManager.Instance.Hide();
-            if (_canUpgrade)
-            {
-                bool result = await TransactionManager.Instance.AddStool(_table.TableIndex);
-                if (result)
-                {
-                    LoadingUIManager.Instance.Show("Upgrading");
-                    Utility.Socket.EmitEvent(SocketEnum.upgradeTable.ToString(), json);
-                }
-            }
-            else
-            {
-                NotifyManager.Instance.Show("Don't have enough money");
-            }
+            Utility.Socket.EmitEvent(SocketEnum.getCanUpgradeTable.ToString(), json);
         }
 
         private async void CanUpgradeTableCallback(string data)
         {
             await UniTask.SwitchToMainThread();
-            Debug.Log("Can upgrade table: " + data);
             try
             {
-                _canUpgrade = JsonConvert.DeserializeObject<bool>(data);
+                _canUpgrade = data.Equals("True");
+
+                if (_canUpgrade)
+                {
+                    bool result = true;
+                    Debug.Log("AddStool to table: " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
+                    if (Application.isEditor == false)
+                    {
+                        result = await TransactionManager.Instance.AddStool(_table.TableIndex);
+                        LoadingUIManager.Instance.ChangeLoadingMessage("Wait for updating transaction");
+                        await UniTask.WaitForSeconds(30f);
+                    }
+                    if (result == false)
+                    {
+                        LoadingUIManager.Instance.Hide();
+                        NotifyManager.Instance.Show("Player cancel upgrade");
+                    }
+                    else
+                    {
+                        Upgrade();
+                        await DataSaveLoadManager.Instance.LoadData();
+                    }
+                }
+                else
+                {
+                    LoadingUIManager.Instance.Hide();
+                    NotifyManager.Instance.Show("Don't have enough money");
+                }
             }
             catch (Exception e)
             {
-                Debug.LogError("CanUpgradeCallback: " + e.Message);
+                Debug.LogError("CanUpgradeCallback error: " + e.Message);
             }
-            _isGettingData = false;
+
+            LoadingUIManager.Instance.Hide();
         }
 
         protected virtual void OnStorePhaseHandler() { }
 
         public virtual void Upgrade()
         {
-            LoadingUIManager.Instance.Hide();
             _upgradeAction.Invoke();
-            _upgradeAction.OnComplete.Invoke();
             _upgradeUI.UpdateMoneyText();
         }
 

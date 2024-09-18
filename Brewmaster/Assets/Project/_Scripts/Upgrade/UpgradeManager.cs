@@ -14,7 +14,7 @@ namespace Game
 
 		private void Start()
 		{
-			Utility.Socket.OnEvent(SocketEnum.upgradeTableCallback.ToString(), this.gameObject.name, nameof(UpgradeCallback), UpgradeCallback);
+			// Utility.Socket.OnEvent(SocketEnum.upgradeTableCallback.ToString(), this.gameObject.name, nameof(UpgradeCallback), UpgradeCallback);
 			Utility.Socket.OnEvent(SocketEnum.updateUpgradePriceCallback.ToString(), this.gameObject.name, nameof(UpdateUpgradePrice), UpdateUpgradePrice);
 
 			GameEvent.Instance.OnStorePhase += OnStorePhaseHandler;
@@ -55,21 +55,21 @@ namespace Game
 			}
 		}
 
-		public async void UpgradeCallback(string data)
-		{
-			await UniTask.SwitchToMainThread();
+		// public async void UpgradeCallback(string data)
+		// {
+		// 	await UniTask.SwitchToMainThread();
 
-			var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
+		// 	var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
 
-			foreach (var _upgradeBase in _upgradeBaseList)
-			{
-				if (_upgradeBase._table.TableIndex == int.Parse(dict["tableIndex"]))
-				{
-					_upgradeBase.Price = int.Parse(dict["message"]);
-					_upgradeBase.Upgrade();
-				}
-			}
-		}
+		// 	foreach (var _upgradeBase in _upgradeBaseList)
+		// 	{
+		// 		if (_upgradeBase._table.TableIndex == int.Parse(dict["tableIndex"]))
+		// 		{
+		// 			_upgradeBase.Price = int.Parse(dict["message"]);
+		// 			_upgradeBase.Upgrade();
+		// 		}
+		// 	}
+		// }
 
 		public void AddUpgradeBase(UpgradeBase upgradeBase)
 		{

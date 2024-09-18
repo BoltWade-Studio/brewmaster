@@ -57,7 +57,7 @@ namespace Game
         }
         public void Hide()
         {
-            _loadingUI.gameObject?.SetActive(false);
+            _loadingUI?.gameObject?.SetActive(false);
         }
     }
 }

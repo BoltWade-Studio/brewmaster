@@ -31,7 +31,6 @@ namespace Game
 		[SerializeField] private GameObject _pauseGameMenu;
 		[SerializeField] private TextMeshProUGUI _pMoneyText, _pDayText;
 		[SerializeField] private CustomButton _pResumeBtn, _pToMainMenuBtn;
-		[SerializeField] private TransitionSettings _transitionSetting;
 
 		[Header("Store")]
 		[SerializeField] private GameObject _storeMenu;
@@ -41,6 +40,8 @@ namespace Game
 		[Header("Twitter")]
 		[SerializeField] private TwitterInputPanel _twitterInputPanel;
 
+		[Header("Other")]
+		public TransitionSettings TransitionSetting;
 		private bool _isStorePhrase;
 
 		#region Unity functions
@@ -220,7 +221,7 @@ namespace Game
 		}
 		private void OnMainMenuClickHandler()
 		{
-			TransitionManager.Instance().Transition("MainMenu", _transitionSetting, 0.3f);
+			TransitionManager.Instance().Transition("MainMenu", TransitionSetting, 0.3f);
 		}
 		private void OnResumeClickHandler()
 		{

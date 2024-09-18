@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Claims;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using EasyTransition;
 using Newtonsoft.Json;
 using NOOD;
 using NOOD.Sound;
@@ -35,14 +37,15 @@ namespace Game
         {
             Utility.Socket.OnEvent(SocketEnum.getPointBeforeClaimCallback.ToString(), this.gameObject.name, nameof(GetPointBeforeClaimCallback), GetPointBeforeClaimCallback);
 
-            Debug.LogError("End Day Start");
             _shareToTwitterBtn.OnClick += OnShareToTwitterBtnPress;
             _claimBtn.OnClick += OnClaimBtnPress;
             _nextDayBtn.OnClick += OnNextDayBtnPress;
             _shopBtn.OnClick += OnShopBtnPress;
+            _mainMenuBtn.OnClick += OnMainMenuBtnPress;
 
             this.gameObject.SetActive(false);
         }
+
         void OnEnable()
         {
             GameEvent.Instance.OnClaimSuccess += OnClaimSuccessHandler;
@@ -62,10 +65,29 @@ namespace Game
         }
         private async void OnClaimBtnPress()
         {
+            GameEvent.Instance.OnClaimSuccess += SetClaimBtnInactive;
+            GameEvent.Instance.OnClaimFail += SetClaimBtnActive;
             await TransactionManager.Instance.Claim();
+            await UniTask.WaitForSeconds(1f);
+            GameEvent.Instance.OnClaimSuccess -= SetClaimBtnInactive;
+            GameEvent.Instance.OnClaimFail -= SetClaimBtnActive;
+        }
+        private void SetClaimBtnActive()
+        {
+            _claimBtn.IsInteractable = true;
+        }
+        private void SetClaimBtnInactive()
+        {
+            _claimBtn.IsInteractable = false;
         }
         private void OnShopBtnPress()
         {
+            if (Application.isEditor)
+            {
+                Hide();
+                GameEvent.Instance.OnStorePhase?.Invoke();
+                return;
+            }
             if (_isClaimed == false)
             {
                 // Show notification
@@ -90,6 +112,21 @@ namespace Game
             else
             {
                 NextDay();
+            }
+        }
+        private void OnMainMenuBtnPress()
+        {
+            if (_isClaimed == false)
+            {
+                string message = "You will lose all today point and treasury if you don't claim, Continue?";
+                PopupManager.Instance.ShowYesNoPopup("Are you sure?", message, () =>
+                {
+                    TransitionManager.Instance().Transition("MainMenu", UIManager.Instance.TransitionSetting, 0.3f);
+                }, null);
+            }
+            else
+            {
+                TransitionManager.Instance().Transition("MainMenu", UIManager.Instance.TransitionSetting, 0.3f);
             }
         }
         private void OnClaimSuccessHandler()

@@ -20,6 +20,7 @@ namespace Game
         private Dictionary<TransactionID, string> _transactionEntryDic = new Dictionary<TransactionID, string>();
         private bool _gettingData;
         private bool _sending;
+        private bool _isClaimSuccess;
 
         void Start()
         {
@@ -31,10 +32,6 @@ namespace Game
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.C))
-            {
-                Claim();
-            }
         }
 
         #region Private
@@ -155,7 +152,7 @@ namespace Game
         {
             await UniTask.SwitchToMainThread();
             Debug.Log("ClosedUpPubCallback: " + data);
-            if (data != "Player abort" && data != "")
+            if (!data.Contains("abort", StringComparison.InvariantCultureIgnoreCase) && data != "")
             {
                 LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for transaction update");
                 await UniTask.WaitForSeconds(30f);
@@ -195,19 +192,25 @@ namespace Game
             _sending = true;
             if (Application.isEditor == false)
             {
+                Debug.Log("AddStool: " + tableIndex);
                 string contractAddress = await GetContractEntry(TransactionID.CONTRACT_ADDRESS);
                 string addStoolEntry = await GetContractEntry(TransactionID.ADD_STOOL);
 
                 JSInteropManager.SendTransaction(contractAddress, addStoolEntry, JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { tableIndex.ToString() } }), this.gameObject.name, nameof(AddStoolCallback));
                 await UniTask.WaitUntil(() => _sending == false);
                 await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.ADD_STOOL));
-                return _transactionJsonDataDic[TransactionID.ADD_STOOL].Contains("User Abort") == false;
+                return _transactionJsonDataDic[TransactionID.ADD_STOOL].Contains("abort", StringComparison.InvariantCultureIgnoreCase) == false;
+            }
+            else
+            {
+                _sending = false;
             }
             return true;
         }
         private async void AddStoolCallback(string data)
         {
             await UniTask.SwitchToMainThread();
+            Debug.Log("AddStoolCallback: " + data);
             if (_transactionJsonDataDic.ContainsKey(TransactionID.ADD_STOOL))
             {
                 _transactionJsonDataDic[TransactionID.ADD_STOOL] = data;

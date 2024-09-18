@@ -59,48 +59,24 @@ namespace Game
             Utility.Socket.OnEvent(SocketEnum.updateSeatPositionsCallback.ToString(), this.gameObject.name, nameof(UpdateSeatPositionCallback), UpdateSeatPositionCallback);
 
             UpdatePositionsToServer();
-
-            Debug.Log("AAA Update table manger start");
-
-            try
+            if (GameplayManager.Instance.IsMainMenu == false)
             {
-                // if (GameplayManager.Instance.IsMainMenu == false)
-                // {
-                //     _tableData = DataSaveLoadManager.Instance.TableData;
-                // }
-                Debug.Log("client table count: " + _tableList.Count);
-                Debug.Log("server table count: " + PlayerData.PlayerScale.Count());
-                for (int i = 0; i < _tableList.Count; i++)
-                {
-                    if (GameplayManager.Instance.IsMainMenu == false)
-                    {
-                        Debug.Log("index: " + i + " table index: " + PlayerData.PlayerScale[i].TableIndex);
-                        _tableList[i].TableIndex = PlayerData.PlayerScale[i].TableIndex;
-                        _tableList[i].AvailableSeatNumber = PlayerData.PlayerScale[i].Stools;
-                        _tableList[i].LoadSeat();
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.Log("AAA error: " + e.Message);
+                LoadTableSeat();
+                GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
             }
 
-            OnTableUpgrade += OnTableUpgradeHandler;
         }
         void OnEnable()
         {
             Player.OnPlayerChangePosition += OnPlayerChangePositionHandler;
-            // GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
         }
         void OnDisable()
         {
             Player.OnPlayerChangePosition -= OnPlayerChangePositionHandler;
-            // GameEvent.Instance.OnLoadDataSuccess -= OnLoadDataSuccessHandler;
         }
         void OnDestroy()
         {
-            OnTableUpgrade -= OnTableUpgradeHandler;
+            GameEvent.Instance.OnLoadDataSuccess -= OnLoadDataSuccessHandler;
         }
         #endregion
 
@@ -156,26 +132,31 @@ namespace Game
         }
         #endregion
 
-        // private void OnLoadDataSuccessHandler()
-        // {
-        //     if (GameplayManager.Instance.IsMainMenu == false)
-        //     {
-        //         _tableData = DataSaveLoadManager.Instance.TableData;
-        //     }
-        //     for (int i = 0; i < _tableList.Count; i++)
-        //     {
-        //         if (GameplayManager.Instance.IsMainMenu == false)
-        //         {
-        //             _tableList[i].TableIndex = PlayerData.PlayerScale[i].TableIndex;
-        //             _tableList[i].AvailableSeatNumber = PlayerData.PlayerScale[i].Stools;
-        //             _tableList[i].LoadSeat();
-        //         }
-        //     }
-        // }
-        private void OnTableUpgradeHandler(Table table)
+        private void OnLoadDataSuccessHandler()
         {
-            // int index = _tableList.IndexOf(table);
-            // _tableData.SeatNumberList[index] += 1;
+            LoadTableSeat();
+        }
+        private void LoadTableSeat()
+        {
+            Debug.Log("client table count: " + _tableList.Count);
+            Debug.Log("server table count: " + PlayerData.PlayerScale.Count());
+            for (int i = 0; i < PlayerData.PlayerScale.Count(); i++)
+            {
+                int index = i;
+                Table table = _tableList[index];
+                Scale scale = PlayerData.PlayerScale[index];
+                if (GameplayManager.Instance.IsMainMenu == false)
+                {
+                    table.TableIndex = scale.TableIndex;
+                    table.AvailableSeatNumber = scale.Stools;
+                    Debug.Log("index: " + scale.TableIndex + " number: " + scale.Stools);
+                }
+                table.LoadSeat();
+            }
+            foreach (Scale scale in PlayerData.PlayerScale)
+            {
+                Debug.Log("Scale: " + scale);
+            }
         }
         private void OnPlayerChangePositionHandler(int index)
         {

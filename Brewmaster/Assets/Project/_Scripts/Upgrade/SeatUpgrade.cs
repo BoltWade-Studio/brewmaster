@@ -11,6 +11,7 @@ namespace Game
             _table = this.GetComponent<Table>();
             _upgradeAction = new UpgradeAction(() =>
             {
+                Debug.Log("Before Unlock at table: " + _table.TableIndex);
                 _table.UnlockSeat();
                 _table.AvailableSeatNumber++;
             });
@@ -44,7 +45,7 @@ namespace Game
         }
         private void MoveToNewPos()
         {
-            Vector3 tempPos = _table.GetUpgradePosition();
+            Vector3 tempPos = _table.GetNextUpgradePosition();
             Vector3 newPos = new Vector3(tempPos.x, this.transform.position.y, tempPos.z);
             _upgradeUI.SetPosition(newPos);
         }

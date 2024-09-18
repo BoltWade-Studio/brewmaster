@@ -296,6 +296,13 @@ namespace Game
 						_actionEventDic["updateTablePositionCallback"].Invoke("");
 					}
 				});
+				socket.On("getCanUpgradeTableCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("getCanUpgradeTableCallback"))
+					{
+						_actionEventDic["getCanUpgradeTableCallback"].Invoke(data.GetValue<string>());
+					}
+				});
 				socket.Connect();
 			}
 

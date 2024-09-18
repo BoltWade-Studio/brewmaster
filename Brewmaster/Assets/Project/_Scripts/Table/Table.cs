@@ -9,8 +9,6 @@ namespace Game
 {
     public class Table : MonoBehaviour
     {
-        // [SerializeField] private List<Transform> 
-        [FormerlySerializedAs("_availableSeats")]
         [SerializeField] private List<Transform> _allSeats = new List<Transform>();
         private List<Transform> _availableSeatList = new List<Transform>();
 
@@ -18,20 +16,18 @@ namespace Game
         private bool _unlockAllSeats;
 
         public int AvailableSeatNumber = 1;
-        public int TableIndex;
+        public int TableIndex { get; set; }
         public List<Transform> AllSeats => _allSeats;
 
         #region Unity Functions
-        private void Start()
+        private void Awake()
         {
-            if (_unlockAllSeats == true) AvailableSeatNumber = 4;
-
-            foreach (Transform seat in _allSeats)
+            _availableSeatList = new List<Transform>();
+            _lockSeatList = new Stack<Transform>();
+            foreach (var seat in _allSeats)
             {
-                // Make a copy of all seat
                 _availableSeatList.Add(seat);
             }
-            LoadSeat();
         }
         private void OnDestroy()
         {
@@ -42,7 +38,7 @@ namespace Game
         #endregion
 
         #region Upgrade Functions
-        public Vector3 GetUpgradePosition()
+        public Vector3 GetNextUpgradePosition()
         {
             return _lockSeatList.ToArray()[0].position.ToVector3XZ();
         }
@@ -55,6 +51,7 @@ namespace Game
         public void LoadSeat()
         {
             Debug.Log("Table index: " + TableIndex + " Available Seat: " + AvailableSeatNumber);
+            Debug.Log("Available Seat List: " + _availableSeatList.Count);
             while (_availableSeatList.Count != AvailableSeatNumber)
             {
                 if (_availableSeatList.Count > AvailableSeatNumber)
@@ -82,6 +79,7 @@ namespace Game
 
         public void UnlockSeat()
         {
+            Debug.Log("Unlock seat at table: " + TableIndex);
             Transform seat = _lockSeatList.Pop();
             seat.gameObject.SetActive(true);
             _availableSeatList.Add(seat);
