@@ -163,6 +163,15 @@ mergeInto(LibraryManager.library, {
                 SendMessage(this.objectNameDic.updateTreasuryCallback, this.methodNameDic.updateTreasuryCallback, data)
             }
         });
+
+        socket.on('updateInDayTreasuryCallback', (data) =>
+        {
+			if(this.objectNameDic.updateInDayTreasuryCallback && this.methodNameDic.updateInDayTreasuryCallback)
+			{
+				SendMessage(this.objectNameDic.updateInDayTreasuryCallback, this.methodNameDic.updateInDayTreasuryCallback, data)
+			}
+		});
+
         socket.on('claimCallback', (data) =>
         {
 			if(this.objectNameDic.claimCallback && this.methodNameDic.claimCallback)
