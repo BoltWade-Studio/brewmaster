@@ -50,10 +50,18 @@ namespace Game
         #region In game functions
         public void LoadSeat()
         {
+	        _availableSeatList.Clear();
+	        foreach (Transform seat in _allSeats)
+	        {
+		        // Make a copy of all seat
+		        _availableSeatList.Add(seat);
+	        }
+
             Debug.Log("Table index: " + TableIndex + " Available Seat: " + AvailableSeatNumber);
             Debug.Log("Available Seat List: " + _availableSeatList.Count);
             while (_availableSeatList.Count != AvailableSeatNumber)
             {
+	            Debug.Log("Available Seat: " + _availableSeatList.Count);
                 if (_availableSeatList.Count > AvailableSeatNumber)
                 {
                     // Deactivate all seats > availableSeatNumber

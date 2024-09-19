@@ -53,8 +53,9 @@ namespace Game
 			_pResumeBtn.OnClick += OnResumeClickHandler;
 			_storeConfirmBtn.OnClick += () =>
 			{
-				GameEvent.Instance.OnNextDay?.Invoke();
+				// GameEvent.Instance.OnNextDay?.Invoke();
 				HideStoreMenu();
+				_endDayPanel.Show(false);
 				_isStorePhrase = false;
 			};
 

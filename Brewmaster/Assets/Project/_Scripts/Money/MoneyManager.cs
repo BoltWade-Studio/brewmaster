@@ -13,9 +13,18 @@ namespace Game
 		void Start()
 		{
 			Utility.Socket.OnEvent(SocketEnum.updateTreasuryCallback.ToString(), this.gameObject.name, nameof(OnUpdatePlayerTreasury), OnUpdatePlayerTreasury);
+			Utility.Socket.OnEvent(SocketEnum.updateInDayTreasuryCallback.ToString(), this.gameObject.name, nameof(OnUpdateInDayPlayerTreasury), OnUpdateInDayPlayerTreasury);
 		}
 
 		private async void OnUpdatePlayerTreasury(string point)
+		{
+			await UniTask.SwitchToMainThread();
+			PlayerData.PlayerDataClass.Treasury = JsonConvert.DeserializeObject<int>(point);
+			UIManager.Instance.UpdateInDayMoney();
+			UIManager.Instance.UpdatePlayerInfoPanel();
+		}
+
+		private async void OnUpdateInDayPlayerTreasury(string point)
 		{
 			await UniTask.SwitchToMainThread();
 			PlayerData.PlayerDataClass.Treasury = JsonConvert.DeserializeObject<int>(point);

@@ -316,7 +316,7 @@ namespace Game
 
 			public static void EmitEvent(string eventName, string jsonData = null)
 			{
-				Debug.Log("EmitEvent: " + eventName);
+				// Debug.Log("EmitEvent: " + eventName);
 				jsonData = ToSocketJson(jsonData);
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -328,7 +328,7 @@ namespace Game
 			}
 			public static void OnEvent(string eventName, string objectName, string methodName, Action<string> action)
 			{
-				Debug.Log("OnEvent: " + eventName);
+				// Debug.Log("OnEvent: " + eventName);
 #if UNITY_WEBGL && !UNITY_EDITOR
 				JsSocketConnect.OnEvent(eventName, objectName, methodName);
 #else

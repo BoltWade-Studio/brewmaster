@@ -23,6 +23,7 @@ public enum SocketEnum
 	updateUpgradePriceCallback,
 	loadCallback,
 	updateTreasuryCallback,
+	updateInDayTreasuryCallback,
 	sendContractCallback,
 	getEntryCallback,
 	getPlayerPubCallback,
@@ -33,7 +34,7 @@ public enum SocketEnum
 	claimCallback,
 	#endregion
 
-	#region Upgrade 
+	#region Upgrade
 	getPriceForAddStool,
 	getPriceForAddStoolCallback,
 	upgradeTable,
