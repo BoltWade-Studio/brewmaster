@@ -44,7 +44,6 @@ namespace Game
             {
                 UpgradeManager.Instance.AddUpgradeBase(this);
             }
-            Utility.Socket.OnEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
 
             ChildStart();
         }
@@ -78,6 +77,7 @@ namespace Game
 
             _isGettingData = true;
             LoadingUIManager.Instance.Show("Checking condition");
+            Utility.Socket.OnEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
             Utility.Socket.EmitEvent("getCanUpgradeTable", json);
             await UniTask.WaitUntil(() => _isGettingData == false);
             Debug.Log("_isGettingData: " + _isGettingData);

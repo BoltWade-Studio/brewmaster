@@ -9,7 +9,7 @@ namespace Game
 {
     public class Table : MonoBehaviour
     {
-        // [SerializeField] private List<Transform> 
+        // [SerializeField] private List<Transform>
         [FormerlySerializedAs("_availableSeats")]
         [SerializeField] private List<Transform> _allSeats = new List<Transform>();
         private List<Transform> _availableSeatList = new List<Transform>();
@@ -24,14 +24,14 @@ namespace Game
         #region Unity Functions
         private void Start()
         {
-            if (_unlockAllSeats == true) AvailableSeatNumber = 4;
+	        foreach (Transform seat in _allSeats)
+	        {
+		        // Make a copy of all seat
+		        _availableSeatList.Add(seat);
+	        }
 
-            foreach (Transform seat in _allSeats)
-            {
-                // Make a copy of all seat
-                _availableSeatList.Add(seat);
-            }
-            LoadSeat();
+            if (_unlockAllSeats == true) AvailableSeatNumber = 4;
+            // LoadSeat();
         }
         private void OnDestroy()
         {
@@ -54,9 +54,17 @@ namespace Game
         #region In game functions
         public void LoadSeat()
         {
+	        _availableSeatList.Clear();
+	        foreach (Transform seat in _allSeats)
+	        {
+		        // Make a copy of all seat
+		        _availableSeatList.Add(seat);
+	        }
+
             Debug.Log("Table index: " + TableIndex + " Available Seat: " + AvailableSeatNumber);
             while (_availableSeatList.Count != AvailableSeatNumber)
             {
+	            Debug.Log("Available Seat: " + _availableSeatList.Count);
                 if (_availableSeatList.Count > AvailableSeatNumber)
                 {
                     // Deactivate all seats > availableSeatNumber
