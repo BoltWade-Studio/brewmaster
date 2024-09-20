@@ -40,6 +40,7 @@ namespace Game
             _shareToTwitterBtn.OnClick += OnShareToTwitterBtnPress;
             _claimBtn.OnClick += OnClaimBtnPress;
             _nextDayBtn.OnClick += OnNextDayBtnPress;
+            _mainMenuBtn.OnClick += UIManager.Instance.OnMainMenuClickHandler;
             _shopBtn.OnClick += OnShopBtnPress;
             _mainMenuBtn.OnClick += OnMainMenuBtnPress;
 
@@ -99,6 +100,7 @@ namespace Game
                 GameEvent.Instance.OnStorePhase?.Invoke();
             }
         }
+
         private void OnNextDayBtnPress()
         {
             if (_isClaimed == false)
@@ -132,6 +134,7 @@ namespace Game
         private void OnClaimSuccessHandler()
         {
             // Active shop button
+            _claimBtn.gameObject.GetComponent<Button>().interactable = false;
             _isClaimed = true;
         }
         #endregion
@@ -141,8 +144,9 @@ namespace Game
             await DataSaveLoadManager.Instance.LoadData();
             NextDay();
         }
-        private void NextDay()
+        private async void NextDay()
         {
+	        await DataSaveLoadManager.Instance.LoadData();
             Hide();
             GameEvent.Instance.OnNextDay?.Invoke();
         }
@@ -175,7 +179,16 @@ namespace Game
             _canvasGroup.alpha = 0;
             if (isUpdate)
             {
-                _isClaimed = false;
+	            if (PlayerData.PlayerTreasury > 0)
+	            {
+		            _isClaimed = false;
+		            _claimBtn.gameObject.GetComponent<Button>().interactable = true;
+	            }
+	            else
+	            {
+		            _isClaimed = true;
+		            _claimBtn.gameObject.GetComponent<Button>().interactable = false;
+	            }
                 await GetPointBeforeClaim();
                 PlayMoneyAnimation();
             }
