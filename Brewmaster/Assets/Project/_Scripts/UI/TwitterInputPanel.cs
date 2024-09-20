@@ -39,7 +39,7 @@ namespace Game
 		#region Button Events
 		private void OnConfirmBtnClick()
 		{
-			TwitterShareManager.Instance.ConfirmTwitterInput(_twitterInputField.text, (success) => OnTwitterCallbackSuccess(success), (exception) => OnTwitterCallbackException(exception));
+			TwitterShareManager.Instance.ConfirmTwitterInput(_twitterInputField.text, OnTwitterCallbackSuccess, OnTwitterCallbackException);
 		}
 
 		private void OnTwitterCallbackSuccess(string giftTxHash)

@@ -6,27 +6,50 @@ using Newtonsoft.Json;
 using NOOD;
 using UnityEngine;
 using Utils;
+using Debug = Game.DevelopDebug;
 
 namespace Game
 {
     public class TwitterShareManager : MonoBehaviorInstance<TwitterShareManager>
     {
         private Action<string> _onSuccess, _onError;
+        private string _twitterMessage;
+        private bool _isGettingData = false;
 
         void Start()
         {
             Utility.Socket.OnEvent("giftTxHash", this.gameObject.name, nameof(OnTwitterCallbackSuccess), OnTwitterCallbackSuccess);
+            Utility.Socket.OnEvent(SocketEnum.getTwitterMessageCallback.ToString(), this.gameObject.name, nameof(GetTwitterMessageCallback), GetTwitterMessageCallback);
+            GameEvent.Instance.OnClaimSuccess += OnClaimSuccessHandler;
         }
 
-        public void ShareToTwitter()
+        private void OnClaimSuccessHandler()
         {
-            string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { TwitterMessage.GetTwitterMessage() } });
-            json = Utility.Socket.ToSocketJson(json);
-            Debug.Log(json);
+            ActiveShareToXPopup();
+        }
+
+        public void ActiveShareToXPopup()
+        {
+            PopupManager.Instance.ShowYesNoPopup("Share to X", "Share to X to get rewards", () =>
+            {
+                OpenTwitterNewTab();
+                UIManager.Instance.ShowTwitterInputPanel();
+            }, null);
+        }
+
+        public void OpenTwitterNewTab()
+        {
+            _isGettingData = true;
 #if !UNITY_EDITOR
-            JsSocketConnect.EmitEvent(SocketEnum.shareToTwitterRequest.ToString(), json);
+            // Get message on server
+            JsSocketConnect.EmitEvent(SocketEnum.shareToTwitterRequest.ToString());
 #endif
-            UIManager.Instance.ShowTwitterInputPanel();
+        }
+
+        private void GetTwitterMessageCallback(string message)
+        {
+            _twitterMessage = message;
+            _isGettingData = false;
         }
 
         public void ConfirmTwitterInput(string url, Action<string> callbackSuccess, Action<string> callbackError)

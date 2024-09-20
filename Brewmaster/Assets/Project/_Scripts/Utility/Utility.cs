@@ -97,10 +97,10 @@ namespace Game
 					}
 				});
 
-	            socket.On("spawnCustomer", (data) =>
+				socket.On("spawnCustomer", (data) =>
 				{
 					Debug.Log("Receive event spawnCustomer!");
-					if(_actionEventDic.ContainsKey("spawnCustomer"))
+					if (_actionEventDic.ContainsKey("spawnCustomer"))
 					{
 						// Debug.Log("spawnCustomer: " + data);
 						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
@@ -243,14 +243,80 @@ namespace Game
 						_actionEventDic["updateUpgradePrice"].Invoke(useData.ToString());
 					}
 				});
-
+				socket.On("getEntryCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("getEntryCallback"))
+					{
+						Debug.Log("getEntryCallback: " + data);
+						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+						_actionEventDic["getEntryCallback"].Invoke(useData.ToString());
+					}
+				});
+				socket.On("getPlayerPubCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("getPlayerPubCallback"))
+					{
+						_actionEventDic["getPlayerPubCallback"].Invoke(data.GetValue<string>());
+					}
+				});
+				socket.On("updateTreasuryCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("updateTreasuryCallback"))
+					{
+						_actionEventDic["updateTreasuryCallback"].Invoke(data.GetValue<string>());
+					}
+				});
+				socket.On("claimCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("claimCallback"))
+					{
+						_actionEventDic["claimCallback"].Invoke(data.GetValue<string>());
+					}
+				});
+				socket.On("getPointBeforeClaimCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("getPointBeforeClaimCallback"))
+					{
+						_actionEventDic["getPointBeforeClaimCallback"].Invoke(data.GetValue<string>());
+					}
+				});
+				socket.On("updateSeatPositionsCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("updateSeatPositionsCallback"))
+					{
+						Debug.Log("updateSeatPositionsCallback: " + data);
+						_actionEventDic["updateSeatPositionsCallback"].Invoke("");
+					}
+				});
+				socket.On("updateTablePositionCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("updateTablePositionCallback"))
+					{
+						Debug.Log("updateTablePositionsCallback: " + data);
+						_actionEventDic["updateTablePositionCallback"].Invoke("");
+					}
+				});
+				socket.On("getCanUpgradeTableCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("getCanUpgradeTableCallback"))
+					{
+						_actionEventDic["getCanUpgradeTableCallback"].Invoke(data.GetValue<string>());
+					}
+				});
 				socket.Connect();
 			}
+
 #endif
+			public static void Disconnect()
+			{
+#if UNITY_EDITOR
+				socket.Disconnect();
+#endif
+			}
 
 			public static void EmitEvent(string eventName, string jsonData = null)
 			{
-				Debug.Log("EmitEvent: " + eventName);
+				// Debug.Log("EmitEvent: " + eventName);
 				jsonData = ToSocketJson(jsonData);
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -262,10 +328,10 @@ namespace Game
 			}
 			public static void OnEvent(string eventName, string objectName, string methodName, Action<string> action)
 			{
+				// Debug.Log("OnEvent: " + eventName);
 #if UNITY_WEBGL && !UNITY_EDITOR
 				JsSocketConnect.OnEvent(eventName, objectName, methodName);
 #else
-				Debug.Log("OnEvent: " + eventName);
 				if (_actionEventDic.ContainsKey(eventName))
 					_actionEventDic[eventName] = action;
 				else
@@ -297,10 +363,17 @@ namespace Game
 				if (jsonRaw != null)
 				{
 					int startIndex = jsonRaw.IndexOf("[");
-					int length = jsonRaw.Length - startIndex - 1;
+					int endIndex = jsonRaw.LastIndexOf("]") + 1;
+					int length = endIndex - startIndex;
 					jsonRaw = jsonRaw.Substring(startIndex, length);
 				}
 				return jsonRaw;
+			}
+
+			public static string StringToSocketJson(string normalString)
+			{
+				string jsonString = JsonConvert.SerializeObject(new ArrayWrapper() { array = new string[] { normalString } });
+				return ToSocketJson(jsonString);
 			}
 		}
 	}

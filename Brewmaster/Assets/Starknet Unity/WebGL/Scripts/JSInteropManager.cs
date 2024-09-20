@@ -29,6 +29,8 @@ public class JSInteropManager : MonoBehaviour
 
     [DllImport("__Internal")]
     public static extern void SendTransaction(string contractAddress, string entrypoint, string calldata, string callbackObjectName, string callbackMethodName);
+    [DllImport("__Internal")]
+    public static extern void SendTransactionNoData(string contractAddress, string entrypoint, string callbackObjectName, string callbackMethodName);
 
     [DllImport("__Internal")]
     public static extern void CallContract(string contractAddress, string entrypoint, string calldata, string callbackObjectName, string callbackMethodName);

@@ -14,7 +14,6 @@ public class WalletConnect : MonoBehaviour
         yield return new WaitUntil(() => JSInteropManager.IsConnected());
 
         playerAddress = JSInteropManager.GetAccount();
-        Debug.Log("Connected");
         PlayerPrefs.SetString("playerAddress", playerAddress);
         Debug.Log("Connected to wallet: " + playerAddress);
     }
@@ -42,5 +41,11 @@ public class WalletConnect : MonoBehaviour
         {
             JSInteropManager.AskToInstallWallet();
         }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
     }
 }

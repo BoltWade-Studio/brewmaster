@@ -1,28 +1,41 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using DG.Tweening;
 using Newtonsoft.Json;
 using NOOD;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
-using Utils;
 
 namespace Game
 {
 	public class PlayerInfoPanel : MonoBehaviour
 	{
-		[SerializeField] private TextMeshProUGUI _playerAddressText, _ingamePointText, _sahPointText;
+		[SerializeField] private TextMeshProUGUI _playerAddressText;
+		[SerializeField] private TextMeshProUGUI _treasuryText;
+		[SerializeField] private TextMeshProUGUI _pointText;
 		[SerializeField] private Button _claimBtn, _logOutBtn, _shareToTwitterBtn;
 		[SerializeField] private GameObject _blockXImage;
+
+#if UNITY_EDITOR
+		[ContextMenu("Reserialize")]
+		public void Reserialize()
+		{
+			var enumerable = new[] { "Assets/Project/_Prefab/UI/PlayerInfoPanel.prefab" }.AsEnumerable();
+			AssetDatabase.ForceReserializeAssets(enumerable);
+		}
+#endif
 
 		void OnEnable()
 		{
 			_claimBtn.onClick.AddListener(OnClaimBtnClick);
 			_logOutBtn.onClick.AddListener(OnLogOutBtnClick);
 			_shareToTwitterBtn.onClick.AddListener(OnShareToTwitterBtnClick);
-			GameplayManager.Instance.OnEndDay += GameplayManager_OnEndDay;
-			GameplayManager.Instance.OnNextDay += GameplayManager_OnNextDay;
-			ActiveXButton(!ConnectWalletManager.Instance.isAnonymous);
+			GameEvent.Instance.OnEndDay += OnEndDayHandler;
+			GameEvent.Instance.OnNextDay += OnNextDayHandler;
+			ActiveXButton(!ConnectWalletManager.Instance.IsAnonymous);
 		}
 
 		void OnDisable()
@@ -30,28 +43,25 @@ namespace Game
 			_claimBtn.onClick.RemoveListener(OnClaimBtnClick);
 			_logOutBtn.onClick.RemoveListener(OnLogOutBtnClick);
 			_shareToTwitterBtn.onClick.RemoveListener(OnShareToTwitterBtnClick);
-			NoodyCustomCode.UnSubscribeAllEvent<GameplayManager>(this);
 		}
 		void Start()
 		{
 			UpdateUI();
 			_shareToTwitterBtn.interactable = false;
+			GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
 		}
 
-		void Update()
+		private void OnLoadDataSuccessHandler()
 		{
-			if (!_ingamePointText.text.Equals(PlayerData.TotalPoint.ToString()))
-				_ingamePointText.text = PlayerData.TotalPoint.ToString();
-			if (!_playerAddressText.text.Equals(PlayerData.PlayerAddress))
-				_playerAddressText.text = PlayerData.PlayerAddress;
+			UpdateUI();
 		}
 
-		private void GameplayManager_OnEndDay()
+		private void OnEndDayHandler()
 		{
 			_shareToTwitterBtn.interactable = true;
 		}
 
-		private void GameplayManager_OnNextDay()
+		private void OnNextDayHandler()
 		{
 			_shareToTwitterBtn.interactable = false;
 		}
@@ -59,23 +69,31 @@ namespace Game
 		public void UpdateUI()
 		{
 			UpdateClaimBtn();
+			UpdatePoint();
+		}
+
+		private void UpdatePoint()
+		{
+			_treasuryText.text = PlayerData.PlayerTreasury.ToString();
+			_playerAddressText.text = PlayerData.PlayerAddress;
+			_pointText.text = PlayerData.PlayerPoint.ToString();
 		}
 
 		private void UpdateClaimBtn()
 		{
-			_claimBtn.interactable = !ConnectWalletManager.Instance.isAnonymous;
-			_logOutBtn.interactable = !ConnectWalletManager.Instance.isAnonymous;
+			_claimBtn.interactable = !ConnectWalletManager.Instance.IsAnonymous;
+			_logOutBtn.interactable = !ConnectWalletManager.Instance.IsAnonymous;
 		}
 		private void OnLogOutBtnClick()
 		{
 		}
-		private void OnClaimBtnClick()
+		private async void OnClaimBtnClick()
 		{
-			ConnectWalletManager.Instance.Claim();
+			await TransactionManager.Instance.Claim();
 		}
 		private void OnShareToTwitterBtnClick()
 		{
-			TwitterShareManager.Instance.ShareToTwitter();
+			TwitterShareManager.Instance.OpenTwitterNewTab();
 		}
 
 		private void ActiveXButton(bool isActive)

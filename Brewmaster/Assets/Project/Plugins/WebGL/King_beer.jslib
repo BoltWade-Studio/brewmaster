@@ -12,17 +12,12 @@ mergeInto(LibraryManager.library, {
             return;
         }
 
-        var socket = io('http://localhost:5006');
-        // var socket = io('https://brewmaster-socket.boltwade.xyz');
+        // var socket = io('http://localhost:5006');
+        var socket = io('https://brewmaster-socket.boltwade.xyz');
 
         socket.on('connect', () => {
             socket.isReady = true;
             console.log('Socket.IO connected');
-        });
-
-        socket.on('updateBrushPosition', () => {
-            if(this.objectNameDic.updateBrushPosition && this.methodNameDic.updateBrushPosition)
-                SendMessage(this.objectNameDic.updateBrushPosition, this.methodNameDic.updateBrushPosition);
         });
 
         socket.on('updateProof', (proof) => {
@@ -41,9 +36,6 @@ mergeInto(LibraryManager.library, {
         });
 
 		socket.on('twitterRequestCallback', (data) => {
-            // console.log(data);
-            // let dataString = UTF8ToString(data);
-            // let array = JSON.parse(dataString.toString());
 			const encodedText = encodeURIComponent(data);
 			const tweetUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
 
@@ -151,6 +143,70 @@ mergeInto(LibraryManager.library, {
 			if(this.objectNameDic.updateUpgradePrice && this.methodNameDic.updateUpgradePrice)
 				SendMessage(this.objectNameDic.updateUpgradePrice, this.methodNameDic.updateUpgradePrice, dataString);
 		});
+
+        socket.on('getEntryCallback', (data) => {
+            // use this data to call actual transaction
+			if(this.objectNameDic.getEntryCallback && this.methodNameDic.getEntryCallback)
+                SendMessage(this.objectNameDic.getEntryCallback, this.methodNameDic.getEntryCallback, data)
+        });
+
+        socket.on('getPlayerPubCallback', (data) => {
+			if(this.objectNameDic.getPlayerPubCallback && this.methodNameDic.getPlayerPubCallback)
+            {
+                SendMessage(this.objectNameDic.getPlayerPubCallback, this.methodNameDic.getPlayerPubCallback, data)
+            }
+        });
+        socket.on('updateTreasuryCallback', (data) =>
+        {
+			if(this.objectNameDic.updateTreasuryCallback && this.methodNameDic.updateTreasuryCallback)
+            {
+                SendMessage(this.objectNameDic.updateTreasuryCallback, this.methodNameDic.updateTreasuryCallback, data)
+            }
+        });
+
+        socket.on('updateInDayTreasuryCallback', (data) =>
+        {
+			if(this.objectNameDic.updateInDayTreasuryCallback && this.methodNameDic.updateInDayTreasuryCallback)
+			{
+				SendMessage(this.objectNameDic.updateInDayTreasuryCallback, this.methodNameDic.updateInDayTreasuryCallback, data)
+			}
+		});
+
+        socket.on('claimCallback', (data) =>
+        {
+			if(this.objectNameDic.claimCallback && this.methodNameDic.claimCallback)
+            {
+                SendMessage(this.objectNameDic.claimCallback, this.methodNameDic.claimCallback, data)
+            }
+        });
+        socket.on('getPointBeforeClaimCallback', (data) =>
+        {
+			if(this.objectNameDic.getPointBeforeClaimCallback && this.methodNameDic.getPointBeforeClaimCallback)
+            {
+                SendMessage(this.objectNameDic.getPointBeforeClaimCallback, this.methodNameDic.getPointBeforeClaimCallback, data)
+            }
+        });
+        socket.on('getCanUpgradeTableCallback', (data) =>
+        {
+			if(this.objectNameDic.getCanUpgradeTableCallback && this.methodNameDic.getCanUpgradeTableCallback)
+            {
+                SendMessage(this.objectNameDic.getCanUpgradeTableCallback, this.methodNameDic.getCanUpgradeTableCallback, data)
+            }
+        });
+        socket.on('updateTablePositionCallback', (data) =>
+        {
+			if(this.objectNameDic.updateTablePositionCallback && this.methodNameDic.updateTablePositionCallback)
+            {
+                SendMessage(this.objectNameDic.updateTablePositionCallback, this.methodNameDic.updateTablePositionCallback, '')
+            }
+        });
+        socket.on('updateSeatPositionsCallback', (data) =>
+        {
+			if(this.objectNameDic.updateSeatPositionsCallback && this.methodNameDic.updateSeatPositionsCallback)
+            {
+                SendMessage(this.objectNameDic.updateSeatPositionsCallback, this.methodNameDic.updateSeatPositionsCallback, '')
+            }
+        });
 
         window.unitySocket = socket;
     },

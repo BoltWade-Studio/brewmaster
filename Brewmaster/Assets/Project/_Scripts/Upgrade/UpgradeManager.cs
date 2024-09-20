@@ -1,82 +1,80 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using NOOD;
 using UnityEngine;
 
 namespace Game
 {
-    public class UpgradeManager : MonoBehaviorInstance<UpgradeManager>
-    {
-        private List<UpgradeBase> _upgradeBaseList = new List<UpgradeBase>();
-        private bool _showNotiNotEnoughMoney = false;
+	public class UpgradeManager : MonoBehaviorInstance<UpgradeManager>
+	{
+		private List<UpgradeBase> _upgradeBaseList = new List<UpgradeBase>();
+		private bool _showNotiNotEnoughMoney = false;
 
-        private void Start()
-        {
-	        Utility.Socket.OnEvent("upgradeTableCallback", this.gameObject.name, nameof(UpgradeCallback), UpgradeCallback);
-	        Utility.Socket.OnEvent("updateUpgradePrice", this.gameObject.name, nameof(UpdateUpgradePrice), UpdateUpgradePrice);
-	        Utility.Socket.EmitEvent("updateUpgradePrice");
-        }
-
-        private void Update()
-        {
-	        if (_showNotiNotEnoughMoney)
-	        {
-		        NotifyManager.Instance.Show("Do not enough money");
-		        _showNotiNotEnoughMoney = false;
-	        }
-        }
-
-        protected override void ChildAwake()
-        {
-            _upgradeBaseList = new List<UpgradeBase>();
-        }
-
-        public void UpdateUpgradePrice(string data)
-        {
-	        // Debug.Log("UpdateUpgradePrice: " + data);
-
-	        var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
-
-	        foreach (var _upgradeBase in _upgradeBaseList)
-	        {
-		        if (_upgradeBase._table.TableIndex == int.Parse(dict["i"]))
-		        {
-			        // Debug.Log("Found Table to Update Price! " + dict["message"]);
-			        _upgradeBase.Price = int.Parse(dict["message"]);
-			        _upgradeBase.toUpdatePrice = true;
-		        }
-	        }
-        }
-
-        public void UpgradeCallback(string data)
-        {
-	        Debug.Log("UpgradeCallback: " + data);
-
-	        if (data.Contains("fail"))
-	        {
-		        _showNotiNotEnoughMoney = true;
-		        return;
-	        }
-
-	        var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
-
-	        foreach (var _upgradeBase in _upgradeBaseList)
-	        {
-		        if (_upgradeBase._table.TableIndex == int.Parse(dict["tableIndex"]))
-		        {
-			        // Debug.Log("Found Table to Upgrade!");
-			        _upgradeBase.Price = int.Parse(dict["message"]);
-			        _upgradeBase.toUpgrade = true;
-		        }
-	        }
-        }
-
-        public void AddUpgradeBase(UpgradeBase upgradeBase)
+		private void Start()
 		{
-			// Debug.Log("AddUpgradeBase: " + upgradeBase._table.TableIndex);
+			// Utility.Socket.OnEvent(SocketEnum.upgradeTableCallback.ToString(), this.gameObject.name, nameof(UpgradeCallback), UpgradeCallback);
+			Utility.Socket.OnEvent(SocketEnum.updateUpgradePriceCallback.ToString(), this.gameObject.name, nameof(UpdateUpgradePrice), UpdateUpgradePrice);
+
+			GameEvent.Instance.OnStorePhase += OnStorePhaseHandler;
+		}
+
+
+		private void Update()
+		{
+			if (_showNotiNotEnoughMoney)
+			{
+				NotifyManager.Instance.Show("Do not enough money");
+				_showNotiNotEnoughMoney = false;
+			}
+		}
+
+		protected override void ChildAwake()
+		{
+			_upgradeBaseList = new List<UpgradeBase>();
+		}
+
+		private void OnStorePhaseHandler()
+		{
+			Utility.Socket.EmitEvent(SocketEnum.updateUpgradePrice.ToString());
+		}
+
+		public void UpdateUpgradePrice(string data)
+		{
+			Debug.Log("UpdatePriceCallback: " + data);
+			var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
+
+			foreach (var _upgradeBase in _upgradeBaseList)
+			{
+				if (_upgradeBase._table.TableIndex == int.Parse(dict["i"]))
+				{
+					_upgradeBase.Price = int.Parse(dict["message"]);
+					_upgradeBase.UpdatePrice();
+				}
+			}
+		}
+
+		// public async void UpgradeCallback(string data)
+		// {
+		// 	await UniTask.SwitchToMainThread();
+
+		// 	var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
+
+		// 	foreach (var _upgradeBase in _upgradeBaseList)
+		// 	{
+		// 		if (_upgradeBase._table.TableIndex == int.Parse(dict["tableIndex"]))
+		// 		{
+		// 			_upgradeBase.Price = int.Parse(dict["message"]);
+		// 			_upgradeBase.Upgrade();
+		// 		}
+		// 	}
+		// }
+
+		public void AddUpgradeBase(UpgradeBase upgradeBase)
+		{
 			_upgradeBaseList.Add(upgradeBase);
 		}
-    }
+	}
 
 }
