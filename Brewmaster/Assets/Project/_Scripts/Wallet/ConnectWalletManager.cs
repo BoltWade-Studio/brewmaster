@@ -94,7 +94,7 @@ namespace Game
 
 		private async void WalletConnectAsync(Action walletAction)
 		{
-			LoadingUIManager.Instance.Show();
+			LoadingUIManager.Instance.Show("Getting player data");
 			string playerAddress;
 			if (Application.isEditor)
 			{
