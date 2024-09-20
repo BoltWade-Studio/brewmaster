@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
+using EasyTransition;
 using Newtonsoft.Json;
 using NOOD;
 using NOOD.Sound;
@@ -39,6 +40,7 @@ namespace Game
             _shareToTwitterBtn.OnClick += OnShareToTwitterBtnPress;
             _claimBtn.OnClick += OnClaimBtnPress;
             _nextDayBtn.OnClick += OnNextDayBtnPress;
+            _mainMenuBtn.OnClick += UIManager.Instance.OnMainMenuClickHandler;
             _shopBtn.OnClick += OnShopBtnPress;
 
             this.gameObject.SetActive(false);
@@ -77,6 +79,7 @@ namespace Game
                 GameEvent.Instance.OnStorePhase?.Invoke();
             }
         }
+
         private void OnNextDayBtnPress()
         {
             if (_isClaimed == false)
@@ -105,8 +108,9 @@ namespace Game
             await DataSaveLoadManager.Instance.LoadData();
             NextDay();
         }
-        private void NextDay()
+        private async void NextDay()
         {
+	        await DataSaveLoadManager.Instance.LoadData();
             Hide();
             GameEvent.Instance.OnNextDay?.Invoke();
         }

@@ -50,6 +50,7 @@ namespace Game
 			_playerInfo.OnClick += OnPlayerInfoClickHandler;
 			_pauseGameBtn.OnClick += OnPauseButtonClickHandler;
 			_pResumeBtn.OnClick += OnResumeClickHandler;
+			_pToMainMenuBtn.OnClick += OnMainMenuClickHandler;
 			_storeConfirmBtn.OnClick += () =>
 			{
 				// GameEvent.Instance.OnNextDay?.Invoke();
@@ -219,7 +220,7 @@ namespace Game
 		{
 			GameplayManager.Instance.OnPausePressed?.Invoke();
 		}
-		private void OnMainMenuClickHandler()
+		public void OnMainMenuClickHandler()
 		{
 			TransitionManager.Instance().Transition("MainMenu", _transitionSetting, 0.3f);
 		}
