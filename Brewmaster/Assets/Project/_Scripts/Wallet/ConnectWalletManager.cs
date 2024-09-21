@@ -94,6 +94,7 @@ namespace Game
 		private async void WalletConnectAsync(Action walletAction)
 		{
 			LoadingUIManager.Instance.Show("Getting player data");
+			Debug.Log("WalletConnectAsync: IsConnected: " + JSInteropManager.IsConnected());
 			string playerAddress;
 			if (Application.isEditor)
 			{
@@ -112,7 +113,13 @@ namespace Game
 			}
 
 			Utility.Socket.EmitEvent(SocketEnum.updatePlayerAddress.ToString(), playerAddress);
+			GameEvent.Instance.OnLoadDataSuccess += OnLoadDatasSuccessHandler;
 			await DataSaveLoadManager.Instance.LoadData();
+			GameEvent.Instance.OnLoadDataSuccess -= OnLoadDatasSuccessHandler;
+		}
+
+		private void OnLoadDatasSuccessHandler()
+		{
 			_connectWalletUI.Close();
 			LoadingUIManager.Instance.Hide();
 			_onSuccess?.Invoke();

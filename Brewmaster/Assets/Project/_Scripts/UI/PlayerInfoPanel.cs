@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
+using EasyTransition;
 using Newtonsoft.Json;
 using NOOD;
 using TMPro;
@@ -86,6 +87,11 @@ namespace Game
 		}
 		private void OnLogOutBtnClick()
 		{
+			PopupManager.Instance.ShowYesNoPopup("Log out", "Are you sure you want to log out?", () =>
+			{
+				Utility.Socket.OnEvent(SocketEnum.logoutCallback.ToString(), this.gameObject.name, nameof(LogOutCallback), LogOutCallback);
+				Utility.Socket.EmitEvent(SocketEnum.logout.ToString());
+			}, null);
 		}
 		private async void OnClaimBtnClick()
 		{
@@ -96,6 +102,12 @@ namespace Game
 			TwitterShareManager.Instance.OpenTwitterNewTab();
 		}
 
+		private void LogOutCallback(string data)
+		{
+			if (Application.isEditor == false)
+				JSInteropManager.DisconnectWallet();
+			TransitionManager.Instance().Transition("MainMenu", UIManager.Instance.TransitionSetting, 0);
+		}
 		private void ActiveXButton(bool isActive)
 		{
 			_shareToTwitterBtn.interactable = isActive;

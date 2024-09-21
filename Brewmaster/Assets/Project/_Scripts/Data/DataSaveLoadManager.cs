@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
 using Game;
 using Newtonsoft.Json;
@@ -51,15 +52,7 @@ namespace Game
 			// Create new pub if scale is 0
 			if (PlayerData.PlayerScale.Count() == 0)
 			{
-				if (Application.isEditor == false)
-				{
-					// Create new pub with sendTransaction
-					await TransactionManager.Instance.CreatePub();
-					LoadingUIManager.Instance.Show("Updating contract");
-					await UniTask.WaitForSeconds(30f);
-					LoadingUIManager.Instance.ChangeLoadingMessage("Getting data");
-					await LoadData();
-				}
+				await CreateNewPub();
 			}
 			else
 			{
@@ -72,6 +65,27 @@ namespace Game
 				}
 
 				GameEvent.Instance.OnLoadDataSuccess?.Invoke();
+			}
+		}
+
+		private async UniTask CreateNewPub()
+		{
+			bool isCreatedPub = await TransactionManager.Instance.CreatePub();
+			if (isCreatedPub == true)
+			{
+				LoadingUIManager.Instance.Show("Wait for contract update");
+				await UniTask.WaitForSeconds(30f);
+				LoadingUIManager.Instance.ChangeLoadingMessage("Getting player data");
+				await LoadData();
+			}
+			else
+			{
+				LoadingUIManager.Instance.Hide();
+				string message = "The user aborted the action, please create a pub to continue playing the game";
+				PopupManager.Instance.ShowYesNoPopup("Create new pub", message, async () =>
+				{
+					await CreateNewPub();
+				}, null);
 			}
 		}
 	}

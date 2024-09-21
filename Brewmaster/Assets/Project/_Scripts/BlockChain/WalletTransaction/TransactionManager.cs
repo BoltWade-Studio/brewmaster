@@ -100,7 +100,7 @@ namespace Game
         #endregion
 
         #region CreatePlayerPub
-        public async UniTask CreatePub()
+        public async UniTask<bool> CreatePub()
         {
             // SendContract to JSInteropManager
             _sending = true;
@@ -109,11 +109,36 @@ namespace Game
             Debug.Log("SendContract: " + contractAddress + " Entry: " + createPubEntry);
             string json = JsonConvert.SerializeObject(new ArrayWrapper
             { array = new string[] { } });
+
+            LoadingUIManager.Instance.Show("Waiting for create new pub");
+
             JSInteropManager.SendTransaction(contractAddress, createPubEntry, json, this.gameObject.name, nameof(CreatePubCallback));
+
             await UniTask.WaitUntil(() => _sending == false);
+            return _transactionJsonDataDic[TransactionID.CREATE_PUB].Equals("true");
         }
         private void CreatePubCallback(string data)
         {
+            Debug.Log("Create pub callback data: " + data);
+            string result = "false";
+            if (data.ToLower().Contains("abort"))
+            {
+                // User abort
+                result = "false";
+            }
+            else
+            {
+                // User created pub
+                result = "true";
+            }
+            if (_transactionJsonDataDic.ContainsKey(TransactionID.CREATE_PUB))
+            {
+                _transactionJsonDataDic[TransactionID.CREATE_PUB] = result;
+            }
+            else
+            {
+                _transactionJsonDataDic.Add(TransactionID.CREATE_PUB, result);
+            }
             _sending = false;
         }
         #endregion

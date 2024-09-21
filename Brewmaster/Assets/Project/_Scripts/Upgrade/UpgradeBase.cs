@@ -101,8 +101,6 @@ namespace Game
                     if (Application.isEditor == false)
                     {
                         result = await TransactionManager.Instance.AddStool(_table.TableIndex);
-                        LoadingUIManager.Instance.ChangeLoadingMessage("Wait for updating transaction");
-                        await UniTask.WaitForSeconds(30f);
                     }
                     if (result == false)
                     {
@@ -111,6 +109,8 @@ namespace Game
                     }
                     else
                     {
+                        LoadingUIManager.Instance.ChangeLoadingMessage("Wait for updating transaction");
+                        await UniTask.WaitForSeconds(30f);
                         Upgrade();
                         await DataSaveLoadManager.Instance.LoadData();
                     }

@@ -24,6 +24,10 @@ mergeInto(LibraryManager.library,{
 			try
 			{
 				await window.starknet_argentX.enable();
+				if(window.starknet.isConnected) 
+				{
+					window.walletConnect = true;
+				}
 			}
 			catch(e)
 			{
@@ -39,6 +43,10 @@ mergeInto(LibraryManager.library,{
 			try
 			{
 				await window.starknet_braavos.enable();
+				if(window.starknet.isConnected) 
+				{
+					window.walletConnect = true;
+				}
 			}
 			catch(e)
 			{
@@ -52,9 +60,14 @@ mergeInto(LibraryManager.library,{
 		}
 	},
 
+	DisconnectWallet: async function()
+	{
+		window.walletConnect = false;
+	},
+
 	IsConnected: function()
 	{
-		return window.starknet && window.starknet.isConnected;
+		return window.starknet && window.starknet.isConnected && window.walletConnect == true;
 	},
 
 	GetAccount: function()
