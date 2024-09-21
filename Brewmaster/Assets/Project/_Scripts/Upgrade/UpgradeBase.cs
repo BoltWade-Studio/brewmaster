@@ -76,7 +76,7 @@ namespace Game
             PerformUpgrade();
         }
 
-        private async void PerformUpgrade()
+        private void PerformUpgrade()
         {
             string json = Utility.Socket.StringToSocketJson(_table.TableIndex.ToString());
             Debug.Log("Upgrading Table " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
@@ -84,22 +84,6 @@ namespace Game
             LoadingUIManager.Instance.Show("Checking condition");
             Utility.Socket.OnEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
             Utility.Socket.EmitEvent("getCanUpgradeTable", json);
-            await UniTask.WaitUntil(() => _isGettingData == false);
-            Debug.Log("_isGettingData: " + _isGettingData);
-            LoadingUIManager.Instance.Hide();
-            if (_canUpgrade)
-            {
-                bool result = await TransactionManager.Instance.AddStool(_table.TableIndex);
-                if (result)
-                {
-                    LoadingUIManager.Instance.Show("Upgrading");
-                    Utility.Socket.EmitEvent(SocketEnum.upgradeTable.ToString(), json);
-                }
-            }
-            else
-            {
-                NotifyManager.Instance.Show("Don't have enough money");
-            }
         }
 
         private async void CanUpgradeTableCallback(string data)
@@ -107,7 +91,8 @@ namespace Game
             await UniTask.SwitchToMainThread();
             try
             {
-                _canUpgrade = data.Equals("True");
+                _canUpgrade = data.ToLower().Equals("true");
+                Debug.Log("CanUpgradeTableCallback: " + _canUpgrade);
 
                 if (_canUpgrade)
                 {

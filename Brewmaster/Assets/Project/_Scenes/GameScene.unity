@@ -3100,6 +3100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _loadingUIPref: {fileID: 3256142594105389554, guid: 424ac87c91998476b91378f3ce422168,
     type: 3}
+  _uiHolder: {fileID: 0}
 --- !u!1 &638020336
 GameObject:
   m_ObjectHideFlags: 0
@@ -5636,10 +5637,10 @@ MonoBehaviour:
   _pDayText: {fileID: 578070061}
   _pResumeBtn: {fileID: 1604615871}
   _pToMainMenuBtn: {fileID: 94347925}
-  _transitionSetting: {fileID: 11400000, guid: 2eec88d4ca6df24419aab2fd6b04c543, type: 2}
   _storeMenu: {fileID: 973974228}
   _storeConfirmBtn: {fileID: 1928675518}
   _twitterInputPanel: {fileID: 1124732205}
+  TransitionSetting: {fileID: 11400000, guid: 057babd6f13132c449650d99e3c4e99c, type: 2}
 --- !u!1 &1075749211
 GameObject:
   m_ObjectHideFlags: 0
