@@ -207,6 +207,13 @@ mergeInto(LibraryManager.library, {
                 SendMessage(this.objectNameDic.updateSeatPositionsCallback, this.methodNameDic.updateSeatPositionsCallback, '')
             }
         });
+        socket.on('logoutCallback', (data) =>
+        {
+			if(this.objectNameDic.logoutCallback && this.methodNameDic.logoutCallback)
+            {
+                SendMessage(this.objectNameDic.logoutCallback, this.methodNameDic.logoutCallback, '')
+            }
+        });
 
         window.unitySocket = socket;
     },

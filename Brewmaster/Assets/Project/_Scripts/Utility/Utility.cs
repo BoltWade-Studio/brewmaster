@@ -303,6 +303,13 @@ namespace Game
 						_actionEventDic["getCanUpgradeTableCallback"].Invoke(data.GetValue<string>());
 					}
 				});
+				socket.On("logoutCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("logoutCallback"))
+					{
+						_actionEventDic["logoutCallback"].Invoke(data.GetValue<string>());
+					}
+				});
 				socket.Connect();
 			}
 

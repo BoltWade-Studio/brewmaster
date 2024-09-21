@@ -2,6 +2,8 @@ public enum SocketEnum
 {
 	initGame,
 	anonymousLogin,
+	logout,
+	logoutCallback,
 
 	#region Update enum
 	updateProof,

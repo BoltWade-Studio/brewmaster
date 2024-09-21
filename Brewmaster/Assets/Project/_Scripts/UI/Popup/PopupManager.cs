@@ -9,11 +9,12 @@ namespace Game
     public class PopupManager : MonoBehaviorInstance<PopupManager>
     {
         [SerializeField] private YesNoPopup _yesNoPopupPref;
-        private Transform _uiHolder;
+        [SerializeField] private Transform _uiHolder;
 
         void Start()
         {
-            _uiHolder = UIManager.Instance.transform;
+            if (_uiHolder == null)
+                _uiHolder = UIManager.Instance.transform;
         }
 
         public void ShowYesNoPopup(string popupName, string message, Action yesAction, Action noAction)
