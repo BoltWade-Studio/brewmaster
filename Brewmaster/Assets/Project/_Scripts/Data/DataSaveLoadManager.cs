@@ -58,20 +58,21 @@ namespace Game
 					LoadingUIManager.Instance.Show("Updating contract");
 					await UniTask.WaitForSeconds(30f);
 					LoadingUIManager.Instance.ChangeLoadingMessage("Getting data");
-					jsonData = await TransactionManager.Instance.GetPlayerPub();
-					PlayerData.PlayerDataClass = JsonConvert.DeserializeObject<PlayerDataClass>(jsonData);
-					LoadingUIManager.Instance.Hide();
+					await LoadData();
 				}
 			}
-
-			// Play game
-			TableData = new TableData();
-			for (int i = 0; i < PlayerData.PlayerScale.Count(); i++)
+			else
 			{
-				TableData.SeatNumberList.Add(PlayerData.PlayerScale[i].Stools);
-			}
+				// Play game
+				LoadingUIManager.Instance.Hide();
+				TableData = new TableData();
+				for (int i = 0; i < PlayerData.PlayerScale.Count(); i++)
+				{
+					TableData.SeatNumberList.Add(PlayerData.PlayerScale[i].Stools);
+				}
 
-			GameEvent.Instance.OnLoadDataSuccess?.Invoke();
+				GameEvent.Instance.OnLoadDataSuccess?.Invoke();
+			}
 		}
 	}
 }
