@@ -145,6 +145,7 @@ namespace Game
 		private void OnNextDayHandler()
 		{
 			_day += 1;
+			UIManager.Instance.UpdateDayText();
 			ResetTimeScale();
 			ResetTime();
 		}

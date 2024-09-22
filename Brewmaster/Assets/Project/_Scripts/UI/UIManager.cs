@@ -85,7 +85,6 @@ namespace Game
 			GameEvent.Instance.OnEndDay += OnEndDayHandler;
 			GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
 			GameEvent.Instance.OnStorePhase += OnStorePaseHandler;
-			GameEvent.Instance.OnNextDay += UpdateDayText;
 		}
 
 
