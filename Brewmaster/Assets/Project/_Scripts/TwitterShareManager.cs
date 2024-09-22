@@ -15,6 +15,7 @@ namespace Game
         private Action<string> _onSuccess, _onError;
         private string _twitterMessage;
         private bool _isGettingData = false;
+        private bool _isShowingPopup = false;
 
         void Start()
         {
@@ -30,11 +31,14 @@ namespace Game
 
         public void ActiveShareToXPopup()
         {
+	        if (_isShowingPopup) return;
+	        _isShowingPopup = true;
             PopupManager.Instance.ShowYesNoPopup("Share to X", "Share to X to get rewards", () =>
             {
+	            _isShowingPopup = false;
                 OpenTwitterNewTab();
                 UIManager.Instance.ShowTwitterInputPanel();
-            }, null);
+            }, (() => _isShowingPopup = false));
         }
 
         public void OpenTwitterNewTab()
