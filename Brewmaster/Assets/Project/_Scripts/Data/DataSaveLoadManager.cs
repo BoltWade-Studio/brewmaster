@@ -20,7 +20,7 @@ namespace Game
 		protected override void ChildAwake()
 		{
 			base.ChildAwake();
-			Day = 0;
+			Day = 1;
 		}
 
 		void Start()
