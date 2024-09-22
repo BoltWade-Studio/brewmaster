@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using NOOD;
 using TMPro;
 using UnityEngine;
@@ -84,6 +85,7 @@ namespace Game
 			GameEvent.Instance.OnEndDay += OnEndDayHandler;
 			GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
 			GameEvent.Instance.OnStorePhase += OnStorePaseHandler;
+			GameEvent.Instance.OnNextDay += UpdateDayText;
 		}
 
 
@@ -174,6 +176,7 @@ namespace Game
 		}
 		public void OnEndDayHandler()
 		{
+			Debug.Log("UIManager: OnEndDayHandler");
 			_endDayPanel.Show(true);
 		}
 
@@ -184,8 +187,11 @@ namespace Game
 		#endregion
 
 		#region Store Menu
-		private void ShowStoreMenu()
+		private async void ShowStoreMenu()
 		{
+			Utility.Socket.EmitEvent(SocketEnum.getPlayerPub.ToString());
+			LoadingUIManager.Instance.ChangeLoadingMessage("Getting player money");
+			await UniTask.WaitForSeconds(1f);
 			_storeMenu.SetActive(true);
 		}
 		private void HideStoreMenu()
