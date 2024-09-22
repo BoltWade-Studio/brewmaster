@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using EasyTransition;
 using Newtonsoft.Json;
@@ -50,6 +51,7 @@ namespace Game
 			UpdateUI();
 			_shareToTwitterBtn.interactable = false;
 			GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
+			Utility.Socket.OnEvent(SocketEnum.logoutCallback.ToString(), this.gameObject.name, nameof(LogOutCallback), LogOutCallback);
 		}
 
 		private void OnLoadDataSuccessHandler()
@@ -57,13 +59,17 @@ namespace Game
 			UpdateUI();
 		}
 
-		private void OnEndDayHandler()
+		private async void OnEndDayHandler()
 		{
+			await UniTask.SwitchToMainThread();
+			Debug.Log("PlayerInfoPanel: OnEndDayHandler");
 			_shareToTwitterBtn.interactable = true;
+			Debug.Log("PlayerInfoPanel: OnEndDayHandler Done");
 		}
 
-		private void OnNextDayHandler()
+		private async void OnNextDayHandler()
 		{
+			await UniTask.SwitchToMainThread();
 			_shareToTwitterBtn.interactable = false;
 		}
 
@@ -89,7 +95,6 @@ namespace Game
 		{
 			PopupManager.Instance.ShowYesNoPopup("Log out", "Are you sure you want to log out?", () =>
 			{
-				Utility.Socket.OnEvent(SocketEnum.logoutCallback.ToString(), this.gameObject.name, nameof(LogOutCallback), LogOutCallback);
 				Utility.Socket.EmitEvent(SocketEnum.logout.ToString());
 			}, null);
 		}
@@ -102,8 +107,9 @@ namespace Game
 			TwitterShareManager.Instance.OpenTwitterNewTab();
 		}
 
-		private void LogOutCallback(string data)
+		private async void LogOutCallback(string data)
 		{
+			await UniTask.SwitchToMainThread();
 			if (Application.isEditor == false)
 				JSInteropManager.DisconnectWallet();
 			TransitionManager.Instance().Transition("MainMenu", UIManager.Instance.TransitionSetting, 0);
