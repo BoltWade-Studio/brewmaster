@@ -42,6 +42,8 @@ PlayerSettings:
   m_SplashScreenLogos:
   - logo: {fileID: 21300000, guid: 42f03ae85105d41aa98d038e0d838801, type: 3}
     duration: 3
+  - logo: {fileID: 21300000, guid: 1e359698ffd2743619b61d169784d4dd, type: 3}
+    duration: 3
   - logo: {fileID: 10404, guid: 0000000000000000f000000000000000, type: 0}
     duration: 3
   m_VirtualRealitySplashScreen: {fileID: 2800000, guid: b2594b703810948bcb4f8f7c5da53b24,
@@ -788,7 +790,7 @@ PlayerSettings:
   blurSplashScreenBackground: 1
   spritePackerPolicy: 
   webGLMemorySize: 32
-  webGLExceptionSupport: 2
+  webGLExceptionSupport: 0
   webGLNameFilesAsHashes: 0
   webGLShowDiagnostics: 0
   webGLDataCaching: 1
@@ -803,12 +805,12 @@ PlayerSettings:
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
   webGLDecompressionFallback: 0
-  webGLInitialMemorySize: 32
+  webGLInitialMemorySize: 256
   webGLMaximumMemorySize: 2048
   webGLMemoryGrowthMode: 2
   webGLMemoryLinearGrowthStep: 16
-  webGLMemoryGeometricGrowthStep: 0.2
-  webGLMemoryGeometricGrowthCap: 96
+  webGLMemoryGeometricGrowthStep: 0.5
+  webGLMemoryGeometricGrowthCap: 512
   webGLPowerPreference: 2
   scriptingDefineSymbols:
     Android: DOTWEEN
