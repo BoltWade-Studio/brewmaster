@@ -59,18 +59,23 @@ namespace Game
 			UpdateUI();
 		}
 
-		private async void OnEndDayHandler()
+		private void OnEndDayHandler()
 		{
-			await UniTask.SwitchToMainThread();
-			Debug.Log("PlayerInfoPanel: OnEndDayHandler");
-			_shareToTwitterBtn.interactable = true;
-			Debug.Log("PlayerInfoPanel: OnEndDayHandler Done");
+			// await UniTask.SwitchToMainThread();
+			// Debug.Log("PlayerInfoPanel: OnEndDayHandler");
+			// if (_shareToTwitterBtn)
+			// 	_shareToTwitterBtn.interactable = true;
+			// else
+			// {
+			// 	Debug.LogError("PlayerInfoPanel: OnEndDayHandler _shareToTwitterBtn is null");
+			// }
+			// Debug.Log("PlayerInfoPanel: OnEndDayHandler Done");
 		}
 
-		private async void OnNextDayHandler()
+		private void OnNextDayHandler()
 		{
-			await UniTask.SwitchToMainThread();
-			_shareToTwitterBtn.interactable = false;
+			// await UniTask.SwitchToMainThread();
+			// _shareToTwitterBtn.interactable = false;
 		}
 
 		public void UpdateUI()
@@ -109,6 +114,7 @@ namespace Game
 
 		private async void LogOutCallback(string data)
 		{
+			Debug.Log("LogOutCallback: " + data);
 			await UniTask.SwitchToMainThread();
 			if (Application.isEditor == false)
 				JSInteropManager.DisconnectWallet();
