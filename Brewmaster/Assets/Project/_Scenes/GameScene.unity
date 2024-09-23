@@ -8149,6 +8149,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _yesNoPopupPref: {fileID: 4328969311755912959, guid: 3f5ed71d7347a4ac1b0fc1a2e4962ae7,
     type: 3}
+  _uiHolder: {fileID: 0}
 --- !u!1 &1591954821
 GameObject:
   m_ObjectHideFlags: 0
@@ -11350,7 +11351,7 @@ PrefabInstance:
     - target: {fileID: 7554995134948519437, guid: 7884ee73157777c419b3c1c1d25a62b1,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 505.3
+      value: 410.9
       objectReference: {fileID: 0}
     - target: {fileID: 7554995134948519437, guid: 7884ee73157777c419b3c1c1d25a62b1,
         type: 3}
