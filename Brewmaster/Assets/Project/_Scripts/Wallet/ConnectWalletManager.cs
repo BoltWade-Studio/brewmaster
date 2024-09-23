@@ -93,7 +93,6 @@ namespace Game
 
 		private async void WalletConnectAsync(Action walletAction)
 		{
-			LoadingUIManager.Instance.Show("Getting player data");
 			Debug.Log("WalletConnectAsync: IsConnected: " + JSInteropManager.IsConnected());
 			string playerAddress;
 			if (Application.isEditor)
@@ -104,9 +103,11 @@ namespace Game
 			{
 				if (!JSInteropManager.IsWalletAvailable())
 				{
+					LoadingUIManager.Instance.Show("Please install wallet");
 					JSInteropManager.AskToInstallWallet();
 					await UniTask.WaitUntil(() => JSInteropManager.IsWalletAvailable());
 				}
+				LoadingUIManager.Instance.Show("Getting player data");
 				walletAction?.Invoke();
 				await UniTask.WaitUntil(() => JSInteropManager.IsConnected());
 				playerAddress = Utility.Socket.StringToSocketJson(JSInteropManager.GetAccount());
