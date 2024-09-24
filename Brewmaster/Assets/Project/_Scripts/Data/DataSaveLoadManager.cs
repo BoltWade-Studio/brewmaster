@@ -44,39 +44,53 @@ namespace Game
 		/// <returns></returns>
 		public async UniTask LoadData()
 		{
-			string jsonData = await TransactionManager.Instance.GetPlayerPub();
-
-			Debug.Log("LoadData: " + jsonData);
-			PlayerData.PlayerDataClass = JsonConvert.DeserializeObject<PlayerDataClass>(jsonData);
+			await GetDataAsync();
 
 			// Create new pub if scale is 0
 			if (PlayerData.PlayerScale.Count() == 0)
 			{
-				await CreateNewPub();
+				bool isCreated = await CreateNewPub();
+				if (isCreated)
+				{
+					LoadingUIManager.Instance.ChangeLoadingMessage("Getting player data");
+					await GetDataAsync();
+					PlayGame();
+				}
 			}
 			else
 			{
-				// Play game
-				LoadingUIManager.Instance.Hide();
-				TableData = new TableData();
-				for (int i = 0; i < PlayerData.PlayerScale.Count(); i++)
-				{
-					TableData.SeatNumberList.Add(PlayerData.PlayerScale[i].Stools);
-				}
-
-				GameEvent.Instance.OnLoadDataSuccess?.Invoke();
+				PlayGame();
 			}
 		}
 
-		private async UniTask CreateNewPub()
+		private void PlayGame()
+		{
+			// Play game
+			LoadingUIManager.Instance.Hide();
+			TableData = new TableData();
+			for (int i = 0; i < PlayerData.PlayerScale.Count(); i++)
+			{
+				TableData.SeatNumberList.Add(PlayerData.PlayerScale[i].Stools);
+			}
+
+			GameEvent.Instance.OnLoadDataSuccess?.Invoke();
+		}
+
+		private async UniTask GetDataAsync()
+		{
+			string jsonData = await TransactionManager.Instance.GetPlayerPub();
+
+			Debug.Log("LoadData: " + jsonData);
+			PlayerData.PlayerDataClass = JsonConvert.DeserializeObject<PlayerDataClass>(jsonData);
+		}
+
+		private async UniTask<bool> CreateNewPub()
 		{
 			bool isCreatedPub = await TransactionManager.Instance.CreatePub();
 			if (isCreatedPub == true)
 			{
 				LoadingUIManager.Instance.Show("Wait for contract update");
 				await UniTask.WaitForSeconds(30f);
-				LoadingUIManager.Instance.ChangeLoadingMessage("Getting player data");
-				await LoadData();
 			}
 			else
 			{
@@ -87,6 +101,7 @@ namespace Game
 					await CreateNewPub();
 				}, null);
 			}
+			return isCreatedPub;
 		}
 	}
 }

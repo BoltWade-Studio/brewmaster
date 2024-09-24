@@ -33,8 +33,10 @@ namespace Game
         }
         void OnDestroy()
         {
-            NoodyCustomCode.UnSubscribeAllEvent(_customer, this);
-            NoodyCustomCode.UnSubscribeFromStatic(typeof(TimeManager), this);
+            _customer.OnCustomerEnterSeat -= SitDown;
+            _customer.OnCustomerReturn -= Move;
+            TimeManager.OnTimePause -= PauseAnimation;
+            TimeManager.OnTimeResume -= ResumeAnimation;
         }
 
         private void GetRandomCloth()
@@ -63,16 +65,16 @@ namespace Game
         {
             _anim.speed = 1;
         }
-        
+
         private void SitDown()
         {
-            if(_moveUpdater)
+            if (_moveUpdater)
             {
                 _moveUpdater.Stop();
             }
             _sitDownUpdater = NoodyCustomCode.StartUpdater(_anim, () =>
             {
-                if(_sitStage < 1)
+                if (_sitStage < 1)
                 {
                     _sitStage += Time.deltaTime * _sitDownSpeed;
                     _anim.SetFloat("SitStage", _sitStage);
@@ -84,13 +86,13 @@ namespace Game
         }
         private void Move()
         {
-            if(_sitDownUpdater)
+            if (_sitDownUpdater)
             {
                 _sitDownUpdater.Stop();
             }
             _moveUpdater = NoodyCustomCode.StartUpdater(_anim, () =>
             {
-                if(_sitStage > 0)
+                if (_sitStage > 0)
                 {
                     _sitStage -= Time.deltaTime * _sitDownSpeed;
                     _anim.SetFloat("SitStage", _sitStage);

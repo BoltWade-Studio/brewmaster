@@ -53,7 +53,9 @@ namespace Game
         protected void OnDisable()
         {
             _upgradeUI.OnUpgradeButtonClick -= OnUpgradeButtonClickHandler;
-            NoodyCustomCode.UnSubscribeAllEvent(GameEvent.Instance, this);
+            GameEvent.Instance.OnNextDay -= HideUI;
+            GameEvent.Instance.OnStorePhase -= OnStorePhraseHandler;
+            GameEvent.Instance.OnStorePhase -= OnStorePhaseHandler;
             ChildOnDisable();
         }
         protected virtual void ChildOnDisable() { }

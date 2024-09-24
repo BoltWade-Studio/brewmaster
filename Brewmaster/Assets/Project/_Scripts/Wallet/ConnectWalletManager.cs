@@ -93,7 +93,7 @@ namespace Game
 
 		private async void WalletConnectAsync(Action walletAction)
 		{
-			Debug.Log("WalletConnectAsync: IsConnected: " + JSInteropManager.IsConnected());
+			// Debug.Log("WalletConnectAsync: IsConnected: " + JSInteropManager.IsConnected());
 			string playerAddress;
 			if (Application.isEditor)
 			{

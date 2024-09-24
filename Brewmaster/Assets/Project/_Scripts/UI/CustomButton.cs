@@ -44,7 +44,8 @@ namespace Game
         }
         private void OnDisable()
         {
-            NoodyCustomCode.UnSubscribeFromStatic(typeof(StringLocalization), this);
+            StringLocalization.OnLocalizationChange -= OnLocalizationChangeHandler;
+            // NoodyCustomCode.UnSubscribeFromStatic(typeof(StringLocalization), this);
             this.transform.DOKill();
         }
 

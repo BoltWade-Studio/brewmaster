@@ -6,7 +6,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using TMPro;
-using ImpossibleOdds;
 using System.Linq;
 using System.Resources;
 using System.Runtime.CompilerServices;
@@ -110,7 +109,7 @@ namespace NOOD
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction);
-            if(hit.collider != null)
+            if (hit.collider != null)
             {
                 return hit.collider.gameObject;
             }
@@ -466,7 +465,7 @@ namespace NOOD
             {
                 if (Mathf.Abs(canvasGroup.alpha - endValue) > 0.01f)
                 {
-                    if(canvasGroup.alpha < endValue)
+                    if (canvasGroup.alpha < endValue)
                         canvasGroup.alpha += Time.deltaTime * speed;
                     if (canvasGroup.alpha > endValue)
                         canvasGroup.alpha -= Time.deltaTime * speed;
@@ -475,7 +474,7 @@ namespace NOOD
                 return false;
             });
         }
-        
+
         //----------------------------//
         /// <summary>
         /// reduce alpha to 0 over Time.deltaTime
@@ -517,7 +516,7 @@ namespace NOOD
                     return true;
                 }
                 return false;
-            }, "",pauseTimePerLoop, -1);
+            }, "", pauseTimePerLoop, -1);
         }
         //----------------------------//
         /// <summary>
@@ -555,12 +554,12 @@ namespace NOOD
                 Color color = image.color;
                 color.a += Time.deltaTime;
                 image.color = color;
-                if(image.color.a >= maxValue)
+                if (image.color.a >= maxValue)
                 {
                     return true;
                 }
                 return false;
-            },"", pauseTimePerLoop, -1);
+            }, "", pauseTimePerLoop, -1);
         }
         //----------------------------//
         /// <summary>
@@ -586,7 +585,7 @@ namespace NOOD
         /// <param name="textMeshProUGUI"></param>
         /// <param name="endValue"></param>
         /// <param name="pauseTimePerLoop">Time between loop</param>
-        public static void FadeOutTextMeshUGUI(TextMeshProUGUI textMeshProUGUI, float endValue,float pauseTimePerLoop)
+        public static void FadeOutTextMeshUGUI(TextMeshProUGUI textMeshProUGUI, float endValue, float pauseTimePerLoop)
         {
             GameObject fadeOutObj = new GameObject("FadeOutObj");
             CoroutineScript coroutineScript = fadeOutObj.AddComponent<CoroutineScript>();
@@ -596,7 +595,7 @@ namespace NOOD
                 Color color = textMeshProUGUI.color;
                 color.a -= Time.deltaTime;
                 textMeshProUGUI.color = color;
-                if(textMeshProUGUI.color.a <= endValue)
+                if (textMeshProUGUI.color.a <= endValue)
                 {
                     textMeshProUGUI.gameObject.SetActive(false);
                     return true;
@@ -639,15 +638,15 @@ namespace NOOD
                 Color color = textMeshProUGUI.color;
                 color.a += Time.deltaTime;
                 textMeshProUGUI.color = color;
-                if(textMeshProUGUI.color.a >= maxValue)
+                if (textMeshProUGUI.color.a >= maxValue)
                 {
                     return true;
                 }
                 return false;
-            },"", pauseTimePerLoop, -1);
+            }, "", pauseTimePerLoop, -1);
         }
         #endregion
-    
+
         #region CoroutineFunction
         /// <summary>
         /// Create a coroutineScript for coroutine loop function
@@ -721,8 +720,8 @@ namespace NOOD
         /// <param name="currentObject"></param>
         public static void UnSubscribeFromStatic(Type staticType, object currentObject)
         {
-            if(currentObject != null)
-                staticType.PurgeDelegatesOf(currentObject);
+            // if(currentObject != null)
+            //     staticType.PurgeDelegatesOf(currentObject);
         }
         /// <summary>
         /// UnSubscribe all function belong to functionObject from delegateObject
@@ -731,8 +730,8 @@ namespace NOOD
         /// <param name="functionObject"> object that hold functions </param>
         public static void UnSubscribeAllEvent(object delegateObject, object functionObject)
         {
-            if(delegateObject != null && functionObject != null)
-                delegateObject.PurgeDelegatesOf(functionObject);
+            // if(delegateObject != null && functionObject != null)
+            //     delegateObject.PurgeDelegatesOf(functionObject);
         }
         /// <summary>
         /// UnSubscribe all function belong to currentObject from instance of object
@@ -750,15 +749,15 @@ namespace NOOD
         #region Update Functions
         public static void StartUpdater(object target, Action action)
         {
-            UpdateObject.Create(target, () => {action?.Invoke(); return false;}, "", false);
+            UpdateObject.Create(target, () => { action?.Invoke(); return false; }, "", false);
         }
         public static void StartUpdater(object target, Action action, string functionName)
         {
-            UpdateObject.Create(target, () => {action?.Invoke(); return false;}, functionName, false);
+            UpdateObject.Create(target, () => { action?.Invoke(); return false; }, functionName, false);
         }
         public static void StartUpdater(object target, Action action, string functionName, bool stopAllWithTheSameName)
         {
-            UpdateObject.Create(target, () => {action?.Invoke(); return false;}, functionName, stopAllWithTheSameName);
+            UpdateObject.Create(target, () => { action?.Invoke(); return false; }, functionName, stopAllWithTheSameName);
         }
         public static UpdateObject StartUpdater(object target, Func<bool> func)
         {
