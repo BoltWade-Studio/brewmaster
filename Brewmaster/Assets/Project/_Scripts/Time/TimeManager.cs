@@ -84,8 +84,6 @@ namespace Game
 		}
 		void OnDestroy()
 		{
-			NoodyCustomCode.UnSubscribeAllEvent<UIManager>(this);
-			NoodyCustomCode.UnSubscribeAllEvent<GameplayManager>(this);
 		}
 		#endregion
 

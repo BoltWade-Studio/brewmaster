@@ -37,7 +37,8 @@ namespace Game
 
 		void OnDestroy()
 		{
-			NoodyCustomCode.UnSubscribeAllEvent(GameEvent.Instance, this);
+			GameEvent.Instance.OnTimeUp -= OnTimeUpHandler;
+			GameEvent.Instance.OnNextDay -= OnNextDayHandler;
 		}
 
 		#region Event functions

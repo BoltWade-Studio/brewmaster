@@ -8,15 +8,15 @@ namespace Game
     {
         [SerializeField] private string _textId;
         [SerializeField] private TextMeshProUGUI _label;
-        
-        void OnDisable()
-        {
-            NoodyCustomCode.UnSubscribeFromStatic(typeof(StringLocalization), this);
-        }
+
         void OnEnable()
         {
             StringLocalization.OnLocalizationChange += OnLanguageChangeHandler;
             UpdateText();
+        }
+        void OnDisable()
+        {
+            StringLocalization.OnLocalizationChange -= OnLanguageChangeHandler;
         }
 
         private void OnLanguageChangeHandler()

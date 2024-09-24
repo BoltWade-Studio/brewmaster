@@ -112,10 +112,11 @@ namespace Game
 		}
 		private void UnRegisterEvent()
 		{
-			NoodyCustomCode.UnSubscribeAllEvent(GameEvent.Instance, this);
-			NoodyCustomCode.UnSubscribeAllEvent<GameplayManager>(this);
-			NoodyCustomCode.UnSubscribeAllEvent<TimeManager>(this);
-			NoodyCustomCode.UnSubscribeFromStatic(typeof(TimeManager), this);
+			TimeManager.OnTimePause -= ShowPauseGameMenu;
+			TimeManager.OnTimeResume -= HidePauseGameMenu;
+			GameEvent.Instance.OnEndDay -= OnEndDayHandler;
+			GameEvent.Instance.OnLoadDataSuccess -= OnLoadDataSuccessHandler;
+			GameEvent.Instance.OnStorePhase -= OnStorePaseHandler;
 		}
 
 		#region Event functions

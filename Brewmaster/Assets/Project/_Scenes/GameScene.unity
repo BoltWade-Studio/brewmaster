@@ -2655,7 +2655,6 @@ GameObject:
   - component: {fileID: 529065287}
   - component: {fileID: 529065290}
   - component: {fileID: 529065289}
-  - component: {fileID: 529065288}
   m_Layer: 5
   m_Name: TreasuryTitle
   m_TagString: Untagged
@@ -2682,20 +2681,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 22.800003}
   m_SizeDelta: {x: 0, y: 58}
   m_Pivot: {x: 0.5, y: 1}
---- !u!114 &529065288
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 529065286}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f54b4322097c5a549bd3aef2c34cc9eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _textId: Treasury
-  _label: {fileID: 529065289}
 --- !u!114 &529065289
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7921,7 +7906,6 @@ GameObject:
   - component: {fileID: 1556393582}
   - component: {fileID: 1556393585}
   - component: {fileID: 1556393584}
-  - component: {fileID: 1556393583}
   m_Layer: 5
   m_Name: PointTitle
   m_TagString: Untagged
@@ -7948,20 +7932,6 @@ RectTransform:
   m_AnchoredPosition: {x: -0.000045776367, y: 22.800003}
   m_SizeDelta: {x: 0, y: 58}
   m_Pivot: {x: 0.5, y: 1}
---- !u!114 &1556393583
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1556393581}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f54b4322097c5a549bd3aef2c34cc9eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _textId: Point
-  _label: {fileID: 1556393584}
 --- !u!114 &1556393584
 MonoBehaviour:
   m_ObjectHideFlags: 0

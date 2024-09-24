@@ -11,14 +11,14 @@ namespace Game
 
         void Start()
         {
-            Player.OnPlayerChangePositionSuccess += Move;
             Debug.Log("PlayerView Start");
+            Player.OnPlayerChangePositionSuccess += Move;
             BeerServeManager.OnPlayerPressDeliverBeer += DeliverBeer;
         }
         void OnDestroy()
         {
-            NoodyCustomCode.UnSubscribeFromStatic(typeof(Player), this);
-            NoodyCustomCode.UnSubscribeFromStatic(typeof(BeerServeManager), this);
+            Player.OnPlayerChangePositionSuccess -= Move;
+            BeerServeManager.OnPlayerPressDeliverBeer -= DeliverBeer;
         }
 
         private void Move()
