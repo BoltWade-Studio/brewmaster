@@ -2694,7 +2694,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f54b4322097c5a549bd3aef2c34cc9eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _textId: TimeUp
+  _textId: Treasury
   _label: {fileID: 529065289}
 --- !u!114 &529065289
 MonoBehaviour:
@@ -2716,7 +2716,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Gold
+  m_text: Treasury
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4e67e1da3983b9c4399bbaf86801558e, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: 030a5f810cfc1469d928a494e56ffff4, type: 2}
@@ -7960,7 +7960,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f54b4322097c5a549bd3aef2c34cc9eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _textId: TimeUp
+  _textId: Point
   _label: {fileID: 1556393584}
 --- !u!114 &1556393584
 MonoBehaviour:
@@ -11313,6 +11313,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerInfoPanel
       objectReference: {fileID: 0}
+    - target: {fileID: 5172381975933653134, guid: 7884ee73157777c419b3c1c1d25a62b1,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7554995134948519437, guid: 7884ee73157777c419b3c1c1d25a62b1,
         type: 3}
       propertyPath: m_Pivot.x
@@ -11351,7 +11356,7 @@ PrefabInstance:
     - target: {fileID: 7554995134948519437, guid: 7884ee73157777c419b3c1c1d25a62b1,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 410.9
+      value: 442.3
       objectReference: {fileID: 0}
     - target: {fileID: 7554995134948519437, guid: 7884ee73157777c419b3c1c1d25a62b1,
         type: 3}
