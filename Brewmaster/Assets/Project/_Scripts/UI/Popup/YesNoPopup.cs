@@ -24,8 +24,8 @@ namespace Game
 
             _yesBtn.OnClick = yesAction;
             _noBtn.OnClick = noAction;
-            _noBtn.OnClick += Hide;
             _yesBtn.OnClick += Hide;
+            _noBtn.OnClick += Hide;
         }
 
         private void Hide()

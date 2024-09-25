@@ -45,14 +45,15 @@ mergeInto(LibraryManager.library, {
 		});
 
         socket.on('exception', (exception) => {
+        	console.log('Exception: ' + exception.toString());
             for(let i = 0; i < this.exceptionArray.length; i++)
             {
-                SendMessage(this.exceptionArray[i].objectName, this.exceptionArray[i].methodName, exception.message);
+                SendMessage(this.exceptionArray[i].objectName, this.exceptionArray[i].methodName, exception.toString());
             }
         });
 
-        socket.on('giftTxHash', (data) => {
-            SendMessage(this.objectNameDic.giftTxHash, this.methodNameDic.giftTxHash, data.toString());
+        socket.on('giftData', (data) => {
+            SendMessage(this.objectNameDic.giftData, this.methodNameDic.giftData, data.toString());
         });
 
         socket.on('playerMove', (data) => {

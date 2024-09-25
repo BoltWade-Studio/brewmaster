@@ -19,7 +19,6 @@ namespace Game
 
         void Start()
         {
-            Utility.Socket.OnEvent("giftTxHash", this.gameObject.name, nameof(OnTwitterCallbackSuccess), OnTwitterCallbackSuccess);
             Utility.Socket.OnEvent(SocketEnum.getTwitterMessageCallback.ToString(), this.gameObject.name, nameof(GetTwitterMessageCallback), GetTwitterMessageCallback);
             GameEvent.Instance.OnClaimSuccess += OnClaimSuccessHandler;
         }
@@ -31,14 +30,14 @@ namespace Game
 
         public void ActiveShareToXPopup()
         {
-	        if (_isShowingPopup) return;
-	        _isShowingPopup = true;
+            if (_isShowingPopup) return;
+            _isShowingPopup = true;
             PopupManager.Instance.ShowYesNoPopup("Share to X", "Share to X to get rewards", () =>
             {
-	            _isShowingPopup = false;
-                OpenTwitterNewTab();
+                _isShowingPopup = false;
                 UIManager.Instance.ShowTwitterInputPanel();
-            }, (() => _isShowingPopup = false));
+                OpenTwitterNewTab();
+            }, () => _isShowingPopup = false);
         }
 
         public void OpenTwitterNewTab()
@@ -62,6 +61,7 @@ namespace Game
             this._onSuccess = callbackSuccess;
             this._onError = callbackError;
             Utility.Socket.SubscribeOnException(this.gameObject.name, nameof(OnTwitterCallbackError), OnTwitterCallbackError);
+            Utility.Socket.OnEvent(SocketEnum.giftData.ToString(), this.gameObject.name, nameof(OnTwitterCallbackSuccess), OnTwitterCallbackSuccess);
             Utility.Socket.EmitEvent(SocketEnum.playerInputLink.ToString(), json);
         }
 
