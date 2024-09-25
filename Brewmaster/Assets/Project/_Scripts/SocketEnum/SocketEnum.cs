@@ -56,11 +56,9 @@ public enum SocketEnum
 	#region Get twitter message
 	getTwitterMessage,
 	getTwitterMessageCallback,
+	giftData,
 	#endregion
 
-	saveDataRequest,
-	loadDataRequest,
-	playerMove,
 	spawnCustomer,
 	customerReachDestination,
 	customerReturn,

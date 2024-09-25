@@ -12,8 +12,8 @@ mergeInto(LibraryManager.library, {
             return;
         }
 
-        var socket = io('http://localhost:5006');
-        // var socket = io('https://brewmaster-socket.boltwade.xyz');
+        // var socket = io('http://localhost:5006');
+        var socket = io('https://brewmaster-socket.boltwade.xyz');
 
         socket.on('connect', () => {
             socket.isReady = true;
@@ -52,8 +52,8 @@ mergeInto(LibraryManager.library, {
             }
         });
 
-        socket.on('giftTxHash', (data) => {
-            SendMessage(this.objectNameDic.giftTxHash, this.methodNameDic.giftTxHash, data.toString());
+        socket.on('giftData', (data) => {
+            SendMessage(this.objectNameDic.giftData, this.methodNameDic.giftData, data.toString());
         });
 
         socket.on('playerMove', (data) => {
