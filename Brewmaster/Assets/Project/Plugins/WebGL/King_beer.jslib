@@ -12,8 +12,8 @@ mergeInto(LibraryManager.library, {
             return;
         }
 
-        // var socket = io('http://localhost:5006');
-        var socket = io('https://brewmaster-socket.boltwade.xyz');
+        var socket = io('http://localhost:5006');
+        // var socket = io('https://brewmaster-socket.boltwade.xyz');
 
         socket.on('connect', () => {
             socket.isReady = true;
@@ -45,9 +45,10 @@ mergeInto(LibraryManager.library, {
 		});
 
         socket.on('exception', (exception) => {
+        	console.log('Exception: ' + exception.toString());
             for(let i = 0; i < this.exceptionArray.length; i++)
             {
-                SendMessage(this.exceptionArray[i].objectName, this.exceptionArray[i].methodName, exception.message);
+                SendMessage(this.exceptionArray[i].objectName, this.exceptionArray[i].methodName, exception.toString());
             }
         });
 
