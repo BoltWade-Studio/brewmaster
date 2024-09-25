@@ -87,21 +87,48 @@ mergeInto(LibraryManager.library,{
 			stringToUTF8(str, buffer, bufferSize);
 			return buffer;
 		}
+
+		const toHex = (number) => {
+			return "0x" + number.toString(16);
+		}
 		
 		const calldataArray = JSON.parse(UTF8ToString(calldata))
 		const contractAddressStr = UTF8ToString(contractAddress)
 		const entrypointStr = UTF8ToString(entrypoint)
 		const callbackObjectStr = UTF8ToString(callbackObjectName)
 		const callbackMethodStr = UTF8ToString(callbackMethodName)
+		const maxQtyGasAuthorized = 1800n; 
+		const maxPriceAuthorizeForOneGas = 12n * 10n ** 9n;
 
 		await window.starknet_argentX.enable();
 		if (window.starknet_argentX.selectedAddress)
 		{
-			window.starknet_argentX.account.execute([{
-				contractAddress: contractAddressStr,
-				entrypoint: entrypointStr,
-				calldata: calldataArray.array
-			}]).then((response) => {
+			window.starknet_argentX.account.execute(
+			[
+				{
+					contractAddress: contractAddressStr,
+					entrypoint: entrypointStr,
+					calldata: calldataArray.array
+				}
+			],
+			// {
+			// 	version: 3,
+			// 	maxFee: 10 ** 15,
+			// 	feeDataAvailabilityMode: "L1",
+			// 	tip: 10 ** 13,
+			// 	paymasterData: [],
+			// 	// resourceBounds: {
+			// 	// 	l1_gas: {
+			// 	// 		max_amount: toHex(maxQtyGasAuthorized),
+			// 	// 		max_price_per_unit: toHex(maxPriceAuthorizeForOneGas),
+			// 	// 	},
+			// 	// 	l2_gas: {
+			// 	// 		max_amount: toHex(0),
+			// 	// 		max_price_per_unit: toHex(0),
+			// 	// 	},
+			// 	// },
+			// },
+			).then((response) => {
 				const transactionHash = response.transaction_hash;
 				myGameInstance.SendMessage(callbackObjectStr, callbackMethodStr, transactionHash);
 			}).catch((error) => {
