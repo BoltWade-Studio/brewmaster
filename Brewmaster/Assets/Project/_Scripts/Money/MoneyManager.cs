@@ -20,15 +20,15 @@ namespace Game
 		{
 			await UniTask.SwitchToMainThread();
 			PlayerData.PlayerDataClass.Treasury = JsonConvert.DeserializeObject<int>(point);
-			UIManager.Instance.UpdateInDayMoney();
+			UIManager.Instance.UpdateMoneyUI();
 			UIManager.Instance.UpdatePlayerInfoPanel();
 		}
 
 		private async void OnUpdateInDayPlayerTreasury(string point)
 		{
 			await UniTask.SwitchToMainThread();
-			PlayerData.PlayerDataClass.Treasury = JsonConvert.DeserializeObject<int>(point);
-			UIManager.Instance.UpdateInDayMoney();
+			PlayerData.InDayTreasury = JsonConvert.DeserializeObject<int>(point);
+			UIManager.Instance.UpdateMoneyUI();
 		}
 	}
 

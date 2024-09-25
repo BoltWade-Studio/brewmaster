@@ -44,6 +44,7 @@ namespace Game
 		/// <returns></returns>
 		public async UniTask LoadData()
 		{
+			Debug.Log("LoadData");
 			await GetDataAsync();
 
 			// Create new pub if scale is 0
@@ -59,6 +60,7 @@ namespace Game
 			}
 			else
 			{
+				Debug.Log("PlayGame");
 				PlayGame();
 			}
 		}

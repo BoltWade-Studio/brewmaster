@@ -14,7 +14,6 @@ namespace Game
 
 		private void Start()
 		{
-			// Utility.Socket.OnEvent(SocketEnum.upgradeTableCallback.ToString(), this.gameObject.name, nameof(UpgradeCallback), UpgradeCallback);
 			Utility.Socket.OnEvent(SocketEnum.updateUpgradePriceCallback.ToString(), this.gameObject.name, nameof(UpdateUpgradePrice), UpdateUpgradePrice);
 
 			GameEvent.Instance.OnStorePhase += OnStorePhaseHandler;

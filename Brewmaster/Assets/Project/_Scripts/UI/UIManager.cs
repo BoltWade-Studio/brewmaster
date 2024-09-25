@@ -69,7 +69,7 @@ namespace Game
 		private void Start()
 		{
 			UpdateDayText();
-			UpdateInDayMoney();
+			UpdateMoneyUI();
 			_timeBG.color = _timeOriginalColor;
 			TimeManager.Instance.OnTimeWarning += () =>
 			{
@@ -124,6 +124,7 @@ namespace Game
 		{
 			ShowStoreMenu();
 			_isStorePhrase = true;
+			UpdateMoneyUI();
 		}
 		#endregion
 
@@ -148,9 +149,12 @@ namespace Game
 		{
 			_dayText.text = "Day".GetText() + " " + TimeManager.Instance.CurrentDay.ToString("00");
 		}
-		public void UpdateInDayMoney()
+		public void UpdateMoneyUI()
 		{
-			_moneyText.text = PlayerData.PlayerTreasury.ToString();
+			if (_isStorePhrase)
+				_moneyText.text = PlayerData.PlayerTreasury.ToString();
+			else
+				_moneyText.text = PlayerData.InDayTreasury.ToString();
 		}
 		public void UpdateTime()
 		{
@@ -182,7 +186,7 @@ namespace Game
 
 		private void OnLoadDataSuccessHandler()
 		{
-			UpdateInDayMoney();
+			UpdateMoneyUI();
 		}
 		#endregion
 

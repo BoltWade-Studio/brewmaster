@@ -10,6 +10,7 @@ namespace Game
     {
         [SerializeField] private YesNoPopup _yesNoPopupPref;
         [SerializeField] private Transform _uiHolder;
+        private YesNoPopup _yesNoPopup;
 
         void Start()
         {
@@ -19,7 +20,10 @@ namespace Game
 
         public void ShowYesNoPopup(string popupName, string message, Action yesAction, Action noAction)
         {
-            Instantiate(_yesNoPopupPref, _uiHolder).Show(popupName, message, yesAction, noAction);
+            if (_yesNoPopup == null)
+                _yesNoPopup = Instantiate(_yesNoPopupPref, _uiHolder);
+
+            _yesNoPopup.Show(popupName, message, yesAction, noAction);
         }
     }
 }

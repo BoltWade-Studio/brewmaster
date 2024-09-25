@@ -97,7 +97,7 @@ namespace Game
 			string playerAddress;
 			if (Application.isEditor)
 			{
-				playerAddress = Utility.Socket.StringToSocketJson("0x062e41e7D4db7fc8e9911A846b328FD09902Ac33ADFE9cA2E32063C68D76f521");
+				playerAddress = Utility.Socket.StringToSocketJson("0x06805c9d975f3997b10f4fd2301b906cD8BD0bA6e9E0961C431a5f24B8D35726");
 			}
 			else
 			{
@@ -115,12 +115,13 @@ namespace Game
 
 			Utility.Socket.EmitEvent(SocketEnum.updatePlayerAddress.ToString(), playerAddress);
 			GameEvent.Instance.OnLoadDataSuccess += OnLoadDatasSuccessHandler;
+			Debug.Log("Subscribe");
 			await DataSaveLoadManager.Instance.LoadData();
-			GameEvent.Instance.OnLoadDataSuccess -= OnLoadDatasSuccessHandler;
 		}
 
 		private void OnLoadDatasSuccessHandler()
 		{
+			GameEvent.Instance.OnLoadDataSuccess -= OnLoadDatasSuccessHandler;
 			_connectWalletUI.Close();
 			LoadingUIManager.Instance.Hide();
 			_onSuccess?.Invoke();

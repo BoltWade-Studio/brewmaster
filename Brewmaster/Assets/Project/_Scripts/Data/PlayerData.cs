@@ -7,6 +7,7 @@ namespace Game
     public static class PlayerData
     {
         public static PlayerDataClass PlayerDataClass;
+        public static int InDayTreasury;
         public static string PlayerAddress => PlayerDataClass.Player;
         public static Scale[] PlayerScale => PlayerDataClass.Scale;
         public static int PlayerTreasury => PlayerDataClass.Treasury;

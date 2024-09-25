@@ -35,8 +35,7 @@ namespace Game
 			_claimBtn.onClick.AddListener(OnClaimBtnClick);
 			_logOutBtn.onClick.AddListener(OnLogOutBtnClick);
 			_shareToTwitterBtn.onClick.AddListener(OnShareToTwitterBtnClick);
-			GameEvent.Instance.OnEndDay += OnEndDayHandler;
-			GameEvent.Instance.OnNextDay += OnNextDayHandler;
+			UpdateUI();
 			ActiveXButton(!ConnectWalletManager.Instance.IsAnonymous);
 		}
 
@@ -59,25 +58,6 @@ namespace Game
 			UpdateUI();
 		}
 
-		private void OnEndDayHandler()
-		{
-			// await UniTask.SwitchToMainThread();
-			// Debug.Log("PlayerInfoPanel: OnEndDayHandler");
-			// if (_shareToTwitterBtn)
-			// 	_shareToTwitterBtn.interactable = true;
-			// else
-			// {
-			// 	Debug.LogError("PlayerInfoPanel: OnEndDayHandler _shareToTwitterBtn is null");
-			// }
-			// Debug.Log("PlayerInfoPanel: OnEndDayHandler Done");
-		}
-
-		private void OnNextDayHandler()
-		{
-			// await UniTask.SwitchToMainThread();
-			// _shareToTwitterBtn.interactable = false;
-		}
-
 		public void UpdateUI()
 		{
 			UpdateClaimBtn();
@@ -86,8 +66,9 @@ namespace Game
 
 		private void UpdatePoint()
 		{
-			_treasuryText.text = PlayerData.PlayerTreasury.ToString();
+			// Player info always get info from PlayerData because this will show player current info, not in day info
 			_playerAddressText.text = PlayerData.PlayerAddress;
+			_treasuryText.text = PlayerData.PlayerTreasury.ToString();
 			_pointText.text = PlayerData.PlayerPoint.ToString();
 		}
 

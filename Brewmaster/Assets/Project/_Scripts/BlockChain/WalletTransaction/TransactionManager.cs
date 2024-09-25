@@ -82,8 +82,9 @@ namespace Game
 
             return _transactionJsonDataDic[TransactionID.GET_PLAYER_PUB];
         }
-        private void GetPlayerPubCallback(string data)
+        private async void GetPlayerPubCallback(string data)
         {
+            await UniTask.SwitchToMainThread();
             Debug.Log("Player data callback: " + data);
             if (_transactionJsonDataDic.ContainsKey(TransactionID.GET_PLAYER_PUB))
             {

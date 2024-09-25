@@ -14,6 +14,7 @@ namespace Game
 		public bool IsEndDay;
 		public bool IsPlaying;
 		public bool IsMainMenu;
+		public bool IsStorePhase;
 
 		protected override void ChildAwake()
 		{
@@ -26,6 +27,7 @@ namespace Game
 		{
 			GameEvent.Instance.OnTimeUp += OnTimeUpHandler;
 			GameEvent.Instance.OnNextDay += OnNextDayHandler;
+			GameEvent.Instance.OnStorePhase += OnStorePhaseHandler;
 
 			SoundManager.InitSoundManager();
 			SoundManager.PlayMusic(MusicEnum.PianoBGMusic);
@@ -34,14 +36,19 @@ namespace Game
 
 			Utility.Socket.EmitEvent(SocketEnum.updateIsMainMenu.ToString(), Utility.Socket.StringToSocketJson(IsMainMenu.ToString()));
 		}
-
 		void OnDestroy()
 		{
 			GameEvent.Instance.OnTimeUp -= OnTimeUpHandler;
 			GameEvent.Instance.OnNextDay -= OnNextDayHandler;
+			GameEvent.Instance.OnStorePhase -= OnStorePhaseHandler;
+			GameEvent.Instance.OnUpdatePosComplete -= OnUpdatePosCompleteHandler;
 		}
 
 		#region Event functions
+		private void OnStorePhaseHandler()
+		{
+			IsStorePhase = true;
+		}
 		private void OnUpdatePosCompleteHandler()
 		{
 			InitializeGame();
@@ -61,12 +68,12 @@ namespace Game
 		private void InitializeGame()
 		{
 			IsEndDay = false;
+			IsStorePhase = false;
 			InitializedGameDataDto data = new InitializedGameDataDto();
 			if (PlayerData.PlayerDataClass != null)
 			{
-				PlayerData.PlayerDataClass.Points = 0;
-				PlayerData.PlayerDataClass.Treasury = 0;
-				UIManager.Instance.UpdateInDayMoney();
+				PlayerData.InDayTreasury = 0;
+				UIManager.Instance.UpdateMoneyUI();
 			}
 			foreach (Table table in TableManager.Instance.GetTableList())
 			{

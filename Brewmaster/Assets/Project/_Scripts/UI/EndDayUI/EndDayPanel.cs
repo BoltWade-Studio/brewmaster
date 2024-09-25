@@ -146,7 +146,7 @@ namespace Game
         }
         private async void NextDay()
         {
-	        await DataSaveLoadManager.Instance.LoadData();
+            await DataSaveLoadManager.Instance.LoadData();
             Hide();
             GameEvent.Instance.OnNextDay?.Invoke();
         }
@@ -179,16 +179,16 @@ namespace Game
             _canvasGroup.alpha = 0;
             if (isUpdate)
             {
-	            if (PlayerData.PlayerTreasury > 0)
-	            {
-		            _isClaimed = false;
-		            _claimBtn.gameObject.GetComponent<Button>().interactable = true;
-	            }
-	            else
-	            {
-		            _isClaimed = true;
-		            _claimBtn.gameObject.GetComponent<Button>().interactable = false;
-	            }
+                if (PlayerData.PlayerTreasury > 0)
+                {
+                    _isClaimed = false;
+                    _claimBtn.gameObject.GetComponent<Button>().interactable = true;
+                }
+                else
+                {
+                    _isClaimed = true;
+                    _claimBtn.gameObject.GetComponent<Button>().interactable = false;
+                }
                 await GetPointBeforeClaim();
                 PlayMoneyAnimation();
             }
@@ -234,7 +234,7 @@ namespace Game
                 await UniTask.Yield();
                 time += Time.unscaledDeltaTime * _moneyIncreaseSpeed;
                 lerpValue = time / SoundManager.GetSoundLength(SoundEnum.MoneySound);
-                treasuryTemp = Mathf.Lerp(0, PlayerData.PlayerTreasury, lerpValue);
+                treasuryTemp = Mathf.Lerp(0, PlayerData.InDayTreasury, lerpValue);
                 _treasuryText.text = treasuryTemp.ToString();
                 pointTemp = Mathf.Lerp(0, _tempPoint, lerpValue);
                 _pointText.text = pointTemp.ToString();
