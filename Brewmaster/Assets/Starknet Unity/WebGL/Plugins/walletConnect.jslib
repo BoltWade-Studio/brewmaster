@@ -69,12 +69,13 @@ mergeInto(LibraryManager.library,{
 
 	IsConnected: function()
 	{
-		return 
-			(window.walletConnect == true) && 
-			(window.starknet_argentX.isConnected || window.starknet_braavos.isConnected);
+		console.log("IsConnected");
+		return (window.walletConnect == true) && 
+			(window.starknet.isConnected || window.starknet_argentX.isConnected || window.starknet_braavos.isConnected);
 	},
 
 	GetAccount: function () {
+		console.log("GetAccount");
 		const walletType = window.localStorage.getItem("walletType");
 		let address = "";
 		if (walletType == "argentX") {
