@@ -62,6 +62,7 @@ namespace Game
 
 		private void ConnectArgentX()
 		{
+			Debug.Log("Connect ArgentX");
 			WalletConnectAsync(JSInteropManager.ConnectWalletArgentX);
 			IsAnonymous = false;
 		}
@@ -93,30 +94,40 @@ namespace Game
 
 		private async void WalletConnectAsync(Action walletAction)
 		{
-			// Debug.Log("WalletConnectAsync: IsConnected: " + JSInteropManager.IsConnected());
-			string playerAddress;
-			if (Application.isEditor)
+			try
 			{
-				playerAddress = Utility.Socket.StringToSocketJson("0x06805c9d975f3997b10f4fd2301b906cD8BD0bA6e9E0961C431a5f24B8D35726");
-			}
-			else
-			{
-				if (!JSInteropManager.IsWalletAvailable())
+				// Debug.Log("WalletConnectAsync: IsConnected: " + JSInteropManager.IsConnected());
+				string playerAddress;
+				if (Application.isEditor)
 				{
-					LoadingUIManager.Instance.Show("Please install wallet");
-					JSInteropManager.AskToInstallWallet();
-					await UniTask.WaitUntil(() => JSInteropManager.IsWalletAvailable());
+					playerAddress =
+						Utility.Socket.StringToSocketJson(
+							"0x005893a02E717eeeE01572066DdD47D70014Cb497345991F8c7D4338F6b29d79");
 				}
-				LoadingUIManager.Instance.Show("Getting player data");
-				walletAction?.Invoke();
-				await UniTask.WaitUntil(() => JSInteropManager.IsConnected());
-				playerAddress = Utility.Socket.StringToSocketJson(JSInteropManager.GetAccount());
-			}
+				else
+				{
+					if (!JSInteropManager.IsWalletAvailable())
+					{
+						LoadingUIManager.Instance.Show("Please install wallet");
+						JSInteropManager.AskToInstallWallet();
+						await UniTask.WaitUntil(() => JSInteropManager.IsWalletAvailable());
+					}
 
-			Utility.Socket.EmitEvent(SocketEnum.updatePlayerAddress.ToString(), playerAddress);
-			GameEvent.Instance.OnLoadDataSuccess += OnLoadDatasSuccessHandler;
-			Debug.Log("Subscribe");
-			await DataSaveLoadManager.Instance.LoadData();
+					LoadingUIManager.Instance.Show("Getting player data");
+					walletAction?.Invoke();
+					await UniTask.WaitUntil(() => JSInteropManager.IsConnected());
+					playerAddress = Utility.Socket.StringToSocketJson(JSInteropManager.GetAccount());
+				}
+
+				Utility.Socket.EmitEvent(SocketEnum.updatePlayerAddress.ToString(), playerAddress);
+				GameEvent.Instance.OnLoadDataSuccess += OnLoadDatasSuccessHandler;
+				Debug.Log("Subscribe");
+				await DataSaveLoadManager.Instance.LoadData();
+			} catch (Exception e)
+			{
+				Debug.LogError("An error occurred in WalletConnectAsync: " + e.Message);
+				throw;
+			}
 		}
 
 		private void OnLoadDatasSuccessHandler()

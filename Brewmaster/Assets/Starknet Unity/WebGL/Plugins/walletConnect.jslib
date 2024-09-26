@@ -24,7 +24,8 @@ mergeInto(LibraryManager.library,{
 			try
 			{
 				await window.starknet_argentX.enable();
-				if(window.starknet.isConnected) 
+      			window.localStorage.setItem("walletType", "argentX");
+				if(window.starknet_argentX.isConnected) 
 				{
 					window.walletConnect = true;
 				}
@@ -38,13 +39,16 @@ mergeInto(LibraryManager.library,{
 
 	ConnectWalletBraavos: async function()
 	{
+		console.log("ConnectWalletBraavos");
 		if (window.starknet_braavos)
 		{
+			console.log("braavos available");
 			try
 			{
 				await window.starknet_braavos.enable();
-				if(window.starknet.isConnected) 
-				{
+      			window.localStorage.setItem("walletType", "braavos");
+				if (window.starknet_braavos.isConnected){
+					console.log("braavos enabled");
 					window.walletConnect = true;
 				}
 			}
@@ -53,10 +57,8 @@ mergeInto(LibraryManager.library,{
 				console.log("error braavos: ");
 				console.log(e.message);
 			}
-		}
-		else
-		{
-			console.log("don't have braavos");
+		} else {
+			console.log("braavos not available");
 		}
 	},
 
@@ -67,12 +69,21 @@ mergeInto(LibraryManager.library,{
 
 	IsConnected: function()
 	{
-		return window.starknet && window.starknet.isConnected && window.walletConnect == true;
+		return 
+			(window.walletConnect == true) && 
+			(window.starknet_argentX.isConnected || window.starknet_braavos.isConnected);
 	},
 
-	GetAccount: function()
-	{
-		const address = window.starknet.account.address;
+	GetAccount: function () {
+		const walletType = window.localStorage.getItem("walletType");
+		let address = "";
+		if (walletType == "argentX") {
+			address = window.starknet_argentX.selectedAddress;
+		} else if (walletType == "braavos") {
+			address = window.starknet_braavos.selectedAddress;
+		} else {
+			address = window.starknet.account.address;
+		}
 		var bufferSize = lengthBytesUTF8(address) + 1;
 		var buffer = _malloc(bufferSize);
 		stringToUTF8(address, buffer, bufferSize);
