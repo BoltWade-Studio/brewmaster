@@ -1802,7 +1802,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: <color=#FB3131>5 STRK</color> will be transfered to your account soon
+  m_text: <color=#FB3131>5 STRK</color> will be transfered to your account at the
+    end of the day
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4e67e1da3983b9c4399bbaf86801558e, type: 2}
   m_sharedMaterial: {fileID: 8580947580272626034, guid: 4e67e1da3983b9c4399bbaf86801558e,
@@ -3682,6 +3683,7 @@ MonoBehaviour:
   IsEndDay: 0
   IsPlaying: 1
   IsMainMenu: 0
+  IsStorePhase: 0
 --- !u!1 &785809832
 GameObject:
   m_ObjectHideFlags: 0
