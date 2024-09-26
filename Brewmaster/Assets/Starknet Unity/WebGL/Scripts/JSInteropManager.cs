@@ -30,7 +30,22 @@ public class JSInteropManager : MonoBehaviour
     public static extern void SendTransactionBraavos(string contractAddress, string entrypoint, string calldata, string callbackObjectName, string callbackMethodName);
 
     [DllImport("__Internal")]
-    public static extern void SendTransaction(string contractAddress, string entrypoint, string calldata, string callbackObjectName, string callbackMethodName);
+    public static extern string GetWalletType();
+
+    public static void SendTransaction(string contractAddress, string entrypoint, string calldata, string callbackObjectName, string callbackMethodName)
+    {
+        string walletType = GetWalletType();
+        Debug.Log("walletType: " + walletType);
+        if (walletType == "argentX")
+        {
+            SendTransactionArgentX(contractAddress, entrypoint, calldata, callbackObjectName, callbackMethodName);
+        }
+        else if (walletType == "braavos")
+        {
+            SendTransactionBraavos(contractAddress, entrypoint, calldata, callbackObjectName, callbackMethodName);
+        }
+
+    }
     [DllImport("__Internal")]
     public static extern void SendTransactionNoData(string contractAddress, string entrypoint, string callbackObjectName, string callbackMethodName);
 

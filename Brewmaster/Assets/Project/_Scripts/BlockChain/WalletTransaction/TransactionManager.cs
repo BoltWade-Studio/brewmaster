@@ -21,6 +21,7 @@ namespace Game
         private bool _gettingData;
         private bool _sending;
         private bool _isClaimSuccess;
+        private bool _transactionSending;
 
         void Start()
         {
@@ -117,20 +118,26 @@ namespace Game
             await UniTask.WaitUntil(() => _sending == false);
             return _transactionJsonDataDic[TransactionID.CREATE_PUB].Equals("true");
         }
-        private void CreatePubCallback(string data)
+        private async void CreatePubCallback(string txHash)
         {
-            Debug.Log("Create pub callback data: " + data);
+            await UniTask.SwitchToMainThread();
+            Debug.Log("Create pub callback data: " + txHash);
             string result = "false";
-            if (data.ToLower().Contains("abort"))
+
+            if (IsValidTransactionHash(txHash))
+            {
+                // This is a transaction hash, wait for transaction
+                LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for transaction update");
+                bool transactionResult = await WaitTransaction(txHash);
+                result = transactionResult.ToString().ToLower();
+                LoadingUIManager.Instance.Hide();
+            }
+            else
             {
                 // User abort
                 result = "false";
             }
-            else
-            {
-                // User created pub
-                result = "true";
-            }
+
             if (_transactionJsonDataDic.ContainsKey(TransactionID.CREATE_PUB))
             {
                 _transactionJsonDataDic[TransactionID.CREATE_PUB] = result;
@@ -153,6 +160,7 @@ namespace Game
         }
         private async void ClaimCallback(string dataArray)
         {
+            await UniTask.SwitchToMainThread();
             string jsonData = "";
             object[] strings = JsonConvert.DeserializeObject<object[]>(dataArray);
             string[] strings1 = new string[strings.Length];
@@ -173,17 +181,30 @@ namespace Game
             }
             Debug.Log("claimCallback: " + jsonData);
         }
-        private async void ClosingUpPubCallback(string data)
+        private async void ClosingUpPubCallback(string txHash)
         {
             await UniTask.SwitchToMainThread();
-            Debug.Log("ClosedUpPubCallback: " + data);
-            if (!data.Contains("abort", StringComparison.InvariantCultureIgnoreCase) && data != "")
+            LoadingUIManager.Instance.Hide();
+            if (IsValidTransactionHash(txHash)) // this is transaction hash
             {
                 LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for transaction update");
-                await UniTask.WaitForSeconds(30f);
-                GameEvent.Instance.OnClaimSuccess?.Invoke();
+
+                // Use existing WaitTransaction method
+                bool result = await WaitTransaction(txHash);
+
+                if (result)
+                {
+                    GameEvent.Instance.OnClaimSuccess?.Invoke();
+                }
+                else
+                {
+                    NotifyManager.Instance.Show("Transaction failed");
+                }
             }
-            LoadingUIManager.Instance.Hide();
+            else
+            {
+                NotifyManager.Instance.Show("Execute failed");
+            }
             _sending = false;
         }
         #endregion
@@ -232,30 +253,76 @@ namespace Game
             }
             return true;
         }
-        private async void AddStoolCallback(string data)
+        private async void AddStoolCallback(string txHash)
         {
             await UniTask.SwitchToMainThread();
-            Debug.Log("AddStoolCallback: " + data);
-            if (_transactionJsonDataDic.ContainsKey(TransactionID.ADD_STOOL))
+            Debug.Log("AddStoolCallback: " + txHash);
+
+            if (IsValidTransactionHash(txHash) == false) // txHash is not valid
             {
-                _transactionJsonDataDic[TransactionID.ADD_STOOL] = data;
+                NotifyManager.Instance.Show("Execute failed");
+                return;
+            }
+
+            // txHash is valid
+            bool transactionSuccess = await WaitTransaction(txHash);
+
+            if (transactionSuccess)
+            {
+                // Transaction is successful
+                NotifyManager.Instance.Show("Transaction successful");
             }
             else
-                _transactionJsonDataDic.Add(TransactionID.ADD_STOOL, data);
+            {
+                // Transaction is failed
+                NotifyManager.Instance.Show("Transaction failed");
+            }
             _sending = false;
+        }
+
+        #endregion
+
+        #region Wait Transaction
+        private async UniTask<bool> WaitTransaction(string txHash)
+        {
+            if (IsValidTransactionHash(txHash) == false)
+            {
+                Debug.LogError("Invalid transaction hash");
+                return false;
+            }
+
+            LoadingUIManager.Instance.Show("Waiting for transaction update");
+
+            _transactionSending = true;
+            string socketString = Utility.Socket.StringToSocketJson(txHash);
+            Utility.Socket.EmitEvent(SocketEnum.waitTransaction.ToString(), socketString);
+            Utility.Socket.OnEvent(SocketEnum.waitTransactionCallback.ToString(), this.gameObject.name, nameof(WaitTransactionCallback), WaitTransactionCallback);
+
+            await UniTask.WaitUntil(() => _transactionSending == false);
+            await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.ADD_STOOL));
+
+            LoadingUIManager.Instance.Hide();
+
+            string result = _transactionJsonDataDic[TransactionID.ADD_STOOL];
+            return result.ToLower() == "true";
+        }
+        private async void WaitTransactionCallback(string response)
+        {
+            await UniTask.SwitchToMainThread();
+            // Transaction is completed callback
+            if (_transactionJsonDataDic.ContainsKey(TransactionID.ADD_STOOL))
+            {
+                _transactionJsonDataDic[TransactionID.ADD_STOOL] = response.ToString();
+            }
+            else
+                _transactionJsonDataDic.Add(TransactionID.ADD_STOOL, response.ToString());
+            _transactionSending = false;
         }
         #endregion
 
-        private void SendContractCallback(string data)
+        private bool IsValidTransactionHash(string txHash)
         {
-            _sending = false;
-        }
-        public async UniTask UpdateSystemManager()
-        {
-            // SendContract to JSInteropManager
-            _sending = true;
-            JSInteropManager.SendTransactionArgentX("contractAddress", "entryPoint", "callData", this.gameObject.name, nameof(SendContractCallback));
-            await UniTask.WaitUntil(() => _sending == false);
+            return !string.IsNullOrEmpty(txHash) && (txHash.Length == 64 || txHash.Length == 65);
         }
     }
 

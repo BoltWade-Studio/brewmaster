@@ -134,7 +134,7 @@ namespace Game
         private void OnClaimSuccessHandler()
         {
             // Active shop button
-            _claimBtn.gameObject.GetComponent<Button>().interactable = false;
+            _claimBtn.IsInteractable = false;
             _isClaimed = true;
         }
         #endregion
@@ -179,15 +179,15 @@ namespace Game
             _canvasGroup.alpha = 0;
             if (isUpdate)
             {
-                if (PlayerData.PlayerTreasury > 0)
+                if (PlayerData.InDayTreasury > 0)
                 {
                     _isClaimed = false;
-                    _claimBtn.gameObject.GetComponent<Button>().interactable = true;
+                    _claimBtn.IsInteractable = true;
                 }
                 else
                 {
                     _isClaimed = true;
-                    _claimBtn.gameObject.GetComponent<Button>().interactable = false;
+                    _claimBtn.IsInteractable = false;
                 }
                 await GetPointBeforeClaim();
                 PlayMoneyAnimation();

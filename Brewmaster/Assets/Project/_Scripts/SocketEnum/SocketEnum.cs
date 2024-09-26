@@ -59,6 +59,11 @@ public enum SocketEnum
 	giftData,
 	#endregion
 
+	#region Transaction
+	waitTransaction,
+	waitTransactionCallback,
+	#endregion
+
 	spawnCustomer,
 	customerReachDestination,
 	customerReturn,

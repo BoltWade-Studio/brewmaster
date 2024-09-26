@@ -310,6 +310,13 @@ namespace Game
 						_actionEventDic["logoutCallback"].Invoke(data.GetValue<string>());
 					}
 				});
+				socket.On("waitTransactionCallback", (data) =>
+				{
+					if (_actionEventDic.ContainsKey("waitTransactionCallback"))
+					{
+						_actionEventDic["waitTransactionCallback"].Invoke(data.GetValue<string>());
+					}
+				});
 				socket.Connect();
 			}
 
@@ -324,7 +331,8 @@ namespace Game
 			public static void EmitEvent(string eventName, string jsonData = null)
 			{
 				// Debug.Log("EmitEvent: " + eventName);
-				jsonData = ToSocketJson(jsonData);
+				if (jsonData != null)
+					jsonData = ToSocketJson(jsonData);
 
 #if UNITY_WEBGL && !UNITY_EDITOR
 				JsSocketConnect.EmitEvent(eventName, jsonData);

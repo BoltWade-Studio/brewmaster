@@ -89,16 +89,11 @@ namespace Game
 		private async UniTask<bool> CreateNewPub()
 		{
 			bool isCreatedPub = await TransactionManager.Instance.CreatePub();
-			if (isCreatedPub == true)
+			if (isCreatedPub == false)
 			{
-				LoadingUIManager.Instance.Show("Wait for contract update");
-				await UniTask.WaitForSeconds(30f);
-			}
-			else
-			{
-				LoadingUIManager.Instance.Hide();
-				string message = "The user aborted the action, please create a pub to continue playing the game";
-				PopupManager.Instance.ShowYesNoPopup("Create new pub", message, async () =>
+				const string title = "Create new pub";
+				const string message = "The user aborted the action, please create a pub to continue playing the game";
+				PopupManager.Instance.ShowYesNoPopup(title, message, async () =>
 				{
 					await CreateNewPub();
 				}, null);
