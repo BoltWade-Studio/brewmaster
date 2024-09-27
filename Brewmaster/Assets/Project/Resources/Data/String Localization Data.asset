@@ -90,3 +90,11 @@ MonoBehaviour:
       _value:
         Vietnamese: "M\u1EE5c ti\xEAu ti\u1EBFp theo:"
         English: 'Next Target:'
+    - _key: Treasury
+      _value:
+        Vietnamese: "D\u1EF1 tr\u1EEF"
+        English: Treasury
+    - _key: Point
+      _value:
+        Vietnamese: "\u0110i\u1EC3m"
+        English: Point
