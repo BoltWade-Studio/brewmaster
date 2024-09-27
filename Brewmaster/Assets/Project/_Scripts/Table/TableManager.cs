@@ -138,8 +138,8 @@ namespace Game
         }
         private void LoadTableSeat()
         {
-            Debug.Log("client table count: " + _tableList.Count);
-            Debug.Log("server table count: " + PlayerData.PlayerScale.Count());
+            // Debug.Log("client table count: " + _tableList.Count);
+            // Debug.Log("server table count: " + PlayerData.PlayerScale.Count());
             for (int i = 0; i < PlayerData.PlayerScale.Count(); i++)
             {
                 int index = i;
@@ -149,7 +149,7 @@ namespace Game
                 {
                     table.TableIndex = scale.TableIndex;
                     table.AvailableSeatNumber = scale.Stools;
-                    Debug.Log("index: " + scale.TableIndex + " number: " + scale.Stools);
+                    // Debug.Log("index: " + scale.TableIndex + " number: " + scale.Stools);
                 }
                 table.LoadSeat();
             }
@@ -169,7 +169,7 @@ namespace Game
 	        {
 		        if (GameplayManager.Instance.IsMainMenu == false)
 		        {
-			        Debug.Log("index: " + i + " table index: " + PlayerData.PlayerScale[i].TableIndex);
+			        // Debug.Log("index: " + i + " table index: " + PlayerData.PlayerScale[i].TableIndex);
 			        _tableList[i].TableIndex = PlayerData.PlayerScale[i].TableIndex;
 			        _tableList[i].AvailableSeatNumber = PlayerData.PlayerScale[i].Stools;
 			        _tableList[i].LoadSeat();

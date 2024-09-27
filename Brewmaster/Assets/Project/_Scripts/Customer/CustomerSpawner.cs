@@ -43,7 +43,7 @@ namespace Game
 		#region Event functions
 		private void SpawnCustomer(string data)
 		{
-			Debug.Log("Spawn customer");
+			// Debug.Log("Spawn customer");
 			try
 			{
 				CustomerDto customerDto = JsonUtility.FromJson<CustomerDto>(data);
