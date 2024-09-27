@@ -77,7 +77,7 @@ namespace Game
         {
             _gettingData = true;
             Utility.Socket.EmitEvent(SocketEnum.getPlayerPub.ToString());
-
+            _transactionJsonDataDic.Remove(TransactionID.GET_PLAYER_PUB);
             await UniTask.WaitUntil(() => _gettingData == false);
             await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.GET_PLAYER_PUB));
 
