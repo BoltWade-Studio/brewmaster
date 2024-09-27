@@ -1,335 +1,297 @@
 mergeInto(LibraryManager.library, {
-    IsWalletAvailable: function () {
-        if (window.starknet) {
-            return true;
-        } else {
-            return false;
-        }
-    },
+	IsWalletAvailable: function () {
+		if (window.starknet) {
+			return true;
+		} else {
+			return false;
+		}
+	},
 
-    AskToInstallWallet: function () {
-        window.alert("Please install Starknet Wallet");
-    },
+	AskToInstallWallet: function () {
+		window.alert("Please install Starknet Wallet");
+	},
 
-    ConnectWalletArgentX: async function () {
-        if (window.starknet_argentX) {
-            try {
-                await window.starknet_argentX.enable();
-                window.localStorage.setItem("walletType", "argentX");
-                if (window.starknet_argentX.isConnected) {
-                    window.walletConnect = true;
-                }
-            } catch (e) {
-                console.log(e.message);
-            }
-        }
-    },
+	ConnectWalletArgentX: async function () {
+		if (window.starknet_argentX) {
+			window.localStorage.setItem("walletType", "argentX");
+			await window.starknet_argentX.enable();
+		}
+	},
 
-    ConnectWalletBraavos: async function () {
-        console.log("ConnectWalletBraavos");
-        if (window.starknet_braavos) {
-            console.log("braavos available");
-            try {
-                await window.starknet_braavos.enable();
-                window.localStorage.setItem("walletType", "braavos");
-                if (window.starknet_braavos.isConnected) {
-                    console.log("braavos enabled");
-                    window.walletConnect = true;
-                }
-            } catch (e) {
-                console.log("error braavos: ");
-                console.log(e.message);
-            }
-        } else {
-            console.log("braavos not available");
-        }
-    },
+	ConnectWalletBraavos: async function () {
+		if (window.starknet_braavos) {
+			window.localStorage.setItem("walletType", "braavos");
+			await window.starknet_braavos.enable();
+		}
+	},
 
-    DisconnectWallet: async function () {
-        window.walletConnect = false;
-    },
+	IsConnected: function () {
+		return (
+			window.starknet_argentX.isConnected ||
+			window.starknet_braavos.isConnected
+		);
+	},
 
-    IsConnected: function () {
-        console.log("IsConnected");
-        return (
-            window.walletConnect == true &&
-            (window.starknet.isConnected ||
-                window.starknet_argentX.isConnected ||
-                window.starknet_braavos.isConnected)
-        );
-    },
+	DisconnectWallet: function () {
+		window.localStorage.removeItem("walletType");
+		if (window.starknet_argentX) {
+			if (typeof window.starknet_argentX.disconnect === "function") {
+				window.starknet_argentX.disconnect();
+			} else {
+				console.error("Disconnect method not found on ArgentX.");
+			}
+		}
+		if (window.starknet_braavos) {
+			if (typeof window.starknet_braavos.disconnect === "function") {
+				window.starknet_braavos.disconnect();
+			} else {
+				console.error("Disconnect method not found on Braavos.");
+			}
+		}
+	},
 
-    GetWalletType: function () {
-        var walletType = window.localStorage.getItem("walletType");
-        var bufferSize = lengthBytesUTF8(walletType) + 1;
-        var buffer = _malloc(bufferSize);
-        stringToUTF8(walletType, buffer, bufferSize);
-        return buffer;
-    },
+	GetAccount: function () {
+		const walletType = window.localStorage.getItem("walletType");
+		let address = "";
+		if (walletType == "argentX") {
+			address = window.starknet_argentX.selectedAddress;
+		} else if (walletType == "braavos") {
+			address = window.starknet_braavos.selectedAddress;
+		} else {
+			address = window.starknet.account.address;
+		}
+		var bufferSize = lengthBytesUTF8(address) + 1;
+		var buffer = _malloc(bufferSize);
+		stringToUTF8(address, buffer, bufferSize);
+		return buffer;
+	},
 
-    GetAccount: function () {
-        console.log("GetAccount");
-        const walletType = window.localStorage.getItem("walletType");
-        let address = "";
-        if (walletType == "argentX") {
-            address = window.starknet_argentX.selectedAddress;
-        } else if (walletType == "braavos") {
-            address = window.starknet_braavos.selectedAddress;
-        } else {
-            address = window.starknet.account.address;
-        }
-        var bufferSize = lengthBytesUTF8(address) + 1;
-        var buffer = _malloc(bufferSize);
-        stringToUTF8(address, buffer, bufferSize);
-        return buffer;
-    },
+	SendTransactionArgentX: async function (
+		contractAddress,
+		entrypoint,
+		calldata,
+		callbackObjectName,
+		callbackMethodName
+	) {
+		const jsStringToWasm = (str) => {
+			var bufferSize = lengthBytesUTF8(str) + 1;
+			var buffer = _malloc(bufferSize);
+			stringToUTF8(str, buffer, bufferSize);
+			return buffer;
+		};
 
-    SendTransactionArgentX: async function (
-        contractAddress,
-        entrypoint,
-        calldata,
-        callbackObjectName,
-        callbackMethodName
-    ) {
-        const jsStringToWasm = (str) => {
-            var bufferSize = lengthBytesUTF8(str) + 1;
-            var buffer = _malloc(bufferSize);
-            stringToUTF8(str, buffer, bufferSize);
-            return buffer;
-        };
+		const calldataArray = JSON.parse(UTF8ToString(calldata));
+		const contractAddressStr = UTF8ToString(contractAddress);
+		const entrypointStr = UTF8ToString(entrypoint);
+		const callbackObjectStr = UTF8ToString(callbackObjectName);
+		const callbackMethodStr = UTF8ToString(callbackMethodName);
 
-        const toHex = (number) => {
-            return "0x" + number.toString(16);
-        };
+		await window.starknet_argentX.enable();
+		if (window.starknet_argentX.selectedAddress) {
+			window.starknet_argentX.account
+				.execute([
+					{
+						contractAddress: contractAddressStr,
+						entrypoint: entrypointStr,
+						calldata: calldataArray.array,
+					},
+				])
+				.then((response) => {
+					const transactionHash = response.transaction_hash;
+					myGameInstance.SendMessage(
+						callbackObjectStr,
+						callbackMethodStr,
+						transactionHash
+					);
+				})
+				.catch((error) => {
+					const errorMessage = error.message;
+					myGameInstance.SendMessage(
+						callbackObjectStr,
+						callbackMethodStr,
+						errorMessage
+					);
+				});
+		}
+	},
 
-        const calldataArray = JSON.parse(UTF8ToString(calldata));
-        const contractAddressStr = UTF8ToString(contractAddress);
-        const entrypointStr = UTF8ToString(entrypoint);
-        const callbackObjectStr = UTF8ToString(callbackObjectName);
-        const callbackMethodStr = UTF8ToString(callbackMethodName);
-        const maxQtyGasAuthorized = 1800n;
-        const maxPriceAuthorizeForOneGas = 12n * 10n ** 9n;
+	SendTransactionBraavos: async function (
+		contractAddress,
+		entrypoint,
+		calldata,
+		callbackObjectName,
+		callbackMethodName
+	) {
+		const jsStringToWasm = (str) => {
+			var bufferSize = lengthBytesUTF8(str) + 1;
+			var buffer = _malloc(bufferSize);
+			stringToUTF8(str, buffer, bufferSize);
+			return buffer;
+		};
 
-        await window.starknet_argentX.enable();
-        if (window.starknet_argentX.selectedAddress) {
-            window.starknet_argentX.account
-                .execute([
-                    {
-                        contractAddress: contractAddressStr,
-                        entrypoint: entrypointStr,
-                        calldata: calldataArray.array,
-                    },
-                ])
-                .then((response) => {
-                    const transactionHash = response.transaction_hash;
-                    myGameInstance.SendMessage(
-                        callbackObjectStr,
-                        callbackMethodStr,
-                        transactionHash
-                    );
-                })
-                .catch((error) => {
-                    const errorMessage = error.message;
-                    myGameInstance.SendMessage(
-                        callbackObjectStr,
-                        callbackMethodStr,
-                        errorMessage
-                    );
-                });
-        }
-    },
+		const calldataArray = JSON.parse(UTF8ToString(calldata));
+		const contractAddressStr = UTF8ToString(contractAddress);
+		const entrypointStr = UTF8ToString(entrypoint);
+		const callbackObjectStr = UTF8ToString(callbackObjectName);
+		const callbackMethodStr = UTF8ToString(callbackMethodName);
 
-    SendTransactionBraavos: async function (
-        contractAddress,
-        entrypoint,
-        calldata,
-        callbackObjectName,
-        callbackMethodName
-    ) {
-        const jsStringToWasm = (str) => {
-            var bufferSize = lengthBytesUTF8(str) + 1;
-            var buffer = _malloc(bufferSize);
-            stringToUTF8(str, buffer, bufferSize);
-            return buffer;
-        };
+		await window.starknet_braavos.enable();
+		if (window.starknet_braavos.selectedAddress) {
+			window.starknet_braavos.account
+				.execute([
+					{
+						contractAddress: contractAddressStr,
+						entrypoint: entrypointStr,
+						calldata: calldataArray.array,
+					},
+				])
+				.then((response) => {
+					const transactionHash = response.transaction_hash;
+					myGameInstance.SendMessage(
+						callbackObjectStr,
+						callbackMethodStr,
+						transactionHash
+					);
+				})
+				.catch((error) => {
+					const errorMessage = error.message;
+					myGameInstance.SendMessage(
+						callbackObjectStr,
+						callbackMethodStr,
+						errorMessage
+					);
+				});
+		}
+	},
 
-        const calldataArray = JSON.parse(UTF8ToString(calldata));
-        const contractAddressStr = UTF8ToString(contractAddress);
-        const entrypointStr = UTF8ToString(entrypoint);
-        const callbackObjectStr = UTF8ToString(callbackObjectName);
-        const callbackMethodStr = UTF8ToString(callbackMethodName);
+	SendTransaction: async function (
+		contractAddress,
+		entrypoint,
+		calldata,
+		callbackObjectName,
+		callbackMethodName
+	) {
+		const jsStringToWasm = (str) => {
+			var bufferSize = lengthBytesUTF8(str) + 1;
+			var buffer = _malloc(bufferSize);
+			stringToUTF8(str, buffer, bufferSize);
+			return buffer;
+		};
 
-        await window.starknet_braavos.enable();
-        if (window.starknet_braavos.selectedAddress) {
-            window.starknet_braavos.account
-                .execute([
-                    {
-                        contractAddress: contractAddressStr,
-                        entrypoint: entrypointStr,
-                        calldata: calldataArray.array,
-                    },
-                ])
-                .then((response) => {
-                    const transactionHash = response.transaction_hash;
-                    myGameInstance.SendMessage(
-                        callbackObjectStr,
-                        callbackMethodStr,
-                        transactionHash
-                    );
-                })
-                .catch((error) => {
-                    const errorMessage = error.message;
-                    myGameInstance.SendMessage(
-                        callbackObjectStr,
-                        callbackMethodStr,
-                        errorMessage
-                    );
-                });
-        }
-    },
+		const calldataArray = JSON.parse(UTF8ToString(calldata));
+		const contractAddressStr = UTF8ToString(contractAddress);
+		const entrypointStr = UTF8ToString(entrypoint);
+		const callbackObjectStr = UTF8ToString(callbackObjectName);
+		const callbackMethodStr = UTF8ToString(callbackMethodName);
 
-    SendTransaction: async function (
-        contractAddress,
-        entrypoint,
-        calldata,
-        callbackObjectName,
-        callbackMethodName
-    ) {
-        const jsStringToWasm = (str) => {
-            var bufferSize = lengthBytesUTF8(str) + 1;
-            var buffer = _malloc(bufferSize);
-            stringToUTF8(str, buffer, bufferSize);
-            return buffer;
-        };
+		if (window.localStorage.getItem("walletType") == "argentX") {
+			await window.starknet_argentX.enable();
+			if (window.starknet_argentX.selectedAddress) {
+				window.starknet_argentX.account
+					.execute([
+						{
+							contractAddress: contractAddressStr,
+							entrypoint: entrypointStr,
+							calldata: calldataArray.array,
+						},
+					])
+					.then((response) => {
+						const transactionHash = response.transaction_hash;
+						myGameInstance.SendMessage(
+							callbackObjectStr,
+							callbackMethodStr,
+							transactionHash
+						);
+					})
+					.catch((error) => {
+						const errorMessage = error.message;
+						myGameInstance.SendMessage(
+							callbackObjectStr,
+							callbackMethodStr,
+							errorMessage
+						);
+					});
+			}
+		} else if (window.localStorage.getItem("walletType") == "braavos") {
+			await window.starknet_braavos.enable();
+			if (window.starknet_braavos.selectedAddress) {
+				window.starknet_braavos.account
+					.execute([
+						{
+							contractAddress: contractAddressStr,
+							entrypoint: entrypointStr,
+							calldata: calldataArray.array,
+						},
+					])
+					.then((response) => {
+						const transactionHash = response.transaction_hash;
+						myGameInstance.SendMessage(
+							callbackObjectStr,
+							callbackMethodStr,
+							transactionHash
+						);
+					})
+					.catch((error) => {
+						const errorMessage = error.message;
+						myGameInstance.SendMessage(
+							callbackObjectStr,
+							callbackMethodStr,
+							errorMessage
+						);
+					});
+			}
+		}
+	},
 
-        const calldataArray = JSON.parse(UTF8ToString(calldata));
-        const contractAddressStr = UTF8ToString(contractAddress);
-        const entrypointStr = UTF8ToString(entrypoint);
-        const callbackObjectStr = UTF8ToString(callbackObjectName);
-        const callbackMethodStr = UTF8ToString(callbackMethodName);
+	CallContract: async function (
+		contractAddress,
+		entrypoint,
+		calldata,
+		callbackObjectName,
+		callbackMethodName
+	) {
+		const jsStringToWasm = (str) => {
+			var bufferSize = lengthBytesUTF8(str) + 1;
+			var buffer = _malloc(bufferSize);
+			stringToUTF8(str, buffer, bufferSize);
+			return buffer;
+		};
 
-        await window.starknet.enable();
-        if (window.starknet.selectedAddress) {
-            window.starknet.account
-                .execute([
-                    {
-                        contractAddress: contractAddressStr,
-                        entrypoint: entrypointStr,
-                        calldata: calldataArray.array,
-                    },
-                ])
-                .then((response) => {
-                    const transactionHash = response.transaction_hash;
-                    myGameInstance.SendMessage(
-                        callbackObjectStr,
-                        callbackMethodStr,
-                        transactionHash
-                    );
-                })
-                .catch((error) => {
-                    const errorMessage = error.message;
-                    myGameInstance.SendMessage(
-                        callbackObjectStr,
-                        callbackMethodStr,
-                        errorMessage
-                    );
-                });
-        }
-    },
+		const calldataArray = JSON.parse(UTF8ToString(calldata));
+		const contractAddressStr = UTF8ToString(contractAddress);
+		const entrypointStr = UTF8ToString(entrypoint);
+		const callbackObjectStr = UTF8ToString(callbackObjectName);
+		const callbackMethodStr = UTF8ToString(callbackMethodName);
 
-    SendTransactionNoData: async function (
-        contractAddress,
-        entrypoint,
-        callbackObjectName,
-        callbackMethodName
-    ) {
-        const jsStringToWasm = (str) => {
-            var bufferSize = lengthBytesUTF8(str) + 1;
-            var buffer = _malloc(bufferSize);
-            stringToUTF8(str, buffer, bufferSize);
-            return buffer;
-        };
+		await window.starknet.enable();
+		if (window.starknet.selectedAddress) {
+			window.starknet.account
+				.callContract({
+					contractAddress: contractAddressStr,
+					entrypoint: entrypointStr,
+					calldata: calldataArray.array,
+				})
+				.then((response) => {
+					const responseStr = JSON.stringify(response);
+					myGameInstance.SendMessage(
+						callbackObjectStr,
+						callbackMethodStr,
+						responseStr
+					);
+				})
+				.catch((error) => {
+					const errorMessage = error.message;
+					myGameInstance.SendMessage(
+						callbackObjectStr,
+						callbackMethodStr,
+						errorMessage
+					);
+				});
+		}
+	},
 
-        const contractAddressStr = UTF8ToString(contractAddress);
-        const entrypointStr = UTF8ToString(entrypoint);
-        const callbackObjectStr = UTF8ToString(callbackObjectName);
-        const callbackMethodStr = UTF8ToString(callbackMethodName);
-        console.log("socketEntryPoint: " + entrypointStr);
-
-        await window.starknet.enable();
-        if (window.starknet.selectedAddress) {
-            window.starknet.account
-                .execute([
-                    {
-                        contractAddress: contractAddressStr,
-                        entrypoint: entrypointStr,
-                    },
-                ])
-                .then((response) => {
-                    // const transactionHash = response.transaction_hash;
-                    myGameInstance.SendMessage(
-                        callbackObjectStr,
-                        callbackMethodStr
-                    );
-                })
-                .catch((error) => {
-                    // const errorMessage = error.message;
-                    myGameInstance.SendMessage(
-                        callbackObjectStr,
-                        callbackMethodStr
-                    );
-                });
-        }
-    },
-
-    CallContract: async function (
-        contractAddress,
-        entrypoint,
-        calldata,
-        callbackObjectName,
-        callbackMethodName
-    ) {
-        const jsStringToWasm = (str) => {
-            var bufferSize = lengthBytesUTF8(str) + 1;
-            var buffer = _malloc(bufferSize);
-            stringToUTF8(str, buffer, bufferSize);
-            return buffer;
-        };
-
-        const calldataArray = JSON.parse(UTF8ToString(calldata));
-        const contractAddressStr = UTF8ToString(contractAddress);
-        const entrypointStr = UTF8ToString(entrypoint);
-        const callbackObjectStr = UTF8ToString(callbackObjectName);
-        const callbackMethodStr = UTF8ToString(callbackMethodName);
-
-        await window.starknet.enable();
-        if (window.starknet.selectedAddress) {
-            window.starknet.account
-                .callContract({
-                    contractAddress: contractAddressStr,
-                    entrypoint: entrypointStr,
-                    calldata: calldataArray.array,
-                })
-                .then((response) => {
-                    const responseStr = JSON.stringify(response);
-                    myGameInstance.SendMessage(
-                        callbackObjectStr,
-                        callbackMethodStr,
-                        responseStr
-                    );
-                })
-                .catch((error) => {
-                    const errorMessage = error.message;
-                    myGameInstance.SendMessage(
-                        callbackObjectStr,
-                        callbackMethodStr,
-                        errorMessage
-                    );
-                });
-        }
-    },
-
-    FreeWasmString: function (ptr) {
-        _free(ptr);
-    },
+	FreeWasmString: function (ptr) {
+		_free(ptr);
+	},
 });
+
