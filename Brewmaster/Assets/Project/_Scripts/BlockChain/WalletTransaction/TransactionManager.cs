@@ -21,7 +21,7 @@ namespace Game
         private bool _gettingData;
         private bool _sending;
         private bool _isClaimSuccess;
-        private bool _transactionSending;
+        private bool _isTransactionSending;
 
         void Start()
         {
@@ -29,10 +29,6 @@ namespace Game
             Utility.Socket.OnEvent(SocketEnum.claimCallback.ToString(), this.gameObject.name, nameof(ClaimCallback), ClaimCallback);
             Utility.Socket.OnEvent(SocketEnum.getPlayerPubCallback.ToString(), this.gameObject.name, nameof(GetPlayerPubCallback), GetPlayerPubCallback);
             Utility.Socket.OnEvent(SocketEnum.getPriceForAddStoolCallback.ToString(), this.gameObject.name, nameof(GetStoolPriceCallback), GetStoolPriceCallback);
-        }
-
-        void Update()
-        {
         }
 
         #region Private
@@ -127,10 +123,8 @@ namespace Game
             if (IsValidTransactionHash(txHash))
             {
                 // This is a transaction hash, wait for transaction
-                LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for transaction update");
                 bool transactionResult = await WaitTransaction(txHash);
                 result = transactionResult.ToString().ToLower();
-                LoadingUIManager.Instance.Hide();
             }
             else
             {
@@ -173,18 +167,25 @@ namespace Game
 
             if (Application.isEditor == false)
             {
+                // Is not editor
                 string contractAddress = await GetContractEntry(TransactionID.CONTRACT_ADDRESS);
                 string closingUpPubEntry = await GetContractEntry(TransactionID.CLOSING_UP_PUB);
 
                 LoadingUIManager.Instance.ChangeLoadingMessage("Sending data");
                 JSInteropManager.SendTransaction(contractAddress, closingUpPubEntry, jsonData, this.gameObject.name, nameof(ClosingUpPubCallback));
             }
+            else
+            {
+                // Is editor
+                LoadingUIManager.Instance.Hide();
+                _sending = false;
+                GameEvent.Instance.OnClaimSuccess?.Invoke();
+            }
             Debug.Log("claimCallback: " + jsonData);
         }
         private async void ClosingUpPubCallback(string txHash)
         {
             await UniTask.SwitchToMainThread();
-            LoadingUIManager.Instance.Hide();
             if (IsValidTransactionHash(txHash)) // this is transaction hash
             {
                 LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for transaction update");
@@ -205,6 +206,7 @@ namespace Game
             {
                 NotifyManager.Instance.Show("Execute failed");
             }
+            LoadingUIManager.Instance.Hide();
             _sending = false;
         }
         #endregion
@@ -233,6 +235,11 @@ namespace Game
         #endregion
 
         #region Upgrade
+        /// <summary>
+        /// Return true if transaction is successful, false if transaction is failed or user abort
+        /// </summary>
+        /// <param name="tableIndex"></param>
+        /// <returns></returns>
         public async UniTask<bool> AddStool(int tableIndex)
         {
             _sending = true;
@@ -242,16 +249,21 @@ namespace Game
                 string contractAddress = await GetContractEntry(TransactionID.CONTRACT_ADDRESS);
                 string addStoolEntry = await GetContractEntry(TransactionID.ADD_STOOL);
 
+                // Send transaction to blockchain 
+                _transactionJsonDataDic.Remove(TransactionID.ADD_STOOL);
+                LoadingUIManager.Instance.ChangeLoadingMessage("Sending data");
                 JSInteropManager.SendTransaction(contractAddress, addStoolEntry, JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { tableIndex.ToString() } }), this.gameObject.name, nameof(AddStoolCallback));
                 await UniTask.WaitUntil(() => _sending == false);
                 await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.ADD_STOOL));
-                return _transactionJsonDataDic[TransactionID.ADD_STOOL].Contains("abort", StringComparison.InvariantCultureIgnoreCase) == false;
+
+                // return true if transaction is successful, false if transaction is failed or user abort
+                return _transactionJsonDataDic[TransactionID.ADD_STOOL].ToLower() == "true";
             }
             else
             {
                 _sending = false;
+                return true;
             }
-            return true;
         }
         private async void AddStoolCallback(string txHash)
         {
@@ -260,14 +272,16 @@ namespace Game
 
             if (IsValidTransactionHash(txHash) == false) // txHash is not valid
             {
-                NotifyManager.Instance.Show("Execute failed");
+                _transactionJsonDataDic.Add(TransactionID.ADD_STOOL, "false");
                 return;
             }
 
-            // txHash is valid
-            bool transactionSuccess = await WaitTransaction(txHash);
 
-            if (transactionSuccess)
+            // txHash is valid, wait for transaction done
+            LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for transaction update");
+            bool isTransactionSuccess = await WaitTransaction(txHash);
+
+            if (isTransactionSuccess)
             {
                 // Transaction is successful
                 NotifyManager.Instance.Show("Transaction successful");
@@ -277,6 +291,7 @@ namespace Game
                 // Transaction is failed
                 NotifyManager.Instance.Show("Transaction failed");
             }
+            _transactionJsonDataDic.Add(TransactionID.ADD_STOOL, isTransactionSuccess.ToString().ToLower());
             _sending = false;
         }
 
@@ -292,31 +307,31 @@ namespace Game
             }
 
             LoadingUIManager.Instance.Show("Waiting for transaction update");
-
-            _transactionSending = true;
+            _isTransactionSending = true;
             string socketString = Utility.Socket.StringToSocketJson(txHash);
-            Utility.Socket.EmitEvent(SocketEnum.waitTransaction.ToString(), socketString);
             Utility.Socket.OnEvent(SocketEnum.waitTransactionCallback.ToString(), this.gameObject.name, nameof(WaitTransactionCallback), WaitTransactionCallback);
+            Utility.Socket.EmitEvent(SocketEnum.waitTransaction.ToString(), socketString);
 
-            await UniTask.WaitUntil(() => _transactionSending == false);
-            await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.ADD_STOOL));
+            await UniTask.WaitUntil(() => _isTransactionSending == false);
+            await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.WAIT_TRANSACTION));
+            await UniTask.WaitForSeconds(1f); // Wait extra 1s
 
-            LoadingUIManager.Instance.Hide();
-
-            string result = _transactionJsonDataDic[TransactionID.ADD_STOOL];
+            string result = _transactionJsonDataDic[TransactionID.WAIT_TRANSACTION];
             return result.ToLower() == "true";
         }
         private async void WaitTransactionCallback(string response)
         {
             await UniTask.SwitchToMainThread();
             // Transaction is completed callback
-            if (_transactionJsonDataDic.ContainsKey(TransactionID.ADD_STOOL))
+            Debug.Log("WaitTransactionCallback: " + response.ToString());
+            if (_transactionJsonDataDic.ContainsKey(TransactionID.WAIT_TRANSACTION))
             {
-                _transactionJsonDataDic[TransactionID.ADD_STOOL] = response.ToString();
+                _transactionJsonDataDic[TransactionID.WAIT_TRANSACTION] = response.ToString();
             }
             else
-                _transactionJsonDataDic.Add(TransactionID.ADD_STOOL, response.ToString());
-            _transactionSending = false;
+                _transactionJsonDataDic.Add(TransactionID.WAIT_TRANSACTION, response.ToString());
+
+            _isTransactionSending = false;
         }
         #endregion
 
@@ -341,6 +356,7 @@ namespace Game
         ADD_STOOL,
         ADD_TABLE,
         CLOSING_UP_PUB,
-        UPGRADE
+        UPGRADE,
+        WAIT_TRANSACTION
     }
 }

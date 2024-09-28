@@ -85,7 +85,7 @@ namespace Game
 
             LoadingUIManager.Instance.Show("Checking condition");
             Utility.Socket.OnEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
-            Utility.Socket.EmitEvent("getCanUpgradeTable", json);
+            Utility.Socket.EmitEvent(SocketEnum.getCanUpgradeTable.ToString(), json);
         }
 
         private async void CanUpgradeTableCallback(string data)
@@ -93,7 +93,7 @@ namespace Game
             await UniTask.SwitchToMainThread();
             try
             {
-                _canUpgrade = data.ToLower().Equals("true");
+                _canUpgrade = data.ToLower().Equals("true"); // Check if the table can be upgraded
                 Debug.Log("CanUpgradeTableCallback: " + _canUpgrade);
 
                 if (_canUpgrade)
@@ -102,33 +102,38 @@ namespace Game
                     Debug.Log("AddStool to table: " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
                     if (Application.isEditor == false)
                     {
+                        // Send transaction to blockchain and wait for result
+                        LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for player confirmation");
                         result = await TransactionManager.Instance.AddStool(_table.TableIndex);
                     }
-                    if (result == false)
+                    if (result == true)
                     {
+                        // Transaction is successful, load data
+                        LoadingUIManager.Instance.ChangeLoadingMessage("Getting player data");
+                        Upgrade(); // Upgrade in local only
+                        await DataSaveLoadManager.Instance.LoadData(); // Load data from blockchain an update in server
                         LoadingUIManager.Instance.Hide();
-                        NotifyManager.Instance.Show("Player cancel upgrade");
                     }
                     else
                     {
-                        LoadingUIManager.Instance.ChangeLoadingMessage("Wait for updating transaction");
-                        await UniTask.WaitForSeconds(30f);
-                        Upgrade();
-                        await DataSaveLoadManager.Instance.LoadData();
+                        // Transaction is failed, hide loading and notify
+                        LoadingUIManager.Instance.Hide();
+                        NotifyManager.Instance.Show("Transaction failed or user abort");
                     }
                 }
                 else
                 {
                     LoadingUIManager.Instance.Hide();
-                    NotifyManager.Instance.Show("Don't have enough money");
+                    NotifyManager.Instance.Show("Don't have enough money or table is not available to upgrade");
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError("CanUpgradeCallback error: " + e.Message);
+                // Debug.LogError("CanUpgradeCallback error: " + e.Message);
+                NotifyManager.Instance.Show("Error: " + e.Message);
+                LoadingUIManager.Instance.Hide();
             }
 
-            LoadingUIManager.Instance.Hide();
         }
 
         protected virtual void OnStorePhaseHandler() { }

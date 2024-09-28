@@ -20,7 +20,8 @@ namespace Game
 #if UNITY_EDITOR
 			public static void Init()
 			{
-				var uri = new Uri("http://localhost:5006");
+				// var uri = new Uri("http://localhost:5006");
+				var uri = new Uri("https://brewmaster-socket-test.boltwade.xyz");
 				// var uri = new Uri("https://brewmaster-socket.starkarcade.com/");
 				socket = new SocketIOUnity(uri, new SocketIOOptions
 				{

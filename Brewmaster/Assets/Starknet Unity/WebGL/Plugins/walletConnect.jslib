@@ -15,7 +15,7 @@ mergeInto(LibraryManager.library, {
         if (window.starknet_argentX) {
             try {
                 await window.starknet_argentX.enable();
-                window.localStorage.setItem("walletType", "argentX");
+                window.sessionStorage.setItem("walletType", "argentX");
                 if (window.starknet_argentX.isConnected) {
                     window.walletConnect = true;
                 }
@@ -31,7 +31,7 @@ mergeInto(LibraryManager.library, {
             console.log("braavos available");
             try {
                 await window.starknet_braavos.enable();
-                window.localStorage.setItem("walletType", "braavos");
+                window.sessionStorage.setItem("walletType", "braavos");
                 if (window.starknet_braavos.isConnected) {
                     console.log("braavos enabled");
                     window.walletConnect = true;
@@ -60,7 +60,7 @@ mergeInto(LibraryManager.library, {
     },
 
     GetWalletType: function () {
-        var walletType = window.localStorage.getItem("walletType");
+        var walletType = window.sessionStorage.getItem("walletType");
         var bufferSize = lengthBytesUTF8(walletType) + 1;
         var buffer = _malloc(bufferSize);
         stringToUTF8(walletType, buffer, bufferSize);
@@ -69,7 +69,7 @@ mergeInto(LibraryManager.library, {
 
     GetAccount: function () {
         console.log("GetAccount");
-        const walletType = window.localStorage.getItem("walletType");
+        const walletType = window.sessionStorage.getItem("walletType");
         let address = "";
         if (walletType == "argentX") {
             address = window.starknet_argentX.selectedAddress;

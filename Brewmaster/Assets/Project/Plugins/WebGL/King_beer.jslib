@@ -9,7 +9,8 @@ mergeInto(LibraryManager.library, {
             return;
         }
 
-        var socket = io('http://localhost:5006');
+        // var socket = io('http://localhost:5006');
+       var socket = io("https://brewmaster-socket-test.boltwade.xyz");
         // var socket = io("https://brewmaster-socket.boltwade.xyz");
 
         socket.on("connect", () => {
@@ -389,12 +390,12 @@ mergeInto(LibraryManager.library, {
         socket.on("waitTransactionCallback", (data) => {
             if (
                 this.objectNameDic.waitTransactionCallback &&
-                this.methodNameDic.waitTransactionCallba
+                this.methodNameDic.waitTransactionCallback
             ) {
                 SendMessage(
-                    this.objectNameDic.waitTransactionCallba,
-                    this.methodNameDic.waitTransactionCallba,
-                    ""
+                    this.objectNameDic.waitTransactionCallback,
+                    this.methodNameDic.waitTransactionCallback,
+                    data
                 );
             }
         });

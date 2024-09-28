@@ -121,9 +121,9 @@ namespace Game
 
 				Utility.Socket.EmitEvent(SocketEnum.updatePlayerAddress.ToString(), playerAddress);
 				GameEvent.Instance.OnLoadDataSuccess += OnLoadDatasSuccessHandler;
-				Debug.Log("Subscribe");
 				await DataSaveLoadManager.Instance.LoadData();
-			} catch (Exception e)
+			}
+			catch (Exception e)
 			{
 				Debug.LogError("An error occurred in WalletConnectAsync: " + e.Message);
 				throw;
