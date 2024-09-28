@@ -9,7 +9,20 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
     <script type="text/javascript">
-        location.reload(true); // true: tải lại mà không sử dụng cache
+        var reloadKey = 'hasReloaded';
+
+        // Check flag
+        if (!localStorage.getItem(reloadKey)) {
+            // If do not have flag, set flag and reload window
+            localStorage.setItem(reloadKey, 'true');
+            console.log("reload window");
+            location.reload();
+        }
+
+        // Delete flag when unload page
+        window.addEventListener('beforeunload', function () {
+            localStorage.removeItem(reloadKey);
+        });
     </script>
 </head>
 
@@ -67,11 +80,10 @@
       dataUrl: buildUrl + "/{{{ DATA_FILENAME }}}",
       frameworkUrl: buildUrl + "/{{{ FRAMEWORK_FILENAME }}}",
       codeUrl: buildUrl + "/{{{ CODE_FILENAME }}}",
-      #
-      if MEMORY_FILENAME
+      #if MEMORY_FILENAME
       memoryUrl: buildUrl + "/{{{ MEMORY_FILENAME }}}",
-      #endif#
-      if SYMBOLS_FILENAME
+      #endif
+      #if SYMBOLS_FILENAME
       symbolsUrl: buildUrl + "/{{{ SYMBOLS_FILENAME }}}",
       #endif
       streamingAssetsUrl: "StreamingAssets",
