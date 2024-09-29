@@ -68,8 +68,9 @@ namespace Game
         {
             GameEvent.Instance.OnClaimSuccess += SetClaimBtnInactive;
             GameEvent.Instance.OnClaimFail += SetClaimBtnActive;
+            LoadingUIManager.Instance.Show("Claiming");
             await TransactionManager.Instance.Claim();
-            await UniTask.WaitForSeconds(1f);
+            LoadingUIManager.Instance.Hide();
             GameEvent.Instance.OnClaimSuccess -= SetClaimBtnInactive;
             GameEvent.Instance.OnClaimFail -= SetClaimBtnActive;
         }

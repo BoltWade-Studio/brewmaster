@@ -103,24 +103,22 @@ namespace Game
 				if (Application.isEditor)
 				{
 					playerAddress =
-						Utility.Socket.StringToSocketJson(
-							"0x005893a02E717eeeE01572066DdD47D70014Cb497345991F8c7D4338F6b29d79");
+							"0x005893a02E717eeeE01572066DdD47D70014Cb497345991F8c7D4338F6b29d79";
 				}
 				else
 				{
 					if (!JSInteropManager.IsWalletAvailable())
 					{
-						LoadingUIManager.Instance.Show("Please install wallet");
-						JSInteropManager.AskToInstallWallet();
+						PopupManager.Instance.ShowAnnouncePopup("Please install wallet", "Do not find starknet wallet. Please install wallet", "OK", null);
 						await UniTask.WaitUntil(() => JSInteropManager.IsWalletAvailable());
 					}
 
-					LoadingUIManager.Instance.Show("Getting player data");
 					walletAction?.Invoke();
 					await UniTask.WaitUntil(() => JSInteropManager.IsConnected());
-					playerAddress = Utility.Socket.StringToSocketJson(JSInteropManager.GetAccount());
+					playerAddress = JSInteropManager.GetAccount();
 				}
 
+				playerAddress = Utility.Socket.StringToSocketJson(playerAddress);
 				Utility.Socket.EmitEvent(SocketEnum.updatePlayerAddress.ToString(), playerAddress);
 				GameEvent.Instance.OnLoadDataSuccess += OnLoadDatasSuccessHandler;
 				await DataSaveLoadManager.Instance.LoadData();

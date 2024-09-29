@@ -45,7 +45,7 @@ namespace Game
 		public async UniTask LoadData()
 		{
 			LoadingUIManager.Instance.Show("Getting player data");
-			await GetPlayerPub();
+			await FetchPlayerPub();
 
 			// Create new pub if scale is 0
 			if (PlayerData.PlayerScale.Count() == 0)
@@ -54,7 +54,7 @@ namespace Game
 				if (isCreated)
 				{
 					LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for create pub");
-					await GetPlayerPub();
+					await FetchPlayerPub();
 					LoadingUIManager.Instance.Hide();
 					PlayGame();
 				}
@@ -79,7 +79,7 @@ namespace Game
 			GameEvent.Instance.OnLoadDataSuccess?.Invoke();
 		}
 
-		private async UniTask GetPlayerPub()
+		private async UniTask FetchPlayerPub()
 		{
 			string jsonData = await TransactionManager.Instance.GetPlayerPub();
 
