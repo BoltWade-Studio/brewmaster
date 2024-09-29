@@ -50,7 +50,7 @@ namespace Game
 			UpdateUI();
 			_shareToTwitterBtn.interactable = false;
 			GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
-			Utility.Socket.OnEvent(SocketEnum.logoutCallback.ToString(), this.gameObject.name, nameof(LogOutCallback), LogOutCallback);
+			Utility.Socket.SubscribeEvent(SocketEnum.logoutCallback.ToString(), this.gameObject.name, nameof(LogOutCallback), LogOutCallback);
 		}
 
 		private void OnLoadDataSuccessHandler()

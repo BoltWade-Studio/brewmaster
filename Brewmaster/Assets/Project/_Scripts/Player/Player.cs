@@ -22,43 +22,44 @@ namespace Game
         #region Unity functions
         private void Start()
         {
-	        Utility.Socket.OnEvent("playerMove", this.gameObject.name, nameof(PlayerMove), PlayerMove);
+            Utility.Socket.SubscribeEvent("playerMove", this.gameObject.name, nameof(PlayerMove), PlayerMove);
         }
 
         private void Update()
         {
             GetInput();
 
-            if(_isPausePressed)
+            if (_isPausePressed)
             {
-	            GameplayManager.Instance.OnPausePressed?.Invoke();
+                GameplayManager.Instance.OnPausePressed?.Invoke();
             }
 
             if (toMove)
-			{
-				OnPlayerChangePositionSuccess?.Invoke();
+            {
+                OnPlayerChangePositionSuccess?.Invoke();
 
-				transform.position = new Vector3(this.transform.position.x, 0, standPosition.z);
-				toMove = false;
-			}
+                transform.position = new Vector3(this.transform.position.x, 0, standPosition.z);
+                toMove = false;
+            }
         }
         #endregion
 
         #region Event functions
         private void PlayerMove(string data)
         {
-	        try
-	        {
-		        standPosition = JsonConvert.DeserializeObject<Vector3>(data);
-		        Debug.Log("PlayerMove: " + standPosition);
-		        toMove = true;
-	        }
-	        catch (Exception e)
-	        {
-		        Debug.LogError("An error occurred: " + e.Message);
-		        throw;
-	        }
-		}
+            object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+            try
+            {
+                standPosition = JsonConvert.DeserializeObject<Vector3>(useData.ToString());
+                Debug.Log("PlayerMove: " + standPosition);
+                toMove = true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("An error occurred: " + e.Message);
+                throw;
+            }
+        }
         #endregion
 
         #region Private functions
@@ -66,20 +67,20 @@ namespace Game
         {
             _isPausePressed = false;
             float y = 0;
-            if(Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
             {
                 y = 1;
             }
-            if(Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+            if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
             {
                 y = -1;
             }
-            if(Input.GetKeyDown(KeyCode.Space))
+            if (Input.GetKeyDown(KeyCode.Space))
             {
                 string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString() } });
                 Utility.Socket.EmitEvent("serveBeer", json);
             }
-            if(Input.GetKeyDown(KeyCode.Escape))
+            if (Input.GetKeyDown(KeyCode.Escape))
             {
                 _isPausePressed = true;
             }
@@ -87,8 +88,8 @@ namespace Game
             _input = new Vector2(0, y);
             if (y != 0)
             {
-	            string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { JsonUtility.ToJson(_input) } });
-	            Utility.Socket.EmitEvent("playerMove", json);
+                string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { JsonUtility.ToJson(_input) } });
+                Utility.Socket.EmitEvent("playerMove", json);
             }
         }
         #endregion

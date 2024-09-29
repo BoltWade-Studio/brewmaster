@@ -35,7 +35,7 @@ namespace Game
         #region Unity functions
         void Start()
         {
-            Utility.Socket.OnEvent(SocketEnum.getPointBeforeClaimCallback.ToString(), this.gameObject.name, nameof(GetPointBeforeClaimCallback), GetPointBeforeClaimCallback);
+            Utility.Socket.SubscribeEvent(SocketEnum.getPointBeforeClaimCallback.ToString(), this.gameObject.name, nameof(GetPointBeforeClaimCallback), GetPointBeforeClaimCallback);
 
             _shareToTwitterBtn.OnClick += OnShareToTwitterBtnPress;
             _claimBtn.OnClick += OnClaimBtnPress;

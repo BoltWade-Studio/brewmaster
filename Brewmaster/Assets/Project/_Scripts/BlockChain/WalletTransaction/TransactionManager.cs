@@ -25,10 +25,10 @@ namespace Game
 
         void Start()
         {
-            Utility.Socket.OnEvent(SocketEnum.getEntryCallback.ToString(), this.gameObject.name, nameof(GetEntryCallback), GetEntryCallback);
-            Utility.Socket.OnEvent(SocketEnum.claimCallback.ToString(), this.gameObject.name, nameof(ClaimCallback), ClaimCallback);
-            Utility.Socket.OnEvent(SocketEnum.getPlayerPubCallback.ToString(), this.gameObject.name, nameof(GetPlayerPubCallback), GetPlayerPubCallback);
-            Utility.Socket.OnEvent(SocketEnum.getPriceForAddStoolCallback.ToString(), this.gameObject.name, nameof(GetStoolPriceCallback), GetStoolPriceCallback);
+            Utility.Socket.SubscribeEvent(SocketEnum.getEntryCallback.ToString(), this.gameObject.name, nameof(GetEntryCallback), GetEntryCallback);
+            Utility.Socket.SubscribeEvent(SocketEnum.claimCallback.ToString(), this.gameObject.name, nameof(ClaimCallback), ClaimCallback);
+            Utility.Socket.SubscribeEvent(SocketEnum.getPlayerPubCallback.ToString(), this.gameObject.name, nameof(GetPlayerPubCallback), GetPlayerPubCallback);
+            Utility.Socket.SubscribeEvent(SocketEnum.getPriceForAddStoolCallback.ToString(), this.gameObject.name, nameof(GetStoolPriceCallback), GetStoolPriceCallback);
         }
 
         #region Private
@@ -44,12 +44,14 @@ namespace Game
             await UniTask.WaitUntil(() => _transactionEntryDic.ContainsKey(transactionID));
             return _transactionEntryDic[transactionID];
         }
-        private void GetEntryCallback(string data)
+        private async void GetEntryCallback(string data)
         {
             Debug.Log("AAA GetEntryCallback: " + data);
             try
             {
-                Dictionary<string, string> dataArray = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
+                await UniTask.SwitchToMainThread();
+                object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+                Dictionary<string, string> dataArray = JsonConvert.DeserializeObject<Dictionary<string, string>>(useData.ToString());
                 string contractName = dataArray["contractName"];
                 Debug.Log("Entry callback: " + "ContractName: " + contractName + " Entry: " + dataArray["entry"]);
 
@@ -309,7 +311,7 @@ namespace Game
             LoadingUIManager.Instance.Show("Waiting for transaction update");
             _isTransactionSending = true;
             string socketString = Utility.Socket.StringToSocketJson(txHash);
-            Utility.Socket.OnEvent(SocketEnum.waitTransactionCallback.ToString(), this.gameObject.name, nameof(WaitTransactionCallback), WaitTransactionCallback);
+            Utility.Socket.SubscribeEvent(SocketEnum.waitTransactionCallback.ToString(), this.gameObject.name, nameof(WaitTransactionCallback), WaitTransactionCallback);
             Utility.Socket.EmitEvent(SocketEnum.waitTransaction.ToString(), socketString);
 
             await UniTask.WaitUntil(() => _isTransactionSending == false);

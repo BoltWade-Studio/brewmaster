@@ -40,7 +40,7 @@ namespace Game
 
 		void Start()
 		{
-			Utility.Socket.OnEvent(SocketEnum.updateAnonymous.ToString(), this.gameObject.name, nameof(OnUpdateAnonymous), OnUpdateAnonymous);
+			Utility.Socket.SubscribeEvent(SocketEnum.updateAnonymous.ToString(), this.gameObject.name, nameof(OnUpdateAnonymous), OnUpdateAnonymous);
 		}
 
 		void OnDestroy()
@@ -84,10 +84,12 @@ namespace Game
 			_onSuccess?.Invoke();
 		}
 
-		private void OnUpdateAnonymous(string data)
+		private async void OnUpdateAnonymous(string data)
 		{
 			Debug.Log("Update anonymous: " + data);
-			string[] dataArray = JsonConvert.DeserializeObject<string[]>(data);
+			await UniTask.SwitchToMainThread();
+			object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+			string[] dataArray = JsonConvert.DeserializeObject<string[]>(useData.ToString());
 
 			// PlayerData.PlayerAddress = dataArray[0];
 		}

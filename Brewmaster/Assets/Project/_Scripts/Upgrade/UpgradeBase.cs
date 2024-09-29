@@ -84,7 +84,9 @@ namespace Game
             Debug.Log("Upgrading Table " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
 
             LoadingUIManager.Instance.Show("Checking condition");
-            Utility.Socket.OnEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
+
+
+            Utility.Socket.SubscribeEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
             Utility.Socket.EmitEvent(SocketEnum.getCanUpgradeTable.ToString(), json);
         }
 
@@ -93,7 +95,8 @@ namespace Game
             await UniTask.SwitchToMainThread();
             try
             {
-                _canUpgrade = data.ToLower().Equals("true"); // Check if the table can be upgraded
+                object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+                _canUpgrade = useData.ToString().ToLower().Equals("true"); // Check if the table can be upgraded
                 Debug.Log("CanUpgradeTableCallback: " + _canUpgrade);
 
                 if (_canUpgrade)

@@ -35,9 +35,9 @@ namespace Game
 		void Start()
 		{
 			_player = Player.Instance;
-			Utility.Socket.OnEvent(SocketEnum.serveBeer.ToString(), this.gameObject.name, nameof(ServeBeer), ServeBeer);
-			Utility.Socket.OnEvent(SocketEnum.updateBeer.ToString(), this.gameObject.name, nameof(UpdateBeer), UpdateBeer);
-			Utility.Socket.OnEvent(SocketEnum.beerCollided.ToString(), this.gameObject.name, nameof(BeerCollided), BeerCollided);
+			Utility.Socket.SubscribeEvent(SocketEnum.serveBeer.ToString(), this.gameObject.name, nameof(ServeBeer), ServeBeer);
+			Utility.Socket.SubscribeEvent(SocketEnum.updateBeer.ToString(), this.gameObject.name, nameof(UpdateBeer), UpdateBeer);
+			Utility.Socket.SubscribeEvent(SocketEnum.beerCollided.ToString(), this.gameObject.name, nameof(BeerCollided), BeerCollided);
 
 			BeerList = new List<List<BeerCup>>();
 
@@ -104,7 +104,8 @@ namespace Game
 		{
 			try
 			{
-				BeerDto beerDto = JsonUtility.FromJson<BeerDto>(data);
+				object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+				BeerDto beerDto = JsonUtility.FromJson<BeerDto>(useData.ToString());
 				toSpawn.Add(beerDto);
 			}
 			catch (Exception e)
@@ -117,7 +118,8 @@ namespace Game
 		{
 			try
 			{
-				BeerDto beerDto = JsonUtility.FromJson<BeerDto>(data);
+				object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+				BeerDto beerDto = JsonUtility.FromJson<BeerDto>(useData.ToString());
 				BeerCup beerCup = BeerList[beerDto.tableIndex].Find(b => b.id == beerDto.id);
 				Customer customer = CustomerManager.Instance.CustomerList.Find(c => c.id == beerDto.customerId);
 
@@ -138,7 +140,8 @@ namespace Game
 		{
 			try
 			{
-				BeerDto beerDto = JsonUtility.FromJson<BeerDto>(data);
+				object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+				BeerDto beerDto = JsonUtility.FromJson<BeerDto>(useData.ToString());
 				BeerCup beerCup = BeerList[beerDto.tableIndex].Find(b => b.id == beerDto.id);
 				if (beerCup != null)
 				{
