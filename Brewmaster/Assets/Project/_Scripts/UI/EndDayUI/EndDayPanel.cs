@@ -21,13 +21,14 @@ namespace Game
         [SerializeField] private GameObject _endDayMenu;
         [SerializeField] private TwitterInputPanel _twitterInputPanel;
         [SerializeField] private CanvasGroup _canvasGroup;
-        [SerializeField] private TextMeshProUGUI _treasuryText, _pointText, _resultText;
+        [SerializeField] private TextMeshProUGUI _treasuryText, _pointText, _nftBuffText, _resultText;
         [SerializeField] private CustomButton _shopBtn, _claimBtn, _nextDayBtn, _mainMenuBtn;
         [SerializeField] private CustomButton _shareToTwitterBtn;
         [SerializeField] private GameObject _blockXImage;
         [SerializeField] private float _moneyIncreaseSpeed = 30;
 
         private int _tempPoint;
+        private int _nftBuff;
         private bool _gettingData = false;
 
         private bool _isClaimed;
@@ -171,6 +172,7 @@ namespace Game
             Debug.Log("GetPointBeforeClaimCallback: " + dataJsonString);
             var data = JsonConvert.DeserializeObject<Dictionary<string, string>>(dataJsonString);
             _tempPoint = int.Parse(data["point"]);
+            _nftBuff = int.Parse(data["ogPassBalance"]);
             _gettingData = false;
         }
 
@@ -241,6 +243,8 @@ namespace Game
                 pointTemp = Mathf.Lerp(0, _tempPoint, lerpValue);
                 _pointText.text = pointTemp.ToString();
             }
+
+            _nftBuffText.text = $"x{_nftBuff * 10}%";
 
             _resultText.gameObject.SetActive(true);
 
