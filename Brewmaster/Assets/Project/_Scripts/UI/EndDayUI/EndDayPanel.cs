@@ -165,11 +165,12 @@ namespace Game
             Utility.Socket.EmitEvent(SocketEnum.getPointBeforeClaim.ToString());
             await UniTask.WaitUntil(() => _gettingData == false);
         }
-        private async void GetPointBeforeClaimCallback(string point)
+        private async void GetPointBeforeClaimCallback(string dataJsonString)
         {
             await UniTask.SwitchToMainThread();
-            Debug.Log("GetPointBeforeClaimCallback: " + point);
-            _tempPoint = JsonConvert.DeserializeObject<int>(point);
+            Debug.Log("GetPointBeforeClaimCallback: " + dataJsonString);
+            var data = JsonConvert.DeserializeObject<Dictionary<string, string>>(dataJsonString);
+            _tempPoint = int.Parse(data["point"]);
             _gettingData = false;
         }
 
