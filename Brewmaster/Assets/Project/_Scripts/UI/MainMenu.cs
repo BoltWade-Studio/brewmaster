@@ -52,14 +52,7 @@ namespace Game
             }
             else
             {
-                if (JSInteropManager.IsConnected() == false)
-                {
-                    ConnectWalletManager.Instance.StartConnectWallet(() => TransitionManager.Instance().Transition("GameScene", _transitionSetting, 0.3f));
-                }
-                else
-                {
-                    TransitionManager.Instance().Transition("GameScene", _transitionSetting, 0.3f);
-                }
+                ConnectWalletManager.Instance.StartConnectWallet(() => TransitionManager.Instance().Transition("GameScene", _transitionSetting, 0.3f));
             }
         }
 
