@@ -55,8 +55,8 @@ namespace Game
         }
         void Start()
         {
-            Utility.Socket.OnEvent(SocketEnum.updateTablePositionCallback.ToString(), this.gameObject.name, nameof(UpdateTablePositionCallback), UpdateTablePositionCallback);
-            Utility.Socket.OnEvent(SocketEnum.updateSeatPositionsCallback.ToString(), this.gameObject.name, nameof(UpdateSeatPositionCallback), UpdateSeatPositionCallback);
+            Utility.Socket.SubscribeEvent(SocketEnum.updateTablePositionCallback.ToString(), this.gameObject.name, nameof(UpdateTablePositionCallback), UpdateTablePositionCallback);
+            Utility.Socket.SubscribeEvent(SocketEnum.updateSeatPositionsCallback.ToString(), this.gameObject.name, nameof(UpdateSeatPositionCallback), UpdateSeatPositionCallback);
 
             UpdatePositionsToServer();
             if (GameplayManager.Instance.IsMainMenu == false)
@@ -165,16 +165,16 @@ namespace Game
 
         public List<Table> GetTableList()
         {
-	        for (int i = 0; i < _tableList.Count; i++)
-	        {
-		        if (GameplayManager.Instance.IsMainMenu == false)
-		        {
-			        // Debug.Log("index: " + i + " table index: " + PlayerData.PlayerScale[i].TableIndex);
-			        _tableList[i].TableIndex = PlayerData.PlayerScale[i].TableIndex;
-			        _tableList[i].AvailableSeatNumber = PlayerData.PlayerScale[i].Stools;
-			        _tableList[i].LoadSeat();
-		        }
-	        }
+            for (int i = 0; i < _tableList.Count; i++)
+            {
+                if (GameplayManager.Instance.IsMainMenu == false)
+                {
+                    // Debug.Log("index: " + i + " table index: " + PlayerData.PlayerScale[i].TableIndex);
+                    _tableList[i].TableIndex = PlayerData.PlayerScale[i].TableIndex;
+                    _tableList[i].AvailableSeatNumber = PlayerData.PlayerScale[i].Stools;
+                    _tableList[i].LoadSeat();
+                }
+            }
             return _tableList;
         }
     }

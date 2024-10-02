@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using NOOD;
 using TMPro;
 using UnityEngine;
@@ -13,6 +14,7 @@ namespace Game
         private LoadingUI _loadingUI;
         private float _time;
         private string _message;
+        private bool _isDisconnectPopup;
 
         protected override void ChildAwake()
         {
@@ -30,6 +32,14 @@ namespace Game
             _time += Time.deltaTime;
             if (_loadingUI)
                 _loadingUI.SetLoadingText(_message + (int)_time);
+            if (_time >= 100 && !_isDisconnectPopup)
+            {
+                _isDisconnectPopup = true;
+                PopupManager.Instance.ShowAnnouncePopup("Server error", "Server disconnected, reload?", "Reload", () =>
+                {
+                    JsReloadWindow.ReloadWindow();
+                });
+            }
         }
 
         public void ChangeLoadingMessage(string message)
@@ -47,6 +57,7 @@ namespace Game
                 _message = message + "...";
             }
             _time = 0;
+            _isDisconnectPopup = false;
 
             if (_loadingUI == null || _loadingUI.gameObject == null)
                 _loadingUI = Instantiate(_loadingUIPref, _uiHolder);
@@ -57,7 +68,13 @@ namespace Game
         }
         public void Hide()
         {
-            _loadingUI?.gameObject?.SetActive(false);
+            if (_loadingUI != null && _loadingUI.gameObject != null)
+            {
+                _loadingUI.transform.DOScale(Vector3.zero, 0.5f).SetEase(Ease.InBack).OnComplete(() =>
+                {
+                    _loadingUI.gameObject.SetActive(false);
+                });
+            }
         }
     }
 }

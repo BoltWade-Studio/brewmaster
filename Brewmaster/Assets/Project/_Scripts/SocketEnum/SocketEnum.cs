@@ -6,7 +6,6 @@ public enum SocketEnum
 	logoutCallback,
 
 	#region Update enum
-	updateProof,
 	updateAnonymous,
 	updatePlayerAddress,
 	updateCustomer,
@@ -65,6 +64,7 @@ public enum SocketEnum
 	#endregion
 
 	spawnCustomer,
+	spawnCustomerCallback,
 	customerReachDestination,
 	customerReturn,
 	deleteCustomer,

@@ -8,9 +8,12 @@ namespace Game
 		public static extern void SocketIOInit();
 
 		[DllImport("__Internal")]
-		public static extern void EmitEvent(string eventName, string dataArray = null);
+		public static extern void EmitEvent(string eventName, string jsonArray = null);
+
 		[DllImport("__Internal")]
-		public static extern void OnEvent(string eventName, string callbackObjectName, string callbackMethodName);
+		public static extern void SubscribeEvent(string eventName, string callbackObjectName, string callbackMethodName);
+		[DllImport("__Internal")]
+		public static extern void UnSubscribeEvent(string eventName, string callbackObjectName, string callbackMethodName);
 		[DllImport("__Internal")]
 		public static extern void SubscribeOnException(string callbackObjectName, string callbackMethodName);
 		[DllImport("__Internal")]

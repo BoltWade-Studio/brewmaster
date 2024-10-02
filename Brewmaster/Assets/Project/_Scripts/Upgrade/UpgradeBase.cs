@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
@@ -22,6 +23,8 @@ namespace Game
         protected int _upgradeTime = 1;
         private bool _canUpgrade;
         private bool _isGettingData;
+
+        private Dictionary<string, object> _transactionJsonDataDic = new Dictionary<string, object>();
 
         #region Unity functions
         protected void Awake()
@@ -78,58 +81,70 @@ namespace Game
             PerformUpgrade();
         }
 
-        private void PerformUpgrade()
+        #region Upgrade
+        private async void PerformUpgrade()
         {
+            LoadingUIManager.Instance.Show("Checking upgrade data");
             string json = Utility.Socket.StringToSocketJson(_table.TableIndex.ToString());
             Debug.Log("Upgrading Table " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
 
-            LoadingUIManager.Instance.Show("Checking condition");
-            Utility.Socket.OnEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
-            Utility.Socket.EmitEvent("getCanUpgradeTable", json);
-        }
+            _isGettingData = true;
+            if (_transactionJsonDataDic.ContainsKey("CanUpgradeTable"))
+                _transactionJsonDataDic.Remove("CanUpgradeTable");
+            Utility.Socket.SubscribeEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
+            Utility.Socket.EmitEvent(SocketEnum.getCanUpgradeTable.ToString(), json);
+            await UniTask.WaitUntil(() => _isGettingData == false);
+            await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey("CanUpgradeTable"));
 
+            bool canUpgrade = _transactionJsonDataDic["CanUpgradeTable"].ToString().ToLower().Equals("true");
+
+            if (canUpgrade == false)
+            {
+                LoadingUIManager.Instance.Hide();
+                NotifyManager.Instance.Show("Don't have enough money or table is not available to upgrade");
+                return;
+            }
+            else
+            {
+                await TransactionUpgrade();
+                LoadingUIManager.Instance.Hide();
+            }
+        }
         private async void CanUpgradeTableCallback(string data)
         {
             await UniTask.SwitchToMainThread();
-            try
-            {
-                _canUpgrade = data.ToLower().Equals("true");
-                Debug.Log("CanUpgradeTableCallback: " + _canUpgrade);
+            _transactionJsonDataDic.Add("CanUpgradeTable", data);
 
-                if (_canUpgrade)
-                {
-                    bool result = true;
-                    Debug.Log("AddStool to table: " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
-                    if (Application.isEditor == false)
-                    {
-                        result = await TransactionManager.Instance.AddStool(_table.TableIndex);
-                    }
-                    if (result == false)
-                    {
-                        LoadingUIManager.Instance.Hide();
-                        NotifyManager.Instance.Show("Player cancel upgrade");
-                    }
-                    else
-                    {
-                        LoadingUIManager.Instance.ChangeLoadingMessage("Wait for updating transaction");
-                        await UniTask.WaitForSeconds(30f);
-                        Upgrade();
-                        await DataSaveLoadManager.Instance.LoadData();
-                    }
-                }
-                else
-                {
-                    LoadingUIManager.Instance.Hide();
-                    NotifyManager.Instance.Show("Don't have enough money");
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError("CanUpgradeCallback error: " + e.Message);
-            }
-
-            LoadingUIManager.Instance.Hide();
+            _isGettingData = false;
         }
+
+        private async UniTask TransactionUpgrade()
+        {
+            bool isPlayerConfirm = true;
+            Debug.Log("AddStool to table: " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
+            if (Application.isEditor == false)
+            {
+                // Send transaction to blockchain and wait for result
+                LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for player confirmation");
+                isPlayerConfirm = await TransactionManager.Instance.AddStool(_table.TableIndex);
+            }
+
+            if (isPlayerConfirm == true)
+            {
+                // Transaction is successful, load data
+                LoadingUIManager.Instance.ChangeLoadingMessage("Getting player data");
+                Upgrade(); // Upgrade in local only
+                await DataSaveLoadManager.Instance.LoadData(); // Load data from blockchain an update in server
+                LoadingUIManager.Instance.Hide();
+            }
+            else
+            {
+                // Transaction is failed, hide loading and notify
+                LoadingUIManager.Instance.Hide();
+                NotifyManager.Instance.Show("Transaction failed or user abort");
+            }
+        }
+        #endregion
 
         protected virtual void OnStorePhaseHandler() { }
 

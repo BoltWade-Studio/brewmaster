@@ -40,7 +40,7 @@ namespace Game
 
 		void Start()
 		{
-			Utility.Socket.OnEvent(SocketEnum.updateAnonymous.ToString(), this.gameObject.name, nameof(OnUpdateAnonymous), OnUpdateAnonymous);
+			Utility.Socket.SubscribeEvent(SocketEnum.updateAnonymous.ToString(), this.gameObject.name, nameof(OnUpdateAnonymous), OnUpdateAnonymous);
 		}
 
 		void OnDestroy()
@@ -84,10 +84,12 @@ namespace Game
 			_onSuccess?.Invoke();
 		}
 
-		private void OnUpdateAnonymous(string data)
+		private async void OnUpdateAnonymous(string data)
 		{
 			Debug.Log("Update anonymous: " + data);
-			string[] dataArray = JsonConvert.DeserializeObject<string[]>(data);
+			await UniTask.SwitchToMainThread();
+			object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+			string[] dataArray = JsonConvert.DeserializeObject<string[]>(useData.ToString());
 
 			// PlayerData.PlayerAddress = dataArray[0];
 		}
@@ -101,29 +103,27 @@ namespace Game
 				if (Application.isEditor)
 				{
 					playerAddress =
-						Utility.Socket.StringToSocketJson(
-							"0x005893a02E717eeeE01572066DdD47D70014Cb497345991F8c7D4338F6b29d79");
+							"0x005893a02E717eeeE01572066DdD47D70014Cb497345991F8c7D4338F6b29d79";
 				}
 				else
 				{
 					if (!JSInteropManager.IsWalletAvailable())
 					{
-						LoadingUIManager.Instance.Show("Please install wallet");
-						JSInteropManager.AskToInstallWallet();
+						PopupManager.Instance.ShowAnnouncePopup("Please install wallet", "Do not find starknet wallet. Please install wallet", "OK", null);
 						await UniTask.WaitUntil(() => JSInteropManager.IsWalletAvailable());
 					}
 
-					LoadingUIManager.Instance.Show("Getting player data");
 					walletAction?.Invoke();
 					await UniTask.WaitUntil(() => JSInteropManager.IsConnected());
-					playerAddress = Utility.Socket.StringToSocketJson(JSInteropManager.GetAccount());
+					playerAddress = JSInteropManager.GetAccount();
 				}
 
+				playerAddress = Utility.Socket.StringToSocketJson(playerAddress);
 				Utility.Socket.EmitEvent(SocketEnum.updatePlayerAddress.ToString(), playerAddress);
 				GameEvent.Instance.OnLoadDataSuccess += OnLoadDatasSuccessHandler;
-				Debug.Log("Subscribe");
 				await DataSaveLoadManager.Instance.LoadData();
-			} catch (Exception e)
+			}
+			catch (Exception e)
 			{
 				Debug.LogError("An error occurred in WalletConnectAsync: " + e.Message);
 				throw;

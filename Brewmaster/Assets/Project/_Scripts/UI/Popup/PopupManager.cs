@@ -10,7 +10,9 @@ namespace Game
     {
         [SerializeField] private YesNoPopup _yesNoPopupPref;
         [SerializeField] private Transform _uiHolder;
+        [SerializeField] private AnnouncePopup _announcePopupPref;
         private YesNoPopup _yesNoPopup;
+        private AnnouncePopup _announcePopup;
 
         void Start()
         {
@@ -24,6 +26,14 @@ namespace Game
                 _yesNoPopup = Instantiate(_yesNoPopupPref, _uiHolder);
 
             _yesNoPopup.Show(popupName, message, yesAction, noAction);
+        }
+
+        public void ShowAnnouncePopup(string popupName, string message, string btnText, Action btnAction)
+        {
+            if (_announcePopup == null)
+                _announcePopup = Instantiate(_announcePopupPref, _uiHolder);
+
+            _announcePopup.Show(popupName, message, btnText, btnAction);
         }
     }
 }
