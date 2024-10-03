@@ -56,10 +56,6 @@ namespace Game
         protected override void ChildAwake()
         {
             base.ChildAwake();
-   //          if (GameplayManager.Instance.IsMainMenu == false)
-			// {
-			// 	BuildTables(tableCount);
-			// }
             foreach (Table table in _tableList)
             {
                 table.SetIsUnlockAllSeats(_unlockAllSeats);
@@ -150,7 +146,6 @@ namespace Game
         }
         private void LoadTableSeat()
         {
-	        BuildTables(PlayerData.PlayerScale.Count());
             // Debug.Log("client table count: " + _tableList.Count);
             // Debug.Log("server table count: " + PlayerData.PlayerScale.Count());
             for (int i = 0; i < PlayerData.PlayerScale.Count(); i++)

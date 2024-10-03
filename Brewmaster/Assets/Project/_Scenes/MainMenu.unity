@@ -171,6 +171,8 @@ MonoBehaviour:
   _yesNoPopupPref: {fileID: 4328969311755912959, guid: 3f5ed71d7347a4ac1b0fc1a2e4962ae7,
     type: 3}
   _uiHolder: {fileID: 1066491241}
+  _announcePopupPref: {fileID: 3079698508045353930, guid: 86135e4efc50c42be93322942087407d,
+    type: 3}
 --- !u!1001 &103873605
 PrefabInstance:
   m_ObjectHideFlags: 0

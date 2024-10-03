@@ -47,17 +47,13 @@ namespace Game
 				}
 			}
 		}
-		void OnDestroy()
-		{
-			Utility.Socket.UnSubscribeEvent(SocketEnum.spawnCustomerCallback.ToString(), this.gameObject.name, nameof(SpawnCustomer), SpawnCustomer);
-		}
 		#endregion
 
 		#region Event functions
 		private async void SpawnCustomer(string data)
 		{
 			await UniTask.SwitchToMainThread();
-			// Debug.Log("Spawn customer callback: " + data);
+			Debug.Log("Spawn customer callback: " + data);
 			object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
 			// Debug.Log("Spawn customer");
 			try

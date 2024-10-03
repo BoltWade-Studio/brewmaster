@@ -1,24 +1,24 @@
 mergeInto(LibraryManager.library, {
-	SocketIOInit: function () {
-		this.socketEventClassDic = {};
-		this.exceptionArray = [];
+    SocketIOInit: function () {
+        this.socketEventClassDic = {};
+        this.exceptionArray = [];
 
 		if (typeof io == "undefined") {
 			console.error("Socket.IO client library is not load");
 			return;
 		}
 
-		var socket = io("http://localhost:5006");
-		// var socket = io("https://brewmaster-socket-test.boltwade.xyz");
-		// var socket = io("https://brewmaster-socket.boltwade.xyz");
+        var socket = io("http://localhost:5006");
+        // var socket = io("https://brewmaster-socket-test.boltwade.xyz");
+        // var socket = io("https://brewmaster-socket.boltwade.xyz");
 
 		socket.on("connect", () => {
 			socket.isReady = true;
 			console.log("Socket.IO connected");
 		});
 
-		socket.onAny((eventName, ...args) => {
-			let data;
+        socket.onAny((eventName, ...args) => {
+            let data;
 
 			// Check if args[0] is a string
 			if (args.length > 0) {

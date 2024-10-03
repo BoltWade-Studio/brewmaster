@@ -128,92 +128,26 @@ namespace Game
 			public static void EmitEvent(string eventName, string jsonData = null)
 			{
 				// Debug.Log("EmitEvent: " + eventName);
-				try
-				{
-					if (jsonData != null)
-						jsonData = ToSocketJson(jsonData);
-					// Debug.Log("EmitEvent: " + eventName + " " + jsonData);
+				if (jsonData != null)
+					jsonData = ToSocketJson(jsonData);
 
 #if UNITY_WEBGL && !UNITY_EDITOR
-					JsSocketConnect.EmitEvent(eventName, jsonData);
+				JsSocketConnect.EmitEvent(eventName, jsonData);
 #else
 
-					if (jsonData != null)
-						socket.Emit(eventName, jsonData);
-					else
-						socket.Emit(eventName);
+				socket.Emit(eventName, jsonData);
 #endif
-				}
-				catch (Exception e)
-				{
-					Debug.Log("EmitEvent error: " + e.Message);
-				}
 			}
-			public static void SubscribeEvent(string eventName, string objectName, string methodName, Action<string> action)
+			public static void OnEvent(string eventName, string objectName, string methodName, Action<string> action)
 			{
-				Debug.Log("SubscribeEvent: " + eventName + " " + objectName + " " + methodName);
+				// Debug.Log("OnEvent: " + eventName);
 #if UNITY_WEBGL && !UNITY_EDITOR
-				JsSocketConnect.SubscribeEvent(eventName, objectName, methodName);
+				JsSocketConnect.OnEvent(eventName, objectName, methodName);
 #else
-				if (_socketEventClassDic.ContainsKey(eventName))
-				{
-					if (_socketEventClassDic[eventName].Contains(new SocketEventClass()
-					{
-						ClassName = objectName,
-						MethodName = methodName,
-						Action = action
-					}))
-					{
-						return;
-					}
-					_socketEventClassDic[eventName].Add(new SocketEventClass()
-					{
-						ClassName = objectName,
-						MethodName = methodName,
-						Action = action
-					});
-				}
+				if (_actionEventDic.ContainsKey(eventName))
+					_actionEventDic[eventName] = action;
 				else
-				{
-					_socketEventClassDic.Add(eventName, new List<SocketEventClass>()
-					{
-						new SocketEventClass()
-						{
-							ClassName = objectName,
-							MethodName = methodName,
-							Action = action
-						}
-					});
-				}
-				if (_socketEventClassDic.ContainsKey(eventName) && _socketEventClassDic[eventName].Count > 0)
-				{
-					Debug.Log(JsonConvert.SerializeObject(_socketEventClassDic[eventName][0], Formatting.Indented));
-				}
-#endif
-			}
-
-			public static void UnSubscribeEvent(string eventName, string objectName, string methodName, Action<string> action)
-			{
-#if UNITY_WEBGL && !UNITY_EDITOR
-				JsSocketConnect.UnSubscribeEvent(eventName, objectName, methodName);
-#else
-				if (_socketEventClassDic.ContainsKey(eventName))
-				{
-					if (_socketEventClassDic[eventName].Contains(new SocketEventClass()
-					{
-						ClassName = objectName,
-						MethodName = methodName,
-						Action = action
-					}))
-					{
-						_socketEventClassDic[eventName].Remove(new SocketEventClass()
-						{
-							ClassName = objectName,
-							MethodName = methodName,
-							Action = action
-						});
-					}
-				}
+					_actionEventDic.Add(eventName, action);
 #endif
 			}
 
@@ -222,15 +156,8 @@ namespace Game
 #if UNITY_WEBGL && !UNITY_EDITOR
 				JsSocketConnect.SubscribeOnException(objectName, methodName);
 #else
-				_socketEventClassDic.Add("exception", new List<SocketEventClass>()
-				{
-					new SocketEventClass()
-					{
-						ClassName = objectName,
-						MethodName = methodName,
-						Action = action
-					}
-				});
+				Debug.Log("Add method: " + methodName);
+				methodLists.Add(action);
 #endif
 			}
 
@@ -239,12 +166,7 @@ namespace Game
 #if UNITY_EDITOR && !UNITY_WEBGL
 				JsSocketConnect.UnSubscribeOnException(objectName, methodName);
 #else
-				_socketEventClassDic["exception"].Remove(new SocketEventClass()
-				{
-					ClassName = objectName,
-					MethodName = methodName,
-					Action = action
-				});
+				methodLists.Remove(action);
 #endif
 			}
 
@@ -262,8 +184,8 @@ namespace Game
 
 			public static string StringToSocketJson(string normalString)
 			{
-				string jsonString = JsonConvert.SerializeObject(new string[] { normalString });
-				return jsonString;
+				string jsonString = JsonConvert.SerializeObject(new ArrayWrapper() { array = new string[] { normalString } });
+				return ToSocketJson(jsonString);
 			}
 		}
 	}

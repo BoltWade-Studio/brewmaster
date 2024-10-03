@@ -39,10 +39,12 @@ namespace Game
 			Utility.Socket.EmitEvent(SocketEnum.updateUpgradePrice.ToString());
 		}
 
-		public void UpdateUpgradePrice(string data)
+		public async void UpdateUpgradePrice(string data)
 		{
-			Debug.Log("UpdatePriceCallback: " + data);
-			var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
+			await UniTask.SwitchToMainThread();
+			object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
+			Debug.Log("UpdatePriceCallback: " + useData);
+			var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(useData.ToString());
 
 			foreach (var _upgradeBase in _upgradeBaseList)
 			{

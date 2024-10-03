@@ -44,8 +44,8 @@ namespace Game
 		/// <returns></returns>
 		public async UniTask LoadData()
 		{
-			Debug.Log("LoadData");
-			await GetDataAsync();
+			LoadingUIManager.Instance.Show("Getting player data");
+			await FetchPlayerPub();
 
 			// Create new pub if scale is 0
 			if (PlayerData.PlayerScale.Count() == 0)
@@ -53,14 +53,16 @@ namespace Game
 				bool isCreated = await CreateNewPub();
 				if (isCreated)
 				{
-					LoadingUIManager.Instance.ChangeLoadingMessage("Getting player data");
-					await GetDataAsync();
+					LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for create pub");
+					await FetchPlayerPub();
+					LoadingUIManager.Instance.Hide();
 					PlayGame();
 				}
 			}
 			else
 			{
 				Debug.Log("PlayGame");
+				LoadingUIManager.Instance.Hide();
 				PlayGame();
 			}
 		}
@@ -68,7 +70,6 @@ namespace Game
 		private void PlayGame()
 		{
 			// Play game
-			LoadingUIManager.Instance.Hide();
 			TableData = new TableData();
 			for (int i = 0; i < PlayerData.PlayerScale.Count(); i++)
 			{
@@ -78,7 +79,7 @@ namespace Game
 			GameEvent.Instance.OnLoadDataSuccess?.Invoke();
 		}
 
-		private async UniTask GetDataAsync()
+		private async UniTask FetchPlayerPub()
 		{
 			string jsonData = await TransactionManager.Instance.GetPlayerPub();
 

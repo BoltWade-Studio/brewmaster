@@ -71,8 +71,7 @@ namespace Game
 			{
 				lastUpdate = Time.time;
 				// Send time to server (in minutes)
-				string json = JsonConvert.SerializeObject(new ArrayWrapper
-				{ array = new string[] { Time.time.ToString() } });
+				string json = Utility.Socket.StringToSocketJson(Time.time.ToString());
 				Utility.Socket.EmitEvent("updateTimer", json);
 			}
 
@@ -84,20 +83,24 @@ namespace Game
 		}
 		void OnDestroy()
 		{
+			Utility.Socket.UnSubscribeEvent("updateTimer", this.gameObject.name, nameof(UpdateTimer), UpdateTimer);
 		}
 		#endregion
 
-		private void UpdateTimer(string data)
+		private async void UpdateTimer(string data)
 		{
 			try
 			{
+				await UniTask.SwitchToMainThread();
+				// object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
 				// data consists of a float number
-				float timeLeft = float.Parse(data); // in seconds
+				float timeLeft = float.Parse(data.ToString()); // in seconds
 				_hour = Mathf.Floor(timeLeft / 60);
 				_minute = timeLeft % 60;
 			}
 			catch (Exception e)
 			{
+				Debug.Log("UpdateTimer: " + data);
 				Debug.LogError("An error occurred: " + e.Message);
 				throw;
 			}

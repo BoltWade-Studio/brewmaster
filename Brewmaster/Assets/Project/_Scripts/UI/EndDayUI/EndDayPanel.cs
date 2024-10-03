@@ -21,7 +21,7 @@ namespace Game
         [SerializeField] private GameObject _endDayMenu;
         [SerializeField] private TwitterInputPanel _twitterInputPanel;
         [SerializeField] private CanvasGroup _canvasGroup;
-        [SerializeField] private TextMeshProUGUI _treasuryText, _pointText, _resultText;
+        [SerializeField] private TextMeshProUGUI _treasuryText, _pointText, _nftBuffText, _resultText;
         [SerializeField] private CustomButton _shopBtn, _claimBtn, _nextDayBtn, _mainMenuBtn;
         [SerializeField] private CustomButton _shopMoveUpBtn, _shopMoveDownBtn;
         [SerializeField] private CustomButton _shareToTwitterBtn;
@@ -71,8 +71,9 @@ namespace Game
         {
             GameEvent.Instance.OnClaimSuccess += SetClaimBtnInactive;
             GameEvent.Instance.OnClaimFail += SetClaimBtnActive;
+            LoadingUIManager.Instance.Show("Claiming");
             await TransactionManager.Instance.Claim();
-            await UniTask.WaitForSeconds(1f);
+            LoadingUIManager.Instance.Hide();
             GameEvent.Instance.OnClaimSuccess -= SetClaimBtnInactive;
             GameEvent.Instance.OnClaimFail -= SetClaimBtnActive;
         }
@@ -169,12 +170,12 @@ namespace Game
         }
         private async void GetPointBeforeClaimCallback(string dataJsonString)
         {
-	        await UniTask.SwitchToMainThread();
-	        Debug.Log("GetPointBeforeClaimCallback: " + dataJsonString);
-	        var data = JsonConvert.DeserializeObject<Dictionary<string, string>>(dataJsonString);
-	        _tempPoint = int.Parse(data["point"]);
-	        _nftBuff = int.Parse(data["ogPassBalance"]);
-	        _gettingData = false;
+            await UniTask.SwitchToMainThread();
+            Debug.Log("GetPointBeforeClaimCallback: " + dataJsonString);
+            var data = JsonConvert.DeserializeObject<Dictionary<string, string>>(dataJsonString);
+            _tempPoint = int.Parse(data["point"]);
+            _nftBuff = int.Parse(data["ogPassBalance"]);
+            _gettingData = false;
         }
 
         #region Show hide
@@ -245,6 +246,8 @@ namespace Game
                 pointTemp = Mathf.Lerp(0, _tempPoint, lerpValue);
                 _pointText.text = pointTemp.ToString();
             }
+
+            _nftBuffText.text = $"x{_nftBuff * 10}%";
 
             _resultText.gameObject.SetActive(true);
 
