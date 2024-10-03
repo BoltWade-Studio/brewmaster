@@ -228,7 +228,7 @@ namespace Game
         }
         private void GetStoolPriceCallback(string data)
         {
-            if (_transactionEntryDic.ContainsKey(TransactionID.GET_PRICE_FOR_ADD_STOOL))
+            if (_transactionJsonDataDic.ContainsKey(TransactionID.GET_PRICE_FOR_ADD_STOOL))
             {
                 _transactionJsonDataDic[TransactionID.GET_PRICE_FOR_ADD_STOOL] = data;
             }
@@ -255,7 +255,7 @@ namespace Game
                 string contractAddress = await GetContractEntry(TransactionID.CONTRACT_ADDRESS);
                 string addStoolEntry = await GetContractEntry(TransactionID.ADD_STOOL);
 
-                // Send transaction to blockchain 
+                // Send transaction to blockchain
                 _transactionJsonDataDic.Remove(TransactionID.ADD_STOOL);
                 LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for player confirmation");
                 JSInteropManager.SendTransaction(contractAddress, addStoolEntry, JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { tableIndex.ToString() } }), this.gameObject.name, nameof(AddStoolCallback));
