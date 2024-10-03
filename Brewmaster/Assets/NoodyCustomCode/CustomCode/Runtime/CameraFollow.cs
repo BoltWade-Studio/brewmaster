@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace NOOD.NoodCamera
-{ 
+{
     public class CameraFollow : MonoBehaviorInstance<CameraFollow>
     {
         [SerializeField] float smoothTime = 2;
@@ -21,7 +21,7 @@ namespace NOOD.NoodCamera
         {
             if (!targetTransform && GameObject.FindGameObjectWithTag(targetTag)) targetTransform = GameObject.FindGameObjectWithTag(targetTag).transform;
             if (targetTransform)
-                NOOD.NoodyCustomCode.LerpSmoothCameraFollow(this.gameObject, smoothTime, targetTransform, offset);
+                NOOD.NoodyCustomCode.LerpSmoothCameraFollow(this.gameObject, smoothTime, targetTransform.position, offset);
         }
     }
 }

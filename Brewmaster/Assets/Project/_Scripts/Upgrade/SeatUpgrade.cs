@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using NOOD.Data;
 using UnityEngine;
 
@@ -51,7 +53,7 @@ namespace Game
         }
         protected override bool CheckAllUpgradeComplete()
         {
-            if (_table.AvailableSeatNumber == 4)
+            if (_table.AvailableSeatNumber == 10)
             {
                 return true;
             }
@@ -74,12 +76,18 @@ namespace Game
         }
         protected override void Save()
         {
-            DataManager<int>.SaveToPlayerPrefWithGenId(_upgradeTime, GetId());
+            // DataManager<int>.SaveToPlayerPrefWithGenId(_upgradeTime, GetId());
         }
         protected override void Load()
         {
             _upgradeTime = DataManager<int>.LoadDataFromPlayerPref(GetId(), 1);
         }
+
+        protected override UniTask<bool> Execute()
+        {
+	        return TransactionManager.Instance.AddStool(_table.TableIndex);
+        }
+
         #endregion
     }
 

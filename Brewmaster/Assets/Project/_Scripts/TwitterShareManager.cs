@@ -19,7 +19,7 @@ namespace Game
 
         void Start()
         {
-            Utility.Socket.OnEvent(SocketEnum.getTwitterMessageCallback.ToString(), this.gameObject.name, nameof(GetTwitterMessageCallback), GetTwitterMessageCallback);
+            Utility.Socket.SubscribeEvent(SocketEnum.getTwitterMessageCallback.ToString(), this.gameObject.name, nameof(GetTwitterMessageCallback), GetTwitterMessageCallback);
             GameEvent.Instance.OnClaimSuccess += OnClaimSuccessHandler;
         }
 
@@ -61,7 +61,7 @@ namespace Game
             this._onSuccess = callbackSuccess;
             this._onError = callbackError;
             Utility.Socket.SubscribeOnException(this.gameObject.name, nameof(OnTwitterCallbackError), OnTwitterCallbackError);
-            Utility.Socket.OnEvent(SocketEnum.giftData.ToString(), this.gameObject.name, nameof(OnTwitterCallbackSuccess), OnTwitterCallbackSuccess);
+            Utility.Socket.SubscribeEvent(SocketEnum.giftData.ToString(), this.gameObject.name, nameof(OnTwitterCallbackSuccess), OnTwitterCallbackSuccess);
             Utility.Socket.EmitEvent(SocketEnum.playerInputLink.ToString(), json);
         }
 

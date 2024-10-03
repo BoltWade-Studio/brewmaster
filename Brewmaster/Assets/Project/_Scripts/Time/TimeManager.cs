@@ -61,8 +61,8 @@ namespace Game
 				_day = DataSaveLoadManager.Instance.Day;
 			ResetTime();
 
-			Utility.Socket.OnEvent("updateTimer", this.gameObject.name, nameof(UpdateTimer), UpdateTimer);
-			Utility.Socket.OnEvent("timeUp", this.gameObject.name, nameof(TimeUp), TimeUp);
+			Utility.Socket.SubscribeEvent("updateTimer", this.gameObject.name, nameof(UpdateTimer), UpdateTimer);
+			Utility.Socket.SubscribeEvent("timeUp", this.gameObject.name, nameof(TimeUp), TimeUp);
 		}
 
 		private void Update()

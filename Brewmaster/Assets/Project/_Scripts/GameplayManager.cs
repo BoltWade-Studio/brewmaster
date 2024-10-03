@@ -28,6 +28,7 @@ namespace Game
 			GameEvent.Instance.OnTimeUp += OnTimeUpHandler;
 			GameEvent.Instance.OnNextDay += OnNextDayHandler;
 			GameEvent.Instance.OnStorePhase += OnStorePhaseHandler;
+			// GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
 
 			SoundManager.InitSoundManager();
 			SoundManager.PlayMusic(MusicEnum.PianoBGMusic);
@@ -42,6 +43,7 @@ namespace Game
 			GameEvent.Instance.OnNextDay -= OnNextDayHandler;
 			GameEvent.Instance.OnStorePhase -= OnStorePhaseHandler;
 			GameEvent.Instance.OnUpdatePosComplete -= OnUpdatePosCompleteHandler;
+			// GameEvent.Instance.OnLoadDataSuccess -= OnLoadDataSuccessHandler;
 		}
 
 		#region Event functions
@@ -49,6 +51,12 @@ namespace Game
 		{
 			IsStorePhase = true;
 		}
+
+		private void OnLoadDataSuccessHandler()
+		{
+			InitializeGame();
+		}
+
 		private void OnUpdatePosCompleteHandler()
 		{
 			InitializeGame();
@@ -67,31 +75,14 @@ namespace Game
 		#region Private functions
 		private void InitializeGame()
 		{
+			Debug.Log("InitializeGame");
 			IsEndDay = false;
 			IsStorePhase = false;
-			InitializedGameDataDto data = new InitializedGameDataDto();
 			if (PlayerData.PlayerDataClass != null)
 			{
 				PlayerData.InDayTreasury = 0;
 				UIManager.Instance.UpdateMoneyUI();
 			}
-			foreach (Table table in TableManager.Instance.GetTableList())
-			{
-				SeatListDto seatListDto = new SeatListDto();
-				foreach (Transform seat in table.GetAllSeats())
-				{
-					seatListDto.seatPositionList.Add(seat.position);
-					if (seatListDto.seatPositionList.Count == table.AvailableSeatNumber)
-					{
-						break;
-					}
-				}
-				data.tableList.Add(seatListDto);
-				data.tablePositionList.Add(table.transform.position);
-			}
-
-			data.customerSpawnPosition = CustomerSpawner.Instance.transform.position;
-			data.playerPosition = Player.Instance.transform.position;
 
 			Utility.Socket.EmitEvent(SocketEnum.initGame.ToString());
 		}

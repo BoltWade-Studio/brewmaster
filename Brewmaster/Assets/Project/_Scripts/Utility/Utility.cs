@@ -9,19 +9,35 @@ using Utils;
 
 namespace Game
 {
+	public class SocketEventClass : IEquatable<SocketEventClass>
+	{
+		public string ClassName;
+		public string MethodName;
+		[JsonIgnore]
+		public Action<string> Action;
+
+		public bool Equals(SocketEventClass other)
+		{
+			return ClassName == other.ClassName && MethodName == other.MethodName && Action == other.Action;
+		}
+	}
+
 	public static class Utility
 	{
 		public static class Socket
 		{
 			private static SocketIOUnity socket;
-			private static Dictionary<string, Action<string>> _actionEventDic = new Dictionary<string, Action<string>>();
-			private static List<Action<string>> methodLists = new List<Action<string>>();
+			private static List<Action<string>> _exceptionMethodList = new List<Action<string>>();
+			private static Dictionary<string, List<SocketEventClass>> _socketEventClassDic = new Dictionary<string, List<SocketEventClass>>();
 
 #if UNITY_EDITOR
 			public static void Init()
 			{
 				var uri = new Uri("http://localhost:5006");
+				// var uri = new Uri("https://brewmaster-socket-test.boltwade.xyz");
 				// var uri = new Uri("https://brewmaster-socket.starkarcade.com/");
+
+				_socketEventClassDic = new Dictionary<string, List<SocketEventClass>>();
 				socket = new SocketIOUnity(uri, new SocketIOOptions
 				{
 					Query = new Dictionary<string, string>
@@ -40,283 +56,64 @@ namespace Game
 					Debug.Log("socket.OnConnected");
 				};
 
-				socket.On("updateProof", (proof) =>
+				socket.OnAny((eventName, data) =>
 				{
-					if (_actionEventDic.ContainsKey("updateProof"))
+					if (eventName == "exception")
 					{
-						string data = JsonConvert.DeserializeObject<string[]>(proof.ToString())[0];
-						_actionEventDic["updateProof"].Invoke(data);
-					}
-				});
-
-				socket.On("updateAnonymous", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("updateAnonymous"))
-					{
-						Debug.Log("update anonymous: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["updateAnonymous"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("exception", (exception) =>
-				{
-					Debug.Log("on exception: " + exception.ToString());
-					Debug.Log("Count" + methodLists.Count);
-					WSError wSError;
-					wSError = JsonConvert.DeserializeObject<WSError[]>(exception.ToString())[0];
-					foreach (Action<string> action in methodLists)
-					{
-						Debug.Log("Active action");
-						try
+						WSError wSError;
+						wSError = JsonConvert.DeserializeObject<WSError[]>(data.GetValue<string>())[0];
+						foreach (Action<string> action in _exceptionMethodList)
 						{
-							action(wSError.message);
-						}
-						catch (Exception e)
-						{
-							Debug.Log("Exception: " + e.Message);
+							Debug.Log("Active action");
+							try
+							{
+								action(wSError.message);
+							}
+							catch (Exception e)
+							{
+								Debug.Log("Exception: " + e.Message);
+							}
 						}
 					}
-				});
-
-				socket.On("giftTxHash", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("giftTxHash"))
+					else
 					{
-						_actionEventDic["giftTxHash"].Invoke(data.ToString());
-					}
-				});
-
-				socket.On("playerMove", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("playerMove"))
-					{
-						// Debug.Log("playerMove: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["playerMove"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("spawnCustomer", (data) =>
-				{
-					Debug.Log("Receive event spawnCustomer!");
-					if (_actionEventDic.ContainsKey("spawnCustomer"))
-					{
-						// Debug.Log("spawnCustomer: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["spawnCustomer"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("updateCustomerPosition", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("updateCustomerPosition"))
-					{
-						// Debug.Log("updateCustomerPosition: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["updateCustomerPosition"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("updateCustomerWaitTime", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("updateCustomerWaitTime"))
-					{
-						// Debug.Log("updateCustomerWaitTime: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["updateCustomerWaitTime"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("customerReachDestination", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("customerReachDestination"))
-					{
-						// Debug.Log("customerReachDestination: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["customerReachDestination"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("customerReturn", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("customerReturn"))
-					{
-						// Debug.Log("customerReturn: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["customerReturn"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("deleteCustomer", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("deleteCustomer"))
-					{
-						// Debug.Log("deleteCustomer: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["deleteCustomer"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("serveBeer", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("serveBeer"))
-					{
-						// Debug.Log("serveBeer: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["serveBeer"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("updateBeer", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("updateBeer"))
-					{
-						// Debug.Log("updateBeer: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["updateBeer"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("beerCollided", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("beerCollided"))
-					{
-						// Debug.Log("beerCollided: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["beerCollided"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("updateTimer", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("updateTimer"))
-					{
-						// Debug.Log("updateTimer: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["updateTimer"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("totalPointCallback", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("totalPointCallback"))
-					{
-						// Debug.Log("updateTotalPoint: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["totalPointCallback"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("timeUp", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("timeUp"))
-					{
-						try
+						if (_socketEventClassDic.ContainsKey(eventName))
 						{
-							Debug.Log("timeUp: " + data);
-							_actionEventDic["timeUp"].Invoke("");
-						}
-						catch (Exception e)
-						{
-							Debug.Log("Timeup Exception: " + e.Message);
+							string dataString = "";
+							if (data.Count > 0)
+							{
+								try
+								{
+									dataString = data.GetValue<string>();
+								}
+								catch (Exception e)
+								{
+									dataString = data.ToString();
+									Debug.Log("Socket.OnAny error: " + e.Message);
+								}
+							}
+
+							foreach (var socketEventClass in _socketEventClassDic[eventName])
+							{
+								List<String> noLogList = new List<string>
+									{
+										"updateCustomerWaitTime",
+										"updateTimer",
+										"updateCustomerPosition",
+										"updateBeer",
+										"spawnCustomerCallback",
+										"customerReachDestination",
+										"deleteCustomer",
+										"customerReturn",
+									};
+								if (!noLogList.Contains(eventName))
+									Debug.Log("Socket.OnAny: " + eventName + " " + (dataString ?? ""));
+								socketEventClass.Action?.Invoke(dataString);
+							}
 						}
 					}
 				});
 
-				socket.On("upgradeTableCallback", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("upgradeTableCallback"))
-					{
-						// Debug.Log("upgradeTableCallback: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["upgradeTableCallback"].Invoke(useData.ToString());
-					}
-				});
-
-				socket.On("updateUpgradePrice", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("updateUpgradePrice"))
-					{
-						Debug.Log("updateUpgradePrice: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["updateUpgradePrice"].Invoke(useData.ToString());
-					}
-				});
-				socket.On("getEntryCallback", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("getEntryCallback"))
-					{
-						Debug.Log("getEntryCallback: " + data);
-						object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-						_actionEventDic["getEntryCallback"].Invoke(useData.ToString());
-					}
-				});
-				socket.On("getPlayerPubCallback", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("getPlayerPubCallback"))
-					{
-						_actionEventDic["getPlayerPubCallback"].Invoke(data.GetValue<string>());
-					}
-				});
-				socket.On("updateTreasuryCallback", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("updateTreasuryCallback"))
-					{
-						_actionEventDic["updateTreasuryCallback"].Invoke(data.GetValue<string>());
-					}
-				});
-				socket.On("claimCallback", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("claimCallback"))
-					{
-						_actionEventDic["claimCallback"].Invoke(data.GetValue<string>());
-					}
-				});
-				socket.On("getPointBeforeClaimCallback", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("getPointBeforeClaimCallback"))
-					{
-						_actionEventDic["getPointBeforeClaimCallback"].Invoke(data.GetValue<string>());
-					}
-				});
-				socket.On("updateSeatPositionsCallback", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("updateSeatPositionsCallback"))
-					{
-						Debug.Log("updateSeatPositionsCallback: " + data);
-						_actionEventDic["updateSeatPositionsCallback"].Invoke("");
-					}
-				});
-				socket.On("updateTablePositionCallback", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("updateTablePositionCallback"))
-					{
-						Debug.Log("updateTablePositionsCallback: " + data);
-						_actionEventDic["updateTablePositionCallback"].Invoke("");
-					}
-				});
-				socket.On("getCanUpgradeTableCallback", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("getCanUpgradeTableCallback"))
-					{
-						_actionEventDic["getCanUpgradeTableCallback"].Invoke(data.GetValue<string>());
-					}
-				});
-				socket.On("logoutCallback", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("logoutCallback"))
-					{
-						_actionEventDic["logoutCallback"].Invoke(data.GetValue<string>());
-					}
-				});
-				socket.On("waitTransactionCallback", (data) =>
-				{
-					if (_actionEventDic.ContainsKey("waitTransactionCallback"))
-					{
-						_actionEventDic["waitTransactionCallback"].Invoke(data.GetValue<string>());
-					}
-				});
 				socket.Connect();
 			}
 
@@ -331,26 +128,92 @@ namespace Game
 			public static void EmitEvent(string eventName, string jsonData = null)
 			{
 				// Debug.Log("EmitEvent: " + eventName);
-				if (jsonData != null)
-					jsonData = ToSocketJson(jsonData);
+				try
+				{
+					if (jsonData != null)
+						jsonData = ToSocketJson(jsonData);
+					// Debug.Log("EmitEvent: " + eventName + " " + jsonData);
 
 #if UNITY_WEBGL && !UNITY_EDITOR
-				JsSocketConnect.EmitEvent(eventName, jsonData);
+					JsSocketConnect.EmitEvent(eventName, jsonData);
 #else
 
-				socket.Emit(eventName, jsonData);
+					if (jsonData != null)
+						socket.Emit(eventName, jsonData);
+					else
+						socket.Emit(eventName);
+#endif
+				}
+				catch (Exception e)
+				{
+					Debug.Log("EmitEvent error: " + e.Message);
+				}
+			}
+			public static void SubscribeEvent(string eventName, string objectName, string methodName, Action<string> action)
+			{
+				Debug.Log("SubscribeEvent: " + eventName + " " + objectName + " " + methodName);
+#if UNITY_WEBGL && !UNITY_EDITOR
+				JsSocketConnect.SubscribeEvent(eventName, objectName, methodName);
+#else
+				if (_socketEventClassDic.ContainsKey(eventName))
+				{
+					if (_socketEventClassDic[eventName].Contains(new SocketEventClass()
+					{
+						ClassName = objectName,
+						MethodName = methodName,
+						Action = action
+					}))
+					{
+						return;
+					}
+					_socketEventClassDic[eventName].Add(new SocketEventClass()
+					{
+						ClassName = objectName,
+						MethodName = methodName,
+						Action = action
+					});
+				}
+				else
+				{
+					_socketEventClassDic.Add(eventName, new List<SocketEventClass>()
+					{
+						new SocketEventClass()
+						{
+							ClassName = objectName,
+							MethodName = methodName,
+							Action = action
+						}
+					});
+				}
+				if (_socketEventClassDic.ContainsKey(eventName) && _socketEventClassDic[eventName].Count > 0)
+				{
+					Debug.Log(JsonConvert.SerializeObject(_socketEventClassDic[eventName][0], Formatting.Indented));
+				}
 #endif
 			}
-			public static void OnEvent(string eventName, string objectName, string methodName, Action<string> action)
+
+			public static void UnSubscribeEvent(string eventName, string objectName, string methodName, Action<string> action)
 			{
-				// Debug.Log("OnEvent: " + eventName);
 #if UNITY_WEBGL && !UNITY_EDITOR
-				JsSocketConnect.OnEvent(eventName, objectName, methodName);
+				JsSocketConnect.UnSubscribeEvent(eventName, objectName, methodName);
 #else
-				if (_actionEventDic.ContainsKey(eventName))
-					_actionEventDic[eventName] = action;
-				else
-					_actionEventDic.Add(eventName, action);
+				if (_socketEventClassDic.ContainsKey(eventName))
+				{
+					if (_socketEventClassDic[eventName].Contains(new SocketEventClass()
+					{
+						ClassName = objectName,
+						MethodName = methodName,
+						Action = action
+					}))
+					{
+						_socketEventClassDic[eventName].Remove(new SocketEventClass()
+						{
+							ClassName = objectName,
+							MethodName = methodName,
+							Action = action
+						});
+					}
+				}
 #endif
 			}
 
@@ -359,8 +222,15 @@ namespace Game
 #if UNITY_WEBGL && !UNITY_EDITOR
 				JsSocketConnect.SubscribeOnException(objectName, methodName);
 #else
-				Debug.Log("Add method: " + methodName);
-				methodLists.Add(action);
+				_socketEventClassDic.Add("exception", new List<SocketEventClass>()
+				{
+					new SocketEventClass()
+					{
+						ClassName = objectName,
+						MethodName = methodName,
+						Action = action
+					}
+				});
 #endif
 			}
 
@@ -369,7 +239,12 @@ namespace Game
 #if UNITY_EDITOR && !UNITY_WEBGL
 				JsSocketConnect.UnSubscribeOnException(objectName, methodName);
 #else
-				methodLists.Remove(action);
+				_socketEventClassDic["exception"].Remove(new SocketEventClass()
+				{
+					ClassName = objectName,
+					MethodName = methodName,
+					Action = action
+				});
 #endif
 			}
 
@@ -387,8 +262,8 @@ namespace Game
 
 			public static string StringToSocketJson(string normalString)
 			{
-				string jsonString = JsonConvert.SerializeObject(new ArrayWrapper() { array = new string[] { normalString } });
-				return ToSocketJson(jsonString);
+				string jsonString = JsonConvert.SerializeObject(new string[] { normalString });
+				return jsonString;
 			}
 		}
 	}

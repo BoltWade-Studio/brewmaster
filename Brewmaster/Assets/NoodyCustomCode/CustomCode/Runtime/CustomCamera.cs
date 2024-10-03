@@ -3,8 +3,8 @@ using NOOD.NoodCustomEditor;
 #endif
 using UnityEngine;
 
-namespace NOOD.NoodCamera 
-{ 
+namespace NOOD.NoodCamera
+{
     public class CustomCamera : MonoBehaviorInstance<CustomCamera>
     {
         #region Components
@@ -21,9 +21,10 @@ namespace NOOD.NoodCamera
         [SerializeField] float explodeMagnitude = 0.1f;
         [SerializeField] float smoothTime = 2;
         [SerializeField] string targetTag = "Player";
-        Transform targetTransform;
+        Vector3 targetPosition;
 
         [SerializeField] Vector3 offset;
+        [SerializeField] public Transform topBorder;
 
         [SerializeField] bool isFollow;
         [SerializeField] bool isShake;
@@ -54,12 +55,25 @@ namespace NOOD.NoodCamera
 
         void FollowPlayer()
         {
-            if (!targetTransform && GameObject.FindGameObjectWithTag(targetTag)) targetTransform = GameObject.FindGameObjectWithTag(targetTag).transform;
-            if(targetTransform)
-                NOOD.NoodyCustomCode.LerpSmoothCameraFollow(Camera.main.gameObject, smoothTime, targetTransform, offset);
-            //this.transform.LookAt(targetTransform);
+	        GameObject target = GameObject.FindGameObjectWithTag(targetTag);
+	        if (!target)
+	        {
+		        return;
+	        }
+
+	        targetPosition = target.transform.position;
+
+	        if (topBorder)
+	        {
+		        targetPosition = new Vector3(targetPosition.x, targetPosition.y,
+			        Mathf.Min(targetPosition.z, topBorder.position.z));
+	        }
+
+            NOOD.NoodyCustomCode.LerpSmoothCameraFollow(Camera.main.gameObject, smoothTime, targetPosition,
+		            offset);
+            // this.transform.LookAt(targetTransform);
         }
-    
+
         public void Shake(){
             StartCoroutine(NOOD.NoodyCustomCode.ObjectShake(this.gameObject, duration, magnitude));
             isShake = false;

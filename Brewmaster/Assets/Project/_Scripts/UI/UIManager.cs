@@ -5,7 +5,9 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using EasyTransition;
+using Newtonsoft.Json;
 using UnityEngine.Serialization;
+using Utils;
 
 namespace Game
 {
@@ -37,6 +39,7 @@ namespace Game
 		[SerializeField] private GameObject _storeMenu;
 		[FormerlySerializedAs("_confirmButton")]
 		[SerializeField] private CustomButton _storeConfirmBtn;
+		[SerializeField] private CustomButton _storeUpBtn, _storeDownBtn;
 
 		[Header("Twitter")]
 		[SerializeField] private TwitterInputPanel _twitterInputPanel;
@@ -60,6 +63,8 @@ namespace Game
 				_endDayPanel.Show(false);
 				_isStorePhrase = false;
 			};
+			_storeUpBtn.OnClick += OnStoreMoveUp;
+			_storeDownBtn.OnClick += OnStoreMoveDown;
 
 			HideStoreMenu();
 			_timeOriginalColor = _timeBG.color;
@@ -201,6 +206,20 @@ namespace Game
 		private void HideStoreMenu()
 		{
 			_storeMenu.SetActive(false);
+		}
+
+		private void OnStoreMoveUp()
+		{
+			string json = JsonConvert.SerializeObject(new ArrayWrapper
+				{ array = new string[] { JsonUtility.ToJson(new Vector2(0, 1)) } });
+			Utility.Socket.EmitEvent("playerForceMove", json);
+		}
+
+		private void OnStoreMoveDown()
+		{
+			string json = JsonConvert.SerializeObject(new ArrayWrapper
+				{ array = new string[] { JsonUtility.ToJson(new Vector2(0, -1)) } });
+			Utility.Socket.EmitEvent("playerForceMove", json);
 		}
 		#endregion
 
