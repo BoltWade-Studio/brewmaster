@@ -50,7 +50,7 @@ namespace Game
 
 	    public void OnUpgradeCompleteHandler()
 	    {
-		    _table.TableIndex = TableManager.Instance.GetTableList().Count - 1;
+		    _table.TableIndex = TableManager.Instance.GetTableList().Count;
 		    _table.name = "Table " + _table.TableIndex;
 		    if (CheckAllUpgradeComplete())
 		    {
