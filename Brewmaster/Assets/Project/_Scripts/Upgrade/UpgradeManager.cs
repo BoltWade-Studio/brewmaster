@@ -76,6 +76,29 @@ namespace Game
 		{
 			_upgradeBaseList.Add(upgradeBase);
 		}
+
+		public void RemoveUpgradeBase(UpgradeBase upgradeBase)
+		{
+			_upgradeBaseList.Remove(upgradeBase);
+		}
+
+		public void ClearSeatUpgrade()
+		{
+			// Clear all upgrade base that is seat upgrade
+			List<UpgradeBase> removeList = new List<UpgradeBase>();
+			foreach (var upgradeBase in _upgradeBaseList)
+			{
+				if (upgradeBase is SeatUpgrade)
+				{
+					removeList.Add(upgradeBase);
+				}
+			}
+
+			foreach (var upgradeBase in removeList)
+			{
+				_upgradeBaseList.Remove(upgradeBase);
+			}
+		}
 	}
 
 }

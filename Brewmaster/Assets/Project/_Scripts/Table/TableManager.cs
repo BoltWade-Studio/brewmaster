@@ -89,7 +89,7 @@ namespace Game
         #endregion
 
         #region Update pos to server
-        private void UpdatePositionsToServer()
+        public void UpdatePositionsToServer()
         {
             Debug.Log("AAA Update position to server");
             string[] tablePosStrings = new string[_tableList.Count];
@@ -146,6 +146,7 @@ namespace Game
         }
         private void LoadTableSeat()
         {
+	        BuildTables(PlayerData.PlayerScale.Count());
             // Debug.Log("client table count: " + _tableList.Count);
             // Debug.Log("server table count: " + PlayerData.PlayerScale.Count());
             for (int i = 0; i < PlayerData.PlayerScale.Count(); i++)
@@ -189,6 +190,12 @@ namespace Game
 
         private void BuildTables(int tableCount = 10)
         {
+	        for (int i = 0; i < _tableList.Count; i++)
+	        {
+		        Destroy(_tableList[i].gameObject);
+	        }
+	        UpgradeManager.Instance.ClearSeatUpgrade(); // Clear Seat Upgrade to avoid duplicate, although OnDestroy is called when destroy table, but it's too late
+
 	        _tableList.Clear();
 	        Vector3 currentPosition = _startPosition.position;
 	        for (int i = 0; i < tableCount; i++)
@@ -196,6 +203,7 @@ namespace Game
 		        GameObject table = Instantiate(_tablePrefab, currentPosition, Quaternion.identity, this.transform);
 		        _tableList.Add(table.GetComponent<Table>());
 		        table.transform.parent = _parent.transform;
+		        table.name = "Table_" + i;
 		        currentPosition += Vector3.back * distanceBetweenTables;
 	        }
 
@@ -204,7 +212,7 @@ namespace Game
 
         public Vector3 GetNextAddTablePosition()
 		{
-	        Vector3 nextPos = _tableList[_tableList.Count - 1].transform.position;
+	        Vector3 nextPos = _tableList[^1].transform.position;
 	        nextPos += Vector3.back * distanceBetweenTables;
 	        return nextPos;
 		}

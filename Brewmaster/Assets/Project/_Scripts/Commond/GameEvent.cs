@@ -28,6 +28,7 @@ namespace Game
         private static GameObject s_initGO;
 
         public Action OnStorePhase;
+        public Action OnStorePhaseEnd;
         public Action OnNextDay;
         public Action OnEndDay;
         public Action OnTimeUp;

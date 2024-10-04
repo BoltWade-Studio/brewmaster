@@ -12,11 +12,24 @@ namespace Game
 	    {
 		    _table = gameObject.AddComponent<Table>();
 		    _table.TableIndex = TableManager.Instance.GetTableList().Count;
-		    _upgradeAction = new UpgradeAction(() =>
+		    _table.name = "Table " + _table.TableIndex;
+		    _upgradeAction = new UpgradeAction(async ()  =>
 		    {
-			    Debug.Log("Before Add table");
-			    TableManager.Instance.BuildNewTable();
-			    GameEvent.Instance.OnStorePhase?.Invoke();
+			    try
+			    {
+				    // await DataSaveLoadManager.Instance.LoadData();
+				    // GameEvent.Instance.OnStorePhaseEnd?.Invoke();
+				    // GameEvent.Instance.OnStorePhase?.Invoke();
+				    GameEvent.Instance.OnStorePhase?.Invoke();
+				    TableManager.Instance.UpdatePositionsToServer();
+			    }
+			    catch (System.Exception e)
+			    {
+				    Debug.Log("Invoke store phase Error: " + e);
+			    }
+			    Debug.Log("Invoke store phase");
+
+
 		    });
 	    }
 	    protected override void ChildStart()
@@ -38,6 +51,7 @@ namespace Game
 	    public void OnUpgradeCompleteHandler()
 	    {
 		    _table.TableIndex = TableManager.Instance.GetTableList().Count - 1;
+		    _table.name = "Table " + _table.TableIndex;
 		    if (CheckAllUpgradeComplete())
 		    {
 			    HideUI();
@@ -93,6 +107,36 @@ namespace Game
         protected override UniTask<bool> Execute()
         {
 	        return TransactionManager.Instance.AddTable();
+        }
+
+        protected override async void PerformUpgrade()
+        {
+	        LoadingUIManager.Instance.Show("Checking upgrade data");
+	        string json = Utility.Socket.StringToSocketJson(_table.TableIndex.ToString());
+	        Debug.Log("Adding Table " + _table.TableIndex );
+
+	        _isGettingData = true;
+	        if (_transactionJsonDataDic.ContainsKey("CanUpgradeTable"))
+		        _transactionJsonDataDic.Remove("CanUpgradeTable");
+	        Utility.Socket.SubscribeEvent(SocketEnum.getCanAddTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
+	        Utility.Socket.EmitEvent(SocketEnum.getCanAddTable.ToString(), json);
+	        await UniTask.WaitUntil(() => _isGettingData == false);
+	        await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey("CanUpgradeTable"));
+
+	        bool canUpgrade = _transactionJsonDataDic["CanUpgradeTable"].ToString().ToLower().Equals("true");
+
+	        if (canUpgrade == false)
+	        {
+		        LoadingUIManager.Instance.Hide();
+		        NotifyManager.Instance.Show("Don't have enough money or table is not available to open new table");
+		        return;
+	        }
+	        else
+	        {
+		        await TransactionUpgrade();
+		        // LoadingUIManager.Instance.Hide();
+	        }
+	        Utility.Socket.UnSubscribeEvent(SocketEnum.getCanAddTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
         }
     }
 }

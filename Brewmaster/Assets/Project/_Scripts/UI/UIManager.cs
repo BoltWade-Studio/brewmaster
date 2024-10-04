@@ -60,6 +60,7 @@ namespace Game
 			{
 				// GameEvent.Instance.OnNextDay?.Invoke();
 				HideStoreMenu();
+				GameEvent.Instance.OnStorePhaseEnd?.Invoke();
 				_endDayPanel.Show(false);
 				_isStorePhrase = false;
 			};
@@ -185,7 +186,6 @@ namespace Game
 		}
 		public void OnEndDayHandler()
 		{
-			Debug.Log("UIManager: OnEndDayHandler");
 			_endDayPanel.Show(true);
 		}
 

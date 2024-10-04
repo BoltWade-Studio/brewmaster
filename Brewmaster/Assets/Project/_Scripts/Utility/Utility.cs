@@ -58,6 +58,7 @@ namespace Game
 
 				socket.OnAny((eventName, data) =>
 				{
+					Debug.Log("socket.OnAny: " + eventName);
 					if (eventName == "exception")
 					{
 						WSError wSError;
@@ -89,23 +90,23 @@ namespace Game
 								catch (Exception e)
 								{
 									dataString = data.ToString();
-									Debug.Log("Socket.OnAny error: " + e.Message);
+									// Debug.Log("Socket.OnAny error: " + e.Message);
 								}
 							}
 
 							foreach (var socketEventClass in _socketEventClassDic[eventName])
 							{
 								List<String> noLogList = new List<string>
-									{
-										"updateCustomerWaitTime",
-										"updateTimer",
-										"updateCustomerPosition",
-										"updateBeer",
-										"spawnCustomerCallback",
-										"customerReachDestination",
-										"deleteCustomer",
-										"customerReturn",
-									};
+								{
+									"updateCustomerWaitTime",
+									"updateTimer",
+									"updateCustomerPosition",
+									"updateBeer",
+									"spawnCustomerCallback",
+									"customerReachDestination",
+									"deleteCustomer",
+									"customerReturn",
+								};
 								if (!noLogList.Contains(eventName))
 									Debug.Log("Socket.OnAny: " + eventName + " " + (dataString ?? ""));
 								socketEventClass.Action?.Invoke(dataString);
@@ -128,26 +129,93 @@ namespace Game
 			public static void EmitEvent(string eventName, string jsonData = null)
 			{
 				// Debug.Log("EmitEvent: " + eventName);
-				if (jsonData != null)
-					jsonData = ToSocketJson(jsonData);
+				try
+				{
+					if (jsonData != null)
+						jsonData = ToSocketJson(jsonData);
+					// Debug.Log("EmitEvent: " + eventName + " " + jsonData);
 
 #if UNITY_WEBGL && !UNITY_EDITOR
-				JsSocketConnect.EmitEvent(eventName, jsonData);
+					JsSocketConnect.EmitEvent(eventName, jsonData);
 #else
 
-				socket.Emit(eventName, jsonData);
+					if (jsonData != null)
+						socket.Emit(eventName, jsonData);
+					else
+						socket.Emit(eventName);
+#endif
+				}
+				catch (Exception e)
+				{
+					Debug.Log("EmitEvent error: " + e.Message);
+				}
+			}
+			public static void SubscribeEvent(string eventName, string objectName, string methodName, Action<string> action)
+			{
+				Debug.Log("SubscribeEvent: " + eventName + " " + objectName + " " + methodName);
+#if UNITY_WEBGL && !UNITY_EDITOR
+				JsSocketConnect.SubscribeEvent(eventName, objectName, methodName);
+#else
+				if (_socketEventClassDic.ContainsKey(eventName))
+				{
+					if (_socketEventClassDic[eventName].Contains(new SocketEventClass()
+					{
+						ClassName = objectName,
+						MethodName = methodName,
+						Action = action
+					}))
+					{
+						return;
+					}
+					_socketEventClassDic[eventName].Add(new SocketEventClass()
+					{
+						ClassName = objectName,
+						MethodName = methodName,
+						Action = action
+					});
+				}
+				else
+				{
+					_socketEventClassDic.Add(eventName, new List<SocketEventClass>()
+					{
+						new SocketEventClass()
+						{
+							ClassName = objectName,
+							MethodName = methodName,
+							Action = action
+						}
+					});
+				}
+				if (_socketEventClassDic.ContainsKey(eventName) && _socketEventClassDic[eventName].Count > 0)
+				{
+					Debug.Log(JsonConvert.SerializeObject(_socketEventClassDic[eventName][0], Formatting.Indented));
+				}
 #endif
 			}
-			public static void OnEvent(string eventName, string objectName, string methodName, Action<string> action)
+
+			public static void UnSubscribeEvent(string eventName, string objectName, string methodName, Action<string> action)
 			{
-				// Debug.Log("OnEvent: " + eventName);
+				Debug.Log("UnSubscribeEvent: " + eventName + " " + objectName + " " + methodName);
 #if UNITY_WEBGL && !UNITY_EDITOR
-				JsSocketConnect.OnEvent(eventName, objectName, methodName);
+				JsSocketConnect.UnSubscribeEvent(eventName, objectName, methodName);
 #else
-				if (_actionEventDic.ContainsKey(eventName))
-					_actionEventDic[eventName] = action;
-				else
-					_actionEventDic.Add(eventName, action);
+				if (_socketEventClassDic.ContainsKey(eventName))
+				{
+					if (_socketEventClassDic[eventName].Contains(new SocketEventClass()
+					{
+						ClassName = objectName,
+						MethodName = methodName,
+						Action = action
+					}))
+					{
+						_socketEventClassDic[eventName].Remove(new SocketEventClass()
+						{
+							ClassName = objectName,
+							MethodName = methodName,
+							Action = action
+						});
+					}
+				}
 #endif
 			}
 
@@ -156,8 +224,15 @@ namespace Game
 #if UNITY_WEBGL && !UNITY_EDITOR
 				JsSocketConnect.SubscribeOnException(objectName, methodName);
 #else
-				Debug.Log("Add method: " + methodName);
-				methodLists.Add(action);
+				_socketEventClassDic.Add("exception", new List<SocketEventClass>()
+				{
+					new SocketEventClass()
+					{
+						ClassName = objectName,
+						MethodName = methodName,
+						Action = action
+					}
+				});
 #endif
 			}
 
@@ -166,7 +241,12 @@ namespace Game
 #if UNITY_EDITOR && !UNITY_WEBGL
 				JsSocketConnect.UnSubscribeOnException(objectName, methodName);
 #else
-				methodLists.Remove(action);
+				_socketEventClassDic["exception"].Remove(new SocketEventClass()
+				{
+					ClassName = objectName,
+					MethodName = methodName,
+					Action = action
+				});
 #endif
 			}
 
@@ -184,8 +264,8 @@ namespace Game
 
 			public static string StringToSocketJson(string normalString)
 			{
-				string jsonString = JsonConvert.SerializeObject(new ArrayWrapper() { array = new string[] { normalString } });
-				return ToSocketJson(jsonString);
+				string jsonString = JsonConvert.SerializeObject(new string[] { normalString });
+				return jsonString;
 			}
 		}
 	}

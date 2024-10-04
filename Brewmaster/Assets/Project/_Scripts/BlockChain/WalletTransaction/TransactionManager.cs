@@ -25,10 +25,10 @@ namespace Game
 
         void Start()
         {
-            Utility.Socket.OnEvent(SocketEnum.getEntryCallback.ToString(), this.gameObject.name, nameof(GetEntryCallback), GetEntryCallback);
-            Utility.Socket.OnEvent(SocketEnum.claimCallback.ToString(), this.gameObject.name, nameof(ClaimCallback), ClaimCallback);
-            Utility.Socket.OnEvent(SocketEnum.getPlayerPubCallback.ToString(), this.gameObject.name, nameof(GetPlayerPubCallback), GetPlayerPubCallback);
-            Utility.Socket.OnEvent(SocketEnum.getPriceForAddStoolCallback.ToString(), this.gameObject.name, nameof(GetStoolPriceCallback), GetStoolPriceCallback);
+	        Utility.Socket.SubscribeEvent(SocketEnum.getEntryCallback.ToString(), this.gameObject.name, nameof(GetEntryCallback), GetEntryCallback);
+	        Utility.Socket.SubscribeEvent(SocketEnum.claimCallback.ToString(), this.gameObject.name, nameof(ClaimCallback), ClaimCallback);
+	        Utility.Socket.SubscribeEvent(SocketEnum.getPlayerPubCallback.ToString(), this.gameObject.name, nameof(GetPlayerPubCallback), GetPlayerPubCallback);
+	        Utility.Socket.SubscribeEvent(SocketEnum.getPriceForAddStoolCallback.ToString(), this.gameObject.name, nameof(GetStoolPriceCallback), GetStoolPriceCallback);
         }
 
         void Update()
@@ -288,9 +288,9 @@ namespace Game
             }
 
             // txHash is valid
-            bool transactionSuccess = await WaitTransaction(txHash);
+            bool isTransactionSuccess = await WaitTransaction(txHash);
 
-            if (transactionSuccess)
+            if (isTransactionSuccess)
             {
                 // Transaction is successful
                 NotifyManager.Instance.Show("Transaction successful");
@@ -300,12 +300,13 @@ namespace Game
                 // Transaction is failed
                 NotifyManager.Instance.Show("Transaction failed");
             }
-            _sending = false;
+            _transactionJsonDataDic.Add(TransactionID.ADD_STOOL, isTransactionSuccess.ToString().ToLower());
+            _isSendingData = false;
         }
 
         public async UniTask<bool> AddTable()
 		{
-			_sending = true;
+			_isSendingData = true;
 			if (Application.isEditor == false)
 			{
 				Debug.Log("AddTable: ");
@@ -316,9 +317,9 @@ namespace Game
 				_transactionJsonDataDic.Remove(TransactionID.ADD_TABLE);
 				LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for player confirmation");
 				JSInteropManager.SendTransaction(contractAddress, addTableEntry,
-					JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { "" } }),
+					JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { } }),
 					this.gameObject.name, nameof(AddTableCallback));
-				await UniTask.WaitUntil(() => _sending == false);
+				await UniTask.WaitUntil(() => _isSendingData == false);
 				await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.ADD_TABLE));
 
 				// return true if transaction is successful, false if transaction is failed or user abort
@@ -326,7 +327,7 @@ namespace Game
 			}
 			else
 			{
-				_sending = false;
+				_isSendingData = false;
 				return true;
 			}
 		}
@@ -343,7 +344,6 @@ namespace Game
 			}
 
 			// txHash is valid, wait for transaction done
-			LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for transaction update");
 			bool isTransactionSuccess = await WaitTransaction(txHash);
 
 			if (isTransactionSuccess)
@@ -357,7 +357,7 @@ namespace Game
 				NotifyManager.Instance.Show("Transaction failed");
 			}
 			_transactionJsonDataDic.Add(TransactionID.ADD_TABLE, isTransactionSuccess.ToString().ToLower());
-			_sending = false;
+			_isSendingData = false;
 		}
         #endregion
 
@@ -371,11 +371,11 @@ namespace Game
             }
 
             LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for transaction update");
+            _transactionJsonDataDic.Remove(TransactionID.WAIT_TRANSACTION);
             _isTransactionSending = true;
             string socketString = Utility.Socket.StringToSocketJson(txHash);
             Utility.Socket.SubscribeEvent(SocketEnum.waitTransactionCallback.ToString(), this.gameObject.name, nameof(WaitTransactionCallback), WaitTransactionCallback);
             Utility.Socket.EmitEvent(SocketEnum.waitTransaction.ToString(), socketString);
-            Utility.Socket.OnEvent(SocketEnum.waitTransactionCallback.ToString(), this.gameObject.name, nameof(WaitTransactionCallback), WaitTransactionCallback);
 
             await UniTask.WaitUntil(() => _isTransactionSending == false);
             await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.WAIT_TRANSACTION));
