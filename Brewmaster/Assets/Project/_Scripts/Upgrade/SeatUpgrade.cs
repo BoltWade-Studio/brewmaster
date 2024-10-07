@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using NOOD.Data;
 using UnityEngine;
 
@@ -12,8 +14,9 @@ namespace Game
             _upgradeAction = new UpgradeAction(() =>
             {
                 Debug.Log("Before Unlock at table: " + _table.TableIndex);
-                _table.UnlockSeat();
-                _table.AvailableSeatNumber++;
+                // _table.UnlockSeat();
+                // _table.AvailableSeatNumber++;
+                GameEvent.Instance.OnStorePhase?.Invoke();
             });
         }
         protected override void ChildStart()
@@ -51,7 +54,7 @@ namespace Game
         }
         protected override bool CheckAllUpgradeComplete()
         {
-            if (_table.AvailableSeatNumber == 4)
+            if (_table.AvailableSeatNumber == 10)
             {
                 return true;
             }
@@ -74,12 +77,48 @@ namespace Game
         }
         protected override void Save()
         {
-            DataManager<int>.SaveToPlayerPrefWithGenId(_upgradeTime, GetId());
+            // DataManager<int>.SaveToPlayerPrefWithGenId(_upgradeTime, GetId());
         }
         protected override void Load()
         {
             _upgradeTime = DataManager<int>.LoadDataFromPlayerPref(GetId(), 1);
         }
+
+        protected override UniTask<bool> Execute()
+        {
+	        return TransactionManager.Instance.AddStool(_table.TableIndex);
+        }
+
+        protected override async void PerformUpgrade()
+        {
+	        LoadingUIManager.Instance.Show("Checking upgrade data");
+	        string json = Utility.Socket.StringToSocketJson(_table.TableIndex.ToString());
+	        Debug.Log("Upgrading Table " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
+
+	        _isGettingData = true;
+	        if (_transactionJsonDataDic.ContainsKey("CanUpgradeTable"))
+		        _transactionJsonDataDic.Remove("CanUpgradeTable");
+	        Utility.Socket.SubscribeEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
+	        Utility.Socket.EmitEvent(SocketEnum.getCanUpgradeTable.ToString(), json);
+	        await UniTask.WaitUntil(() => _isGettingData == false);
+	        await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey("CanUpgradeTable"));
+
+	        bool canUpgrade = _transactionJsonDataDic["CanUpgradeTable"].ToString().ToLower().Equals("true");
+
+	        if (canUpgrade == false)
+	        {
+		        LoadingUIManager.Instance.Hide();
+		        NotifyManager.Instance.Show("Don't have enough money or table is not available to upgrade");
+		        return;
+	        }
+	        else
+	        {
+		        await TransactionUpgrade();
+		        // LoadingUIManager.Instance.Hide();
+	        }
+	        Utility.Socket.UnSubscribeEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
+        }
+
         #endregion
     }
 

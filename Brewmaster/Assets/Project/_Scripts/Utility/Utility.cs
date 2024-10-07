@@ -96,7 +96,19 @@ namespace Game
 
 							foreach (var socketEventClass in _socketEventClassDic[eventName])
 							{
-								Debug.Log("Socket.OnAny: " + eventName + " " + (dataString ?? ""));
+								List<String> noLogList = new List<string>
+								{
+									"updateCustomerWaitTime",
+									"updateTimer",
+									"updateCustomerPosition",
+									"updateBeer",
+									"spawnCustomerCallback",
+									"customerReachDestination",
+									"deleteCustomer",
+									"customerReturn",
+								};
+								if (!noLogList.Contains(eventName))
+									Debug.Log("Socket.OnAny: " + eventName + " " + (dataString ?? ""));
 								socketEventClass.Action?.Invoke(dataString);
 							}
 						}
@@ -116,7 +128,7 @@ namespace Game
 
 			public static void EmitEvent(string eventName, string jsonData = null)
 			{
-				Debug.Log("EmitEvent: " + eventName);
+				// Debug.Log("EmitEvent: " + eventName);
 				try
 				{
 					if (jsonData != null)
@@ -183,6 +195,7 @@ namespace Game
 
 			public static void UnSubscribeEvent(string eventName, string objectName, string methodName, Action<string> action)
 			{
+				Debug.Log("UnSubscribeEvent: " + eventName + " " + objectName + " " + methodName);
 #if UNITY_WEBGL && !UNITY_EDITOR
 				JsSocketConnect.UnSubscribeEvent(eventName, objectName, methodName);
 #else

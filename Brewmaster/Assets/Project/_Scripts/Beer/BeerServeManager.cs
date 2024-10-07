@@ -41,7 +41,7 @@ namespace Game
 
 			BeerList = new List<List<BeerCup>>();
 
-			for (int i = 0; i < TableManager.Instance.GetTableList().Count; i++)
+			for (int i = 0; i < 10; i++)
 			{
 				BeerList.Add(new List<BeerCup>());
 			}

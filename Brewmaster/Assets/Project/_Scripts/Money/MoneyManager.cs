@@ -16,6 +16,12 @@ namespace Game
 			Utility.Socket.SubscribeEvent(SocketEnum.updateInDayTreasuryCallback.ToString(), this.gameObject.name, nameof(OnUpdateInDayPlayerTreasury), OnUpdateInDayPlayerTreasury);
 		}
 
+		void OnDestroy()
+		{
+			Utility.Socket.UnSubscribeEvent(SocketEnum.updateTreasuryCallback.ToString(), this.gameObject.name, nameof(OnUpdatePlayerTreasury), OnUpdatePlayerTreasury);
+			Utility.Socket.UnSubscribeEvent(SocketEnum.updateInDayTreasuryCallback.ToString(), this.gameObject.name, nameof(OnUpdateInDayPlayerTreasury), OnUpdateInDayPlayerTreasury);
+		}
+
 		private async void OnUpdatePlayerTreasury(string point)
 		{
 			await UniTask.SwitchToMainThread();

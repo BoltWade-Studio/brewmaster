@@ -42,6 +42,8 @@ public enum SocketEnum
 	upgradeTableCallback,
 	getCanUpgradeTable,
 	getCanUpgradeTableCallback,
+	getCanAddTable,
+	getCanAddTableCallback,
 	#endregion
 
 	#region Get temp point
@@ -74,4 +76,3 @@ public enum SocketEnum
 	getEntry,
 	getPlayerPub,
 }
-

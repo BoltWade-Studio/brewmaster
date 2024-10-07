@@ -17,8 +17,6 @@ namespace Game
 		#endregion
 
 		#region Property
-		public static float DeltaTime => Time.deltaTime * TimeScale;
-		public static float UnScaledDeltaTime => Time.unscaledDeltaTime;
 		private static float s_timeScale = 1;
 		public static float TimeScale
 		{
@@ -67,7 +65,7 @@ namespace Game
 
 		private void Update()
 		{
-			if (Time.time - lastUpdate > 1f / GameSetting.FPS)
+			if (Time.time - lastUpdate > 1f / GameSetting.FPS && !_isTimeUp)
 			{
 				lastUpdate = Time.time;
 				// Send time to server (in minutes)
@@ -146,6 +144,7 @@ namespace Game
 		private void OnNextDayHandler()
 		{
 			_day += 1;
+			_isTimeUp = false;
 			UIManager.Instance.UpdateDayText();
 			ResetTimeScale();
 			ResetTime();

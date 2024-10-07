@@ -21,10 +21,10 @@ namespace Game
         [SerializeField] protected UpgradeUI _upgradeUI;
         [SerializeField] protected UpgradeAction _upgradeAction;
         protected int _upgradeTime = 1;
-        private bool _canUpgrade;
-        private bool _isGettingData;
+        protected bool _canUpgrade;
+        protected bool _isGettingData;
 
-        private Dictionary<string, object> _transactionJsonDataDic = new Dictionary<string, object>();
+        protected Dictionary<string, object> _transactionJsonDataDic = new Dictionary<string, object>();
 
         #region Unity functions
         protected void Awake()
@@ -40,10 +40,12 @@ namespace Game
             GameEvent.Instance.OnNextDay += HideUI;
             GameEvent.Instance.OnStorePhase += OnStorePhraseHandler;
             GameEvent.Instance.OnStorePhase += OnStorePhaseHandler;
+            GameEvent.Instance.OnStorePhaseEnd += OnStorePhaseEndHandler;
             ChildOnEnable();
         }
         protected void Start()
         {
+	        Debug.Log("UpgradeBase Started");
             if (UpgradeManager.Instance)
             {
                 UpgradeManager.Instance.AddUpgradeBase(this);
@@ -59,8 +61,19 @@ namespace Game
             GameEvent.Instance.OnNextDay -= HideUI;
             GameEvent.Instance.OnStorePhase -= OnStorePhraseHandler;
             GameEvent.Instance.OnStorePhase -= OnStorePhaseHandler;
+            GameEvent.Instance.OnStorePhaseEnd -= OnStorePhaseEndHandler;
             ChildOnDisable();
         }
+
+        private void OnDestroy()
+        {
+	  //       Debug.Log("UpgradeBase OnDestroy");
+	  //       if (UpgradeManager.Instance)
+			// {
+			// 	UpgradeManager.Instance.RemoveUpgradeBase(this);
+			// }
+        }
+
         protected virtual void ChildOnDisable() { }
         protected virtual void ChildOnEnable() { }
         #endregion
@@ -82,35 +95,9 @@ namespace Game
         }
 
         #region Upgrade
-        private async void PerformUpgrade()
-        {
-            LoadingUIManager.Instance.Show("Checking upgrade data");
-            string json = Utility.Socket.StringToSocketJson(_table.TableIndex.ToString());
-            Debug.Log("Upgrading Table " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
 
-            _isGettingData = true;
-            if (_transactionJsonDataDic.ContainsKey("CanUpgradeTable"))
-                _transactionJsonDataDic.Remove("CanUpgradeTable");
-            Utility.Socket.SubscribeEvent(SocketEnum.getCanUpgradeTableCallback.ToString(), this.gameObject.name, nameof(CanUpgradeTableCallback), CanUpgradeTableCallback);
-            Utility.Socket.EmitEvent(SocketEnum.getCanUpgradeTable.ToString(), json);
-            await UniTask.WaitUntil(() => _isGettingData == false);
-            await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey("CanUpgradeTable"));
-
-            bool canUpgrade = _transactionJsonDataDic["CanUpgradeTable"].ToString().ToLower().Equals("true");
-
-            if (canUpgrade == false)
-            {
-                LoadingUIManager.Instance.Hide();
-                NotifyManager.Instance.Show("Don't have enough money or table is not available to upgrade");
-                return;
-            }
-            else
-            {
-                await TransactionUpgrade();
-                LoadingUIManager.Instance.Hide();
-            }
-        }
-        private async void CanUpgradeTableCallback(string data)
+        protected abstract void PerformUpgrade();
+        protected async void CanUpgradeTableCallback(string data)
         {
             await UniTask.SwitchToMainThread();
             _transactionJsonDataDic.Add("CanUpgradeTable", data);
@@ -118,7 +105,9 @@ namespace Game
             _isGettingData = false;
         }
 
-        private async UniTask TransactionUpgrade()
+        protected abstract UniTask<bool> Execute();
+
+        protected async UniTask TransactionUpgrade()
         {
             bool isPlayerConfirm = true;
             Debug.Log("AddStool to table: " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
@@ -126,15 +115,15 @@ namespace Game
             {
                 // Send transaction to blockchain and wait for result
                 LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for player confirmation");
-                isPlayerConfirm = await TransactionManager.Instance.AddStool(_table.TableIndex);
+                isPlayerConfirm = await Execute();
             }
 
             if (isPlayerConfirm == true)
             {
                 // Transaction is successful, load data
                 LoadingUIManager.Instance.ChangeLoadingMessage("Getting player data");
-                Upgrade(); // Upgrade in local only
                 await DataSaveLoadManager.Instance.LoadData(); // Load data from blockchain an update in server
+                Upgrade(); // Upgrade in local only
                 LoadingUIManager.Instance.Hide();
             }
             else
@@ -162,6 +151,11 @@ namespace Game
             _upgradeUI.gameObject.SetActive(true);
             _upgradeUI.UpdateMoneyText();
         }
+
+        public void OnStorePhaseEndHandler()
+		{
+			HideUI();
+		}
 
         public void OnStorePhraseHandler()
         {

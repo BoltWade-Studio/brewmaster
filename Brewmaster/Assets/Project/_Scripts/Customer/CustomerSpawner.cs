@@ -17,10 +17,13 @@ namespace Game
 		[SerializeField] private Transform _customerPref;
 		[SerializeField] private float _spawnTime;
 		private List<CustomerDto> toSpawn = new List<CustomerDto>();
+		private bool _isSpawning = true;
 
 		#region Unity functions
 		private void Start()
 		{
+			GameEvent.Instance.OnNextDay += OnNextDayHandler;
+			GameEvent.Instance.OnTimeUp += TimeUp;
 			StartCoroutine(SpawnCustomer());
 			Utility.Socket.SubscribeEvent(SocketEnum.spawnCustomerCallback.ToString(), this.gameObject.name, nameof(SpawnCustomer), SpawnCustomer);
 		}
@@ -47,10 +50,6 @@ namespace Game
 				}
 			}
 		}
-		void OnDestroy()
-		{
-			Utility.Socket.UnSubscribeEvent(SocketEnum.spawnCustomerCallback.ToString(), this.gameObject.name, nameof(SpawnCustomer), SpawnCustomer);
-		}
 		#endregion
 
 		#region Event functions
@@ -70,6 +69,16 @@ namespace Game
 				Debug.LogError("Spawning Error: " + e.Message);
 			}
 		}
+
+		private void OnNextDayHandler()
+		{
+			_isSpawning = true;
+		}
+
+		private void TimeUp()
+		{
+			_isSpawning = false;
+		}
 		#endregion
 
 		#region Coroutine
@@ -78,7 +87,8 @@ namespace Game
 			while (true)
 			{
 				yield return new WaitForSeconds(_spawnTime);
-				Utility.Socket.EmitEvent("spawnCustomer");
+				if (_isSpawning)
+					Utility.Socket.EmitEvent("spawnCustomer");
 			}
 		}
 		#endregion

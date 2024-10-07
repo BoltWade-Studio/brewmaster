@@ -132,10 +132,10 @@ namespace NOOD
             //! WebGL doesn't do multithreading
 
             /* Create a mainThreadQueue in main script to hold the Action and run the action in Update like below
-                 if your Action do something to Unity object like set transform, set physic or contain Unity Time class 
+                 if your Action do something to Unity object like set transform, set physic or contain Unity Time class
                 !Ex for mainThreadQueue:
                     Queue<Action> mainThreadQueue = new Queue<Action>()
-                    
+
                     void Update()
                     {
                         if(mainThreadQueue.Count > 0)
@@ -147,7 +147,7 @@ namespace NOOD
             */
 
             //! if your function has parameters, use param like this
-            //! NoodyCustomCode.RunInBackGround(() => yourFunction(parameters)); 
+            //! NoodyCustomCode.RunInBackGround(() => yourFunction(parameters));
 
             Thread t = new Thread(() =>
             {
@@ -379,11 +379,11 @@ namespace NOOD
             camera.transform.position = temp;
         }
 
-        public static void LerpSmoothCameraFollow(GameObject camera, float smoothTime, Transform targetTransform, Vector3 offset)
+        public static void LerpSmoothCameraFollow(GameObject camera, float smoothTime, Vector3 targetPosition, Vector3 offset)
         {
 
             Vector3 temp = camera.transform.position;
-            Vector3 targetPosition = targetTransform.position + offset;
+            targetPosition += offset;
             Vector3 currentSpeed = Vector3.zero;
             //Vector3 smoothPosition = Vector3.SmoothDamp(camera.transform.position, targetPosition, ref currentSpeed, smoothTime);
             Vector3 smoothPosition = Vector3.Lerp(temp, targetPosition, smoothTime * Time.fixedDeltaTime);
@@ -683,7 +683,7 @@ namespace NOOD
             StartNewCoroutineLoop(action, Time.deltaTime);
         }
         /// <summary>
-        /// Create Coroutine loop with pausePerLoop and loopTime 
+        /// Create Coroutine loop with pausePerLoop and loopTime
         /// </summary>
         /// <param name="action"></param>
         /// <param name="pausePerLoop"> time pause per loop </param>
@@ -779,9 +779,9 @@ namespace NOOD
         {
             UpdateObject.StopAllWithName(functionName);
         }
-        #endregion 
+        #endregion
 
-        #region Transform and Collider 
+        #region Transform and Collider
         public static Vector3 GetRandomPointInsideCollider(Collider collider)
         {
             Vector3 minPosition = collider.bounds.min;

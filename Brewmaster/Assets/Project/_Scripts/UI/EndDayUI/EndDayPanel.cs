@@ -23,6 +23,7 @@ namespace Game
         [SerializeField] private CanvasGroup _canvasGroup;
         [SerializeField] private TextMeshProUGUI _treasuryText, _pointText, _nftBuffText, _resultText;
         [SerializeField] private CustomButton _shopBtn, _claimBtn, _nextDayBtn, _mainMenuBtn;
+        [SerializeField] private CustomButton _shopMoveUpBtn, _shopMoveDownBtn;
         [SerializeField] private CustomButton _shareToTwitterBtn;
         [SerializeField] private GameObject _blockXImage;
         [SerializeField] private float _moneyIncreaseSpeed = 30;
@@ -61,6 +62,7 @@ namespace Game
         #endregion
 
         #region Event
+
         private void OnShareToTwitterBtnPress()
         {
             TwitterShareManager.Instance.ActiveShareToXPopup();
@@ -179,33 +181,34 @@ namespace Game
         #region Show hide
         public async void Show(bool isUpdate = false)
         {
-            this.gameObject.SetActive(true);
-            _canvasGroup.alpha = 0;
-            if (isUpdate)
-            {
-                if (PlayerData.InDayTreasury > 0)
-                {
-                    _isClaimed = false;
-                    _claimBtn.IsInteractable = true;
-                }
-                else
-                {
-                    _isClaimed = true;
-                    _claimBtn.IsInteractable = false;
-                }
-                await GetPointBeforeClaim();
-                PlayMoneyAnimation();
-            }
+	        this.gameObject.SetActive(true);
+	        _canvasGroup.alpha = 0;
+	        if (isUpdate)
+	        {
+		        if (PlayerData.InDayTreasury > 0)
+		        {
+			        _isClaimed = false;
+			        _claimBtn.IsInteractable = true;
+		        }
+		        else
+		        {
+			        _isClaimed = true;
+			        _claimBtn.IsInteractable = false;
+		        }
 
-            _canvasGroup.DOFade(1, 0.2f);
-            _mainMenuBtn.gameObject.SetActive(true);
-            _shopBtn.gameObject.SetActive(true);
-            _nextDayBtn.gameObject.SetActive(true);
+		        await GetPointBeforeClaim();
+		        PlayMoneyAnimation();
+	        }
 
-            _endDayMenu.SetActive(true);
-            _endDayMenu.transform.DOScale(Vector3.one, 0.3f);
-            SoundManager.PlaySound(SoundEnum.MoneySound);
-            EventSystem.current.SetSelectedGameObject(null);
+	        _canvasGroup.DOFade(1, 0.2f);
+	        _mainMenuBtn.gameObject.SetActive(true);
+	        _shopBtn.gameObject.SetActive(true);
+	        _nextDayBtn.gameObject.SetActive(true);
+
+	        _endDayMenu.SetActive(true);
+	        _endDayMenu.transform.DOScale(Vector3.one, 0.3f);
+	        SoundManager.PlaySound(SoundEnum.MoneySound);
+	        EventSystem.current.SetSelectedGameObject(null);
         }
         public void Hide()
         {
