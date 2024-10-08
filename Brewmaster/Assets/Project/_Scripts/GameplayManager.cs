@@ -20,6 +20,7 @@ namespace Game
 		{
 			base.ChildAwake();
 			GameEvent.Instance.OnUpdatePosComplete += OnUpdatePosCompleteHandler;
+			Application.targetFrameRate = 60;
 		}
 
 

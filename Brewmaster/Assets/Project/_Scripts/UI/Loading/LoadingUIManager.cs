@@ -33,7 +33,7 @@ namespace Game
             if (_loadingUI)
                 _loadingUI.SetLoadingText(_message + (int)_time);
 
-            if (_time >= 100 && !_isDisconnectPopup && _loadingUI.gameObject.activeInHierarchy)
+            if (_time >= 100 && !_isDisconnectPopup && _loadingUI != null && _loadingUI.gameObject.activeInHierarchy)
             {
                 _isDisconnectPopup = true;
                 PopupManager.Instance.ShowAnnouncePopup("Server error", "Server disconnected, reload?", "Reload", () =>
