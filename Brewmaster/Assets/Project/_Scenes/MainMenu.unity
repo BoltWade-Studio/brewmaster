@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18114142, g: 0.22672819, b: 0.30731717, a: 1}
+  m_IndirectSpecularColor: {r: 0.11168427, g: 0.27717376, b: 0.44064525, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -489,6 +489,7 @@ MonoBehaviour:
   smoothTime: 2
   targetTag: Player
   offset: {x: 0, y: 0, z: 0}
+  topBorder: {fileID: 0}
   isFollow: 0
   isShake: 1
   isHeavyShake: 0
@@ -1657,6 +1658,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 93006645454677307, guid: d15603e5dc3af3647bb8e5fdba0a284a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 331075923630158280, guid: d15603e5dc3af3647bb8e5fdba0a284a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1141433406650331291, guid: d15603e5dc3af3647bb8e5fdba0a284a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1761285140756227143, guid: d15603e5dc3af3647bb8e5fdba0a284a,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1707,10 +1723,35 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2765216865500149571, guid: d15603e5dc3af3647bb8e5fdba0a284a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4863928800022955155, guid: d15603e5dc3af3647bb8e5fdba0a284a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5630941751392085228, guid: d15603e5dc3af3647bb8e5fdba0a284a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6473254637184407335, guid: d15603e5dc3af3647bb8e5fdba0a284a,
         type: 3}
       propertyPath: m_Name
       value: Lights
+      objectReference: {fileID: 0}
+    - target: {fileID: 7093826156311881057, guid: d15603e5dc3af3647bb8e5fdba0a284a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8287959938717864020, guid: d15603e5dc3af3647bb8e5fdba0a284a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3277,6 +3318,11 @@ MonoBehaviour:
   - {fileID: 249422089}
   - {fileID: 2038089746}
   _unlockAllSeats: 1
+  _startPosition: {fileID: 0}
+  distanceBetweenTables: 10
+  tableCount: 10
+  _tablePrefab: {fileID: 0}
+  _parent: {fileID: 0}
 --- !u!4 &1529327731
 Transform:
   m_ObjectHideFlags: 0

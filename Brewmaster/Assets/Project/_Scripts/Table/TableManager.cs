@@ -146,7 +146,7 @@ namespace Game
         }
         private void LoadTableSeat()
         {
-	        BuildTables(PlayerData.PlayerScale.Count());
+            BuildTables(PlayerData.PlayerScale.Count());
             // Debug.Log("client table count: " + _tableList.Count);
             // Debug.Log("server table count: " + PlayerData.PlayerScale.Count());
             for (int i = 0; i < PlayerData.PlayerScale.Count(); i++)
@@ -190,41 +190,41 @@ namespace Game
 
         private void BuildTables(int tableCount = 10)
         {
-	        for (int i = 0; i < _tableList.Count; i++)
-	        {
-		        Destroy(_tableList[i].gameObject);
-	        }
-	        UpgradeManager.Instance.ClearSeatUpgrade(); // Clear Seat Upgrade to avoid duplicate, although OnDestroy is called when destroy table, but it's too late
+            for (int i = 0; i < _tableList.Count; i++)
+            {
+                Destroy(_tableList[i].gameObject);
+            }
+            UpgradeManager.Instance.ClearSeatUpgrade(); // Clear Seat Upgrade to avoid duplicate, although OnDestroy is called when destroy table, but it's too late
 
-	        _tableList.Clear();
-	        Vector3 currentPosition = _startPosition.position;
-	        for (int i = 0; i < tableCount; i++)
-	        {
-		        GameObject table = Instantiate(_tablePrefab, currentPosition, Quaternion.identity, this.transform);
-		        _tableList.Add(table.GetComponent<Table>());
-		        table.transform.parent = _parent.transform;
-		        table.name = "Table_" + i;
-		        currentPosition += Vector3.back * distanceBetweenTables;
-	        }
+            _tableList.Clear();
+            Vector3 currentPosition = _startPosition.position;
+            for (int i = 0; i < tableCount; i++)
+            {
+                GameObject table = Instantiate(_tablePrefab, currentPosition, Quaternion.identity, this.transform);
+                _tableList.Add(table.GetComponent<Table>());
+                table.transform.parent = _parent.transform;
+                table.name = "Table_" + i;
+                currentPosition += Vector3.back * distanceBetweenTables;
+            }
 
-	        Camera.main.GetComponent<CustomCamera>().topBorder = _tableList[2].transform;
+            CameraFollow.Instance.TopBorder = _tableList[2].transform;
         }
 
         public Vector3 GetNextAddTablePosition()
-		{
-	        Vector3 nextPos = _tableList[^1].transform.position;
-	        nextPos += Vector3.back * distanceBetweenTables;
-	        return nextPos;
-		}
+        {
+            Vector3 nextPos = _tableList[^1].transform.position;
+            nextPos += Vector3.back * distanceBetweenTables;
+            return nextPos;
+        }
 
         public void BuildNewTable()
-		{
-	        GameObject table = Instantiate(_tablePrefab, GetNextAddTablePosition(), Quaternion.identity, this.transform);
-	        Table newTable = table.GetComponent<Table>();
-	        newTable.TableIndex = _tableList.Count;
-	        _tableList.Add(newTable);
-	        table.transform.parent = _parent.transform;
-		}
+        {
+            GameObject table = Instantiate(_tablePrefab, GetNextAddTablePosition(), Quaternion.identity, this.transform);
+            Table newTable = table.GetComponent<Table>();
+            newTable.TableIndex = _tableList.Count;
+            _tableList.Add(newTable);
+            table.transform.parent = _parent.transform;
+        }
     }
 
 }
