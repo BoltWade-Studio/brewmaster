@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
@@ -29,11 +30,13 @@ namespace Game
 
         void Update()
         {
-            _time += Time.deltaTime;
-            if (_loadingUI)
+            if (_loadingUI != null && _loadingUI.gameObject.activeInHierarchy)
+            {
+                _time += Time.deltaTime;
                 _loadingUI.SetLoadingText(_message + (int)_time);
+            }
 
-            if (_time >= 100 && !_isDisconnectPopup && _loadingUI != null && _loadingUI.gameObject.activeInHierarchy)
+            if (_time >= 100 && !_isDisconnectPopup)
             {
                 _isDisconnectPopup = true;
                 PopupManager.Instance.ShowAnnouncePopup("Server error", "Server disconnected, reload?", "Reload", () =>

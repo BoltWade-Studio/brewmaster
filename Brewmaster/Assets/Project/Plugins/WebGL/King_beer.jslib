@@ -49,6 +49,16 @@ mergeInto(LibraryManager.library, {
 			}
 		});
 
+		socket.on("twitterRequestCallback", (data) => {
+            const encodedText = encodeURIComponent(data);
+            const tweetUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
+
+            console.log("tweetUrl: " + tweetUrl);
+            // Open the URL in a new window/tab
+            window.open(tweetUrl, "_blank");
+        });
+
+
 		window.unitySocket = socket;
 	},
 

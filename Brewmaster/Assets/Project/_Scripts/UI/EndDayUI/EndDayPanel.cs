@@ -212,7 +212,7 @@ namespace Game
         }
         public void Hide()
         {
-            _endDayMenu.transform.DOScale(Vector3.zero, 0.3f);
+            _endDayMenu.transform.DOScale(Vector3.zero, 0.3f).OnComplete(() => this.gameObject.SetActive(false));
             _canvasGroup.DOFade(0, 0.1f);
         }
         public void ShowTwitterInputPanel()
