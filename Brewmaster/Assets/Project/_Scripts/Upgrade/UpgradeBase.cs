@@ -45,7 +45,7 @@ namespace Game
         }
         protected void Start()
         {
-	        Debug.Log("UpgradeBase Started");
+            Debug.Log("UpgradeBase Started");
             if (UpgradeManager.Instance)
             {
                 UpgradeManager.Instance.AddUpgradeBase(this);
@@ -67,11 +67,11 @@ namespace Game
 
         private void OnDestroy()
         {
-	  //       Debug.Log("UpgradeBase OnDestroy");
-	  //       if (UpgradeManager.Instance)
-			// {
-			// 	UpgradeManager.Instance.RemoveUpgradeBase(this);
-			// }
+            //       Debug.Log("UpgradeBase OnDestroy");
+            //       if (UpgradeManager.Instance)
+            // {
+            // 	UpgradeManager.Instance.RemoveUpgradeBase(this);
+            // }
         }
 
         protected virtual void ChildOnDisable() { }
@@ -96,7 +96,11 @@ namespace Game
 
         #region Upgrade
 
-        protected abstract void PerformUpgrade();
+        protected virtual void PerformUpgrade()
+        {
+            if (_transactionJsonDataDic.ContainsKey("CanUpgradeTable"))
+                _transactionJsonDataDic.Remove("CanUpgradeTable");
+        }
         protected async void CanUpgradeTableCallback(string data)
         {
             await UniTask.SwitchToMainThread();
@@ -153,9 +157,9 @@ namespace Game
         }
 
         public void OnStorePhaseEndHandler()
-		{
-			HideUI();
-		}
+        {
+            HideUI();
+        }
 
         public void OnStorePhraseHandler()
         {
