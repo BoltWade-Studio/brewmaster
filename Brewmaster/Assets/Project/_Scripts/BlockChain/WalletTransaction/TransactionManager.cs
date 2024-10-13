@@ -152,7 +152,7 @@ namespace Game
         public async UniTask Claim()
         {
             _isSendingData = true;
-            LoadingUIManager.Instance.Show("Getting claim data");
+            LoadingUIManager.Instance.ChangeLoadingMessage("Getting claim data");
             Utility.Socket.EmitEvent(SocketEnum.claim.ToString());
             await UniTask.WaitUntil(() => _isSendingData == false);
         }

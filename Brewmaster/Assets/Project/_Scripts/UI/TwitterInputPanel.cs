@@ -42,8 +42,9 @@ namespace Game
 			TwitterShareManager.Instance.ConfirmTwitterInput(_twitterInputField.text, OnTwitterCallbackSuccess, OnTwitterCallbackException);
 		}
 
-		private void OnTwitterCallbackSuccess(string giftTxHash)
+		private async void OnTwitterCallbackSuccess(string giftTxHash)
 		{
+			await UniTask.SwitchToMainThread();
 			_title.text = "Congratulations!";
 			_confirmButton.gameObject.SetActive(false);
 			_twitterInputField.gameObject.SetActive(false);
@@ -51,8 +52,9 @@ namespace Game
 			_SuccessMessage.gameObject.SetActive(true);
 		}
 
-		private void OnTwitterCallbackException(string exception)
+		private async void OnTwitterCallbackException(string exception)
 		{
+			await UniTask.SwitchToMainThread();
 			_messageError.gameObject.SetActive(true);
 			_messageError.text = exception.ToString();
 			Debug.Log("exception: " + exception.ToString());

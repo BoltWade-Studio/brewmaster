@@ -42,7 +42,6 @@ namespace Game
             _shareToTwitterBtn.OnClick += OnShareToTwitterBtnPress;
             _claimBtn.OnClick += OnClaimBtnPress;
             _nextDayBtn.OnClick += OnNextDayBtnPress;
-            _mainMenuBtn.OnClick += UIManager.Instance.OnMainMenuClickHandler;
             _shopBtn.OnClick += OnShopBtnPress;
             _mainMenuBtn.OnClick += OnMainMenuBtnPress;
 
@@ -247,7 +246,7 @@ namespace Game
                 _pointText.text = pointTemp.ToString();
             }
 
-            _nftBuffText.text = $"x{_nftBuff}% <size=15>Boltwade OG Pass</size>";
+            _nftBuffText.text = $"x{_nftBuff * 10}% <size=15>Boltwade OG Pass</size>";
 
             _resultText.gameObject.SetActive(true);
 

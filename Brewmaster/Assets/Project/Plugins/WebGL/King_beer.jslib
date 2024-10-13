@@ -34,7 +34,7 @@ mergeInto(LibraryManager.library, {
 				data = "";
 			}
 
-			if (eventName === "exception") {
+			if (eventName === 'exception') {
 				this.exceptionArray.forEach(([objectName, methodName]) => {
 					SendMessage(objectName, methodName, data);
 				});
@@ -116,20 +116,16 @@ mergeInto(LibraryManager.library, {
 	},
 
 	SubscribeOnException: function (callbackObjectName, callbackMethodName) {
-		let object = UTF8ToString(callbackObjectName);
-		let method = UTF8ToString(callbackMethodName);
-		const objectMethod = new Object();
-		objectMethod.objectName = object;
-		objectMethod.methodName = method;
+		let objectName = UTF8ToString(callbackObjectName);
+		let methodName = UTF8ToString(callbackMethodName);
 
-		this.exceptionArray.push(objectMethod);
+		this.exceptionArray.push([objectName, methodName]);
 	},
 	UnSubscribeOnException: function (callbackObjectName, callbackMethodName) {
-		let object = UTF8ToString(callbackObjectName);
-		let method = UTF8ToString(callbackMethodName);
-		_.remove(this.exceptionArray, function (e) {
-			return e.objectName == object && e.methodName == method;
-		});
+		let objectName = UTF8ToString(callbackObjectName);
+		let methodName = UTF8ToString(callbackMethodName);
+
+		this.exceptionArray = this.exceptionArray.filter((e) => e[0] !== objectName || e[1] !== methodName);
 	},
 
 	FreeWasmString: function (ptr) {
