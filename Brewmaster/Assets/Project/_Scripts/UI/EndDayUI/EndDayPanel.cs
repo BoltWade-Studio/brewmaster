@@ -247,7 +247,7 @@ namespace Game
                 _pointText.text = pointTemp.ToString();
             }
 
-            _nftBuffText.text = $"x{_nftBuff * 10}%";
+            _nftBuffText.text = $"x{_nftBuff}% <size=15>Boltwade OG Pass</size>";
 
             _resultText.gameObject.SetActive(true);
 

@@ -65,6 +65,11 @@ public enum SocketEnum
 	waitTransactionCallback,
 	#endregion
 
+	#region Og pass
+	getOgPassBalance,
+	getOgPassBalanceCallback,
+	#endregion
+
 	spawnCustomer,
 	spawnCustomerCallback,
 	customerReachDestination,

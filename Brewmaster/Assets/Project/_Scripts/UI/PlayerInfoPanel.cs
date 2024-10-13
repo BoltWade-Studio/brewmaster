@@ -18,6 +18,7 @@ namespace Game
 		[SerializeField] private TextMeshProUGUI _playerAddressText;
 		[SerializeField] private TextMeshProUGUI _treasuryText;
 		[SerializeField] private TextMeshProUGUI _pointText;
+		[SerializeField] private TextMeshProUGUI _ogPassBalanceText;
 		[SerializeField] private Button _claimBtn, _logOutBtn, _shareToTwitterBtn;
 		[SerializeField] private GameObject _blockXImage;
 
@@ -62,6 +63,7 @@ namespace Game
 		{
 			UpdateClaimBtn();
 			UpdatePoint();
+			UpdateOgPassBalance();
 		}
 
 		private void UpdatePoint()
@@ -70,6 +72,11 @@ namespace Game
 			_playerAddressText.text = PlayerData.PlayerAddress;
 			_treasuryText.text = PlayerData.PlayerTreasury.ToString();
 			_pointText.text = PlayerData.PlayerPoint.ToString();
+		}
+
+		private async void UpdateOgPassBalance()
+		{
+			_ogPassBalanceText.text = (await TransactionManager.Instance.GetOgPassBalance()).ToString();
 		}
 
 		private void UpdateClaimBtn()
