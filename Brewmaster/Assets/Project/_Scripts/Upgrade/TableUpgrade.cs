@@ -10,16 +10,13 @@ namespace Game
 		#region Unity functions
 		protected override void ChildAwake()
 		{
-			_table = gameObject.AddComponent<Table>();
-			_table.TableIndex = TableManager.Instance.GetTableList().Count;
-			_table.name = "Table " + _table.TableIndex;
+			Table = gameObject.AddComponent<Table>();
+			Table.TableIndex = TableManager.Instance.GetTableList().Count;
+			Table.name = "Table " + Table.TableIndex;
 			_upgradeAction = new UpgradeAction(async () =>
 			{
 				try
 				{
-					// await DataSaveLoadManager.Instance.LoadData();
-					// GameEvent.Instance.OnStorePhaseEnd?.Invoke();
-					// GameEvent.Instance.OnStorePhase?.Invoke();
 					GameEvent.Instance.OnStorePhase?.Invoke();
 					TableManager.Instance.UpdatePositionsToServer();
 				}
@@ -28,18 +25,17 @@ namespace Game
 					Debug.Log("Invoke store phase Error: " + e);
 				}
 				Debug.Log("Invoke store phase");
-
-
 			});
 		}
 		protected override void ChildStart()
 		{
 			Load();
 		}
-		protected override void ChildOnEnable()
+		protected async override void ChildOnEnable()
 		{
-			base.ChildOnEnable();
 			_upgradeAction.OnComplete += OnUpgradeCompleteHandler;
+			Price = await TransactionManager.Instance.GetPriceForAddTable();
+			_upgradeUI.UpdateMoneyText();
 		}
 		protected override void ChildOnDisable()
 		{
@@ -50,8 +46,8 @@ namespace Game
 
 		public void OnUpgradeCompleteHandler()
 		{
-			_table.TableIndex = TableManager.Instance.GetTableList().Count;
-			_table.name = "Table " + _table.TableIndex;
+			Table.TableIndex = TableManager.Instance.GetTableList().Count;
+			Table.name = "Table " + Table.TableIndex;
 			if (CheckAllUpgradeComplete())
 			{
 				HideUI();
@@ -86,13 +82,13 @@ namespace Game
 
 		protected override string GetId()
 		{
-			string Id = typeof(TableUpgrade).ToString() + _table.TableIndex;
+			string Id = typeof(TableUpgrade).ToString() + Table.TableIndex;
 			return Id;
 		}
 
 		protected override bool CheckAllUpgradeComplete()
 		{
-			if (_table.TableIndex == 10)
+			if (Table.TableIndex == 10)
 			{
 				return true;
 			}
@@ -113,8 +109,8 @@ namespace Game
 		{
 			base.PerformUpgrade();
 			LoadingUIManager.Instance.Show("Checking upgrade data");
-			string json = Utility.Socket.StringToSocketJson(_table.TableIndex.ToString());
-			Debug.Log("Adding Table " + _table.TableIndex);
+			string json = Utility.Socket.StringToSocketJson(Table.TableIndex.ToString());
+			Debug.Log("Adding Table " + Table.TableIndex);
 
 			_isGettingData = true;
 			if (_transactionJsonDataDic.ContainsKey("CanUpgradeTable"))

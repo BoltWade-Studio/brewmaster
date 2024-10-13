@@ -13,14 +13,13 @@ namespace Game
         [SerializeField] private TextMeshProUGUI _moneyText;
         [SerializeField] private CustomButton _upgradeButton;
         [SerializeField] private UpgradeBase _upgradeBase;
-        
+
         void Start()
         {
             _upgradeButton.OnClick += () => OnUpgradeButtonClick?.Invoke();
         }
         void OnEnable()
         {
-            UpdateMoneyText();
             OnUpgradeButtonClick += UpdateMoneyText;
         }
         void OnDisable()
@@ -35,6 +34,7 @@ namespace Game
 
         public void UpdateMoneyText()
         {
+            Debug.Log("UpgradeUI UpdateMoneyText");
             _moneyText.text = _upgradeBase.Price.ToString();
         }
     }

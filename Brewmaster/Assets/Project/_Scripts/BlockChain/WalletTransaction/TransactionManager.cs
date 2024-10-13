@@ -28,7 +28,6 @@ namespace Game
             Utility.Socket.SubscribeEvent(SocketEnum.getEntryCallback.ToString(), this.gameObject.name, nameof(GetEntryCallback), GetEntryCallback);
             Utility.Socket.SubscribeEvent(SocketEnum.claimCallback.ToString(), this.gameObject.name, nameof(ClaimCallback), ClaimCallback);
             Utility.Socket.SubscribeEvent(SocketEnum.getPlayerPubCallback.ToString(), this.gameObject.name, nameof(GetPlayerPubCallback), GetPlayerPubCallback);
-            Utility.Socket.SubscribeEvent(SocketEnum.getPriceForAddStoolCallback.ToString(), this.gameObject.name, nameof(GetStoolPriceCallback), GetStoolPriceCallback);
         }
 
         #region Private
@@ -76,7 +75,8 @@ namespace Game
         {
             _isGettingData = true;
             LoadingUIManager.Instance.ChangeLoadingMessage("Getting player pub");
-            _transactionJsonDataDic.Remove(TransactionID.GET_PLAYER_PUB);
+            if (_transactionJsonDataDic.ContainsKey(TransactionID.GET_PLAYER_PUB))
+                _transactionJsonDataDic.Remove(TransactionID.GET_PLAYER_PUB);
             Utility.Socket.EmitEvent(SocketEnum.getPlayerPub.ToString());
             await UniTask.WaitUntil(() => _isGettingData == false);
             await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.GET_PLAYER_PUB));
@@ -221,7 +221,8 @@ namespace Game
         public async UniTask<int> GetOgPassBalance()
         {
             _isGettingData = true;
-            _transactionJsonDataDic.Remove(TransactionID.GET_OG_PASS_BALANCE);
+            if (_transactionJsonDataDic.ContainsKey(TransactionID.GET_OG_PASS_BALANCE))
+                _transactionJsonDataDic.Remove(TransactionID.GET_OG_PASS_BALANCE);
             Utility.Socket.SubscribeEvent(SocketEnum.getOgPassBalanceCallback.ToString(), this.gameObject.name, nameof(GetOgPassBalanceCallback), GetOgPassBalanceCallback);
             Utility.Socket.EmitEvent(SocketEnum.getOgPassBalance.ToString());
             await UniTask.WaitUntil(() => _isGettingData == false);
@@ -237,17 +238,21 @@ namespace Game
         }
         #endregion
 
-        #region Get Stool Price
-        public async UniTask<int> GetStoolPrice()
+        #region Get Price For Add Stool
+        public async UniTask<int> GetPriceForAddStool()
         {
             _isGettingData = true;
+            Utility.Socket.SubscribeEvent(SocketEnum.getPriceForAddStoolCallback.ToString(), this.gameObject.name, nameof(GetStoolPriceCallback), GetStoolPriceCallback);
+            if (_transactionEntryDic.ContainsKey(TransactionID.GET_PRICE_FOR_ADD_STOOL))
+                _transactionJsonDataDic.Remove(TransactionID.GET_PRICE_FOR_ADD_STOOL);
             Utility.Socket.EmitEvent(SocketEnum.getPriceForAddStool.ToString());
             await UniTask.WaitUntil(() => _isGettingData == false);
             await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.GET_PRICE_FOR_ADD_STOOL));
             return JsonConvert.DeserializeObject<int>(_transactionJsonDataDic[TransactionID.GET_PRICE_FOR_ADD_STOOL].ToString());
         }
-        private void GetStoolPriceCallback(string data)
+        private async void GetStoolPriceCallback(string data)
         {
+            await UniTask.SwitchToMainThread();
             if (_transactionJsonDataDic.ContainsKey(TransactionID.GET_PRICE_FOR_ADD_STOOL))
             {
                 _transactionJsonDataDic[TransactionID.GET_PRICE_FOR_ADD_STOOL] = data;
@@ -256,6 +261,35 @@ namespace Game
             {
                 _transactionJsonDataDic.Add(TransactionID.GET_PRICE_FOR_ADD_STOOL, data);
             }
+            _isGettingData = false;
+            Utility.Socket.UnSubscribeEvent(SocketEnum.getPriceForAddStoolCallback.ToString(), this.gameObject.name, nameof(GetStoolPriceCallback), GetStoolPriceCallback);
+        }
+        #endregion
+
+        #region Get Price For Add Table
+        public async UniTask<int> GetPriceForAddTable()
+        {
+            _isGettingData = true;
+            Utility.Socket.SubscribeEvent(SocketEnum.getPriceForAddTableCallback.ToString(), this.gameObject.name, nameof(GetPriceForAddTableCallback), GetPriceForAddTableCallback);
+            if (_transactionEntryDic.ContainsKey(TransactionID.GET_PRICE_FOR_ADD_TABLE))
+                _transactionJsonDataDic.Remove(TransactionID.GET_PRICE_FOR_ADD_TABLE);
+            Utility.Socket.EmitEvent(SocketEnum.getPriceForAddTable.ToString());
+            await UniTask.WaitUntil(() => _isGettingData == false);
+            await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.GET_PRICE_FOR_ADD_TABLE));
+            return JsonConvert.DeserializeObject<int>(_transactionJsonDataDic[TransactionID.GET_PRICE_FOR_ADD_TABLE].ToString());
+        }
+        private async void GetPriceForAddTableCallback(string data)
+        {
+            await UniTask.SwitchToMainThread();
+            if (_transactionJsonDataDic.ContainsKey(TransactionID.GET_PRICE_FOR_ADD_TABLE))
+            {
+                _transactionJsonDataDic[TransactionID.GET_PRICE_FOR_ADD_TABLE] = data;
+            }
+            else
+            {
+                _transactionJsonDataDic.Add(TransactionID.GET_PRICE_FOR_ADD_TABLE, data);
+            }
+            Utility.Socket.UnSubscribeEvent(SocketEnum.getPriceForAddTableCallback.ToString(), this.gameObject.name, nameof(GetPriceForAddTableCallback), GetPriceForAddTableCallback);
             _isGettingData = false;
         }
         #endregion
@@ -276,7 +310,8 @@ namespace Game
                 string addStoolEntry = await GetContractEntry(TransactionID.ADD_STOOL);
 
                 // Send transaction to blockchain
-                _transactionJsonDataDic.Remove(TransactionID.ADD_STOOL);
+                if (_transactionJsonDataDic.ContainsKey(TransactionID.ADD_STOOL))
+                    _transactionJsonDataDic.Remove(TransactionID.ADD_STOOL);
                 LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for player confirmation");
                 JSInteropManager.SendTransaction(contractAddress, addStoolEntry, JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { tableIndex.ToString() } }), this.gameObject.name, nameof(AddStoolCallback));
                 await UniTask.WaitUntil(() => _isSendingData == false);
@@ -330,7 +365,8 @@ namespace Game
                 string addTableEntry = await GetContractEntry(TransactionID.ADD_TABLE);
 
                 // Send transaction to blockchain
-                _transactionJsonDataDic.Remove(TransactionID.ADD_TABLE);
+                if (_transactionJsonDataDic.ContainsKey(TransactionID.ADD_TABLE))
+                    _transactionJsonDataDic.Remove(TransactionID.ADD_TABLE);
                 LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for player confirmation");
                 JSInteropManager.SendTransaction(contractAddress, addTableEntry,
                     JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { } }),
@@ -387,7 +423,8 @@ namespace Game
             }
 
             LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for transaction update");
-            _transactionJsonDataDic.Remove(TransactionID.WAIT_TRANSACTION);
+            if (_transactionJsonDataDic.ContainsKey(TransactionID.WAIT_TRANSACTION))
+                _transactionJsonDataDic.Remove(TransactionID.WAIT_TRANSACTION);
             _isTransactionSending = true;
             string socketString = Utility.Socket.StringToSocketJson(txHash);
             Utility.Socket.SubscribeEvent(SocketEnum.waitTransactionCallback.ToString(), this.gameObject.name, nameof(WaitTransactionCallback), WaitTransactionCallback);

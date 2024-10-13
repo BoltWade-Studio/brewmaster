@@ -9,8 +9,8 @@ mergeInto(LibraryManager.library, {
 		}
 
         // var socket = io("http://localhost:5006");
-        var socket = io("https://brewmaster-socket-test.boltwade.xyz");
-        // var socket = io("https://brewmaster-socket.boltwade.xyz");
+        // var socket = io("https://brewmaster-socket-test.boltwade.xyz");
+        var socket = io("https://brewmaster-socket.boltwade.xyz");
 
 		socket.on("connect", () => {
 			socket.isReady = true;

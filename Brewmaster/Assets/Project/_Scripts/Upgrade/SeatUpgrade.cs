@@ -10,12 +10,10 @@ namespace Game
         #region Unity functions
         protected override void ChildAwake()
         {
-            _table = this.GetComponent<Table>();
+            Table = this.GetComponent<Table>();
             _upgradeAction = new UpgradeAction(() =>
             {
-                Debug.Log("Before Unlock at table: " + _table.TableIndex);
-                // _table.UnlockSeat();
-                // _table.AvailableSeatNumber++;
+                Debug.Log("Before Unlock at table: " + Table.TableIndex);
                 GameEvent.Instance.OnStorePhase?.Invoke();
             });
         }
@@ -27,11 +25,14 @@ namespace Game
         {
             base.ChildOnEnable();
             _upgradeAction.OnComplete += OnUpgradeCompleteHandler;
+            _upgradeUI.UpdateMoneyText();
         }
-        protected override void ChildOnDisable()
+        protected async override void ChildOnDisable()
         {
             base.ChildOnDisable();
             _upgradeAction.OnComplete -= OnUpgradeCompleteHandler;
+            Price = await TransactionManager.Instance.GetPriceForAddStool();
+            _upgradeUI.UpdateMoneyText();
         }
         #endregion
 
@@ -48,13 +49,13 @@ namespace Game
         }
         private void MoveToNewPos()
         {
-            Vector3 tempPos = _table.GetNextUpgradePosition();
+            Vector3 tempPos = Table.GetNextUpgradePosition();
             Vector3 newPos = new Vector3(tempPos.x, this.transform.position.y, tempPos.z);
             _upgradeUI.SetPosition(newPos);
         }
         protected override bool CheckAllUpgradeComplete()
         {
-            if (_table.AvailableSeatNumber == 10)
+            if (Table.AvailableSeatNumber == 10)
             {
                 return true;
             }
@@ -68,11 +69,11 @@ namespace Game
         #region Abstract functions override
         protected override void UpdateUpgradeTime()
         {
-            _upgradeTime = _table.AvailableSeatNumber;
+            _upgradeTime = Table.AvailableSeatNumber;
         }
         protected override string GetId()
         {
-            string Id = typeof(SeatUpgrade).ToString() + TableManager.Instance.GetTableList().IndexOf(_table);
+            string Id = typeof(SeatUpgrade).ToString() + TableManager.Instance.GetTableList().IndexOf(Table);
             return Id;
         }
         protected override void Save()
@@ -86,15 +87,15 @@ namespace Game
 
         protected override UniTask<bool> Execute()
         {
-            return TransactionManager.Instance.AddStool(_table.TableIndex);
+            return TransactionManager.Instance.AddStool(Table.TableIndex);
         }
 
         protected override async void PerformUpgrade()
         {
             base.PerformUpgrade();
             LoadingUIManager.Instance.Show("Checking upgrade data");
-            string json = Utility.Socket.StringToSocketJson(_table.TableIndex.ToString());
-            Debug.Log("Upgrading Table " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
+            string json = Utility.Socket.StringToSocketJson(Table.TableIndex.ToString());
+            Debug.Log("Upgrading Table " + Table.TableIndex + " with availableSeat: " + Table.AvailableSeatNumber);
 
             _isGettingData = true;
             if (_transactionJsonDataDic.ContainsKey("CanUpgradeTable"))
