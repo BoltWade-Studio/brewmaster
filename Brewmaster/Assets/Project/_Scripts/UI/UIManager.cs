@@ -211,14 +211,14 @@ namespace Game
 		private void OnStoreMoveUp()
 		{
 			string json = JsonConvert.SerializeObject(new ArrayWrapper
-				{ array = new string[] { JsonUtility.ToJson(new Vector2(0, 1)) } });
+			{ array = new string[] { JsonUtility.ToJson(new Vector2(0, 1)) } });
 			Utility.Socket.EmitEvent("playerForceMove", json);
 		}
 
 		private void OnStoreMoveDown()
 		{
 			string json = JsonConvert.SerializeObject(new ArrayWrapper
-				{ array = new string[] { JsonUtility.ToJson(new Vector2(0, -1)) } });
+			{ array = new string[] { JsonUtility.ToJson(new Vector2(0, -1)) } });
 			Utility.Socket.EmitEvent("playerForceMove", json);
 		}
 		#endregion
@@ -252,7 +252,7 @@ namespace Game
 		}
 		public void OnMainMenuClickHandler()
 		{
-			TransitionManager.Instance().Transition("MainMenu", TransitionSetting, 0.3f);
+			TransitionManager.Instance().Transition("MainMenu", TransitionSetting, 0);
 		}
 		private void OnResumeClickHandler()
 		{

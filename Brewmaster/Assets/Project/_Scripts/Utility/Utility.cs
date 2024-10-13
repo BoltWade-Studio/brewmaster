@@ -61,14 +61,12 @@ namespace Game
 					Debug.Log("socket.OnAny: " + eventName);
 					if (eventName == "exception")
 					{
-						WSError wSError;
-						wSError = JsonConvert.DeserializeObject<WSError[]>(data.GetValue<string>())[0];
 						foreach (Action<string> action in _exceptionMethodList)
 						{
 							Debug.Log("Active action");
 							try
 							{
-								action(wSError.message);
+								action(data.GetValue<string>());
 							}
 							catch (Exception e)
 							{
@@ -111,6 +109,10 @@ namespace Game
 									Debug.Log("Socket.OnAny: " + eventName + " " + (dataString ?? ""));
 								socketEventClass.Action?.Invoke(dataString);
 							}
+						}
+						else
+						{
+							Debug.Log("Socket.OnAny: " + eventName + " no listener");
 						}
 					}
 				});
@@ -224,15 +226,7 @@ namespace Game
 #if UNITY_WEBGL && !UNITY_EDITOR
 				JsSocketConnect.SubscribeOnException(objectName, methodName);
 #else
-				_socketEventClassDic.Add("exception", new List<SocketEventClass>()
-				{
-					new SocketEventClass()
-					{
-						ClassName = objectName,
-						MethodName = methodName,
-						Action = action
-					}
-				});
+				_exceptionMethodList.Add(action);
 #endif
 			}
 
@@ -241,12 +235,7 @@ namespace Game
 #if UNITY_EDITOR && !UNITY_WEBGL
 				JsSocketConnect.UnSubscribeOnException(objectName, methodName);
 #else
-				_socketEventClassDic["exception"].Remove(new SocketEventClass()
-				{
-					ClassName = objectName,
-					MethodName = methodName,
-					Action = action
-				});
+				_exceptionMethodList.Remove(action);
 #endif
 			}
 

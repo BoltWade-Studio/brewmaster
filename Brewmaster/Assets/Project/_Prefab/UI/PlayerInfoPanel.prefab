@@ -865,7 +865,6 @@ GameObject:
   - component: {fileID: 9027113737595675828}
   - component: {fileID: 7431821763509897619}
   - component: {fileID: 8325801826393894823}
-  - component: {fileID: 5965193292634656426}
   m_Layer: 5
   m_Name: OG Title
   m_TagString: Untagged
@@ -989,20 +988,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &5965193292634656426
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4359745072146804078}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f54b4322097c5a549bd3aef2c34cc9eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _textId: Point
-  _label: {fileID: 8325801826393894823}
 --- !u!1 &4584312800484018715
 GameObject:
   m_ObjectHideFlags: 0
@@ -1282,7 +1267,6 @@ GameObject:
   - component: {fileID: 1754979964527597625}
   - component: {fileID: 6455252239630055628}
   - component: {fileID: 3000340459379070301}
-  - component: {fileID: 2461575883190037864}
   m_Layer: 5
   m_Name: TreasuryTitle
   m_TagString: Untagged
@@ -1406,20 +1390,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &2461575883190037864
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4905563145672704346}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f54b4322097c5a549bd3aef2c34cc9eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _textId: Treasury
-  _label: {fileID: 3000340459379070301}
 --- !u!1 &5172381975933653134
 GameObject:
   m_ObjectHideFlags: 0
@@ -2004,7 +1974,6 @@ GameObject:
   - component: {fileID: 7515974560290104774}
   - component: {fileID: 3044276836786268679}
   - component: {fileID: 5050431382425680196}
-  - component: {fileID: 3320363851458925251}
   m_Layer: 5
   m_Name: PointTitle
   m_TagString: Untagged
@@ -2128,17 +2097,3 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &3320363851458925251
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8821373916975893946}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f54b4322097c5a549bd3aef2c34cc9eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _textId: Point
-  _label: {fileID: 5050431382425680196}
