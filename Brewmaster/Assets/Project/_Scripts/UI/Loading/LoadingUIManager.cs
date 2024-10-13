@@ -65,6 +65,10 @@ namespace Game
 
             if (_loadingUI == null || _loadingUI.gameObject == null)
                 _loadingUI = Instantiate(_loadingUIPref, _uiHolder);
+
+            // Play show animation
+            _loadingUI.transform.DOKill();
+            _loadingUI.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack);
             _loadingUI.gameObject.SetActive(true);
 
             // Set UI as top
@@ -74,6 +78,8 @@ namespace Game
         {
             if (_loadingUI != null && _loadingUI.gameObject != null)
             {
+                // Play hide animation
+                _loadingUI.transform.DOKill();
                 _loadingUI.transform.DOScale(Vector3.zero, 0.5f).SetEase(Ease.InBack).OnComplete(() =>
                 {
                     _loadingUI.gameObject.SetActive(false);
