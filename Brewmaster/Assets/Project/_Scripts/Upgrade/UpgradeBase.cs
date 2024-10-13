@@ -13,7 +13,7 @@ namespace Game
 {
     public abstract class UpgradeBase : MonoBehaviour
     {
-        [HideInInspector] public Table _table;
+        [HideInInspector] public Table Table;
         [HideInInspector] public int Price;
 
         [SerializeField] private int _defaultPrice = 50;
@@ -67,11 +67,11 @@ namespace Game
 
         private void OnDestroy()
         {
-            //       Debug.Log("UpgradeBase OnDestroy");
-            //       if (UpgradeManager.Instance)
-            // {
-            // 	UpgradeManager.Instance.RemoveUpgradeBase(this);
-            // }
+            Debug.Log("UpgradeBase OnDestroy");
+            if (UpgradeManager.Instance)
+            {
+                UpgradeManager.Instance.RemoveUpgradeBase(this);
+            }
         }
 
         protected virtual void ChildOnDisable() { }
@@ -114,7 +114,7 @@ namespace Game
         protected async UniTask TransactionUpgrade()
         {
             bool isPlayerConfirm = true;
-            Debug.Log("AddStool to table: " + _table.TableIndex + " with availableSeat: " + _table.AvailableSeatNumber);
+            Debug.Log("AddStool to table: " + Table.TableIndex + " with availableSeat: " + Table.AvailableSeatNumber);
             if (Application.isEditor == false)
             {
                 // Send transaction to blockchain and wait for result
@@ -148,7 +148,7 @@ namespace Game
         }
 
         /// <summary>
-        /// Update price base on own setting of the child upgradeTime
+        /// Update price base on own setting of the child 
         /// </summary>
         public virtual void UpdatePrice()
         {

@@ -14,8 +14,6 @@ namespace Game
 
 		private void Start()
 		{
-			Utility.Socket.SubscribeEvent(SocketEnum.updateUpgradePriceCallback.ToString(), this.gameObject.name, nameof(UpdateUpgradePrice), UpdateUpgradePrice);
-
 			GameEvent.Instance.OnStorePhase += OnStorePhaseHandler;
 		}
 
@@ -36,41 +34,11 @@ namespace Game
 
 		private void OnStorePhaseHandler()
 		{
-			Utility.Socket.EmitEvent(SocketEnum.updateUpgradePrice.ToString());
-		}
-
-		public async void UpdateUpgradePrice(string data)
-		{
-			await UniTask.SwitchToMainThread();
-			object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
-			Debug.Log("UpdatePriceCallback: " + useData);
-			var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(useData.ToString());
-
-			foreach (var _upgradeBase in _upgradeBaseList)
+			foreach (var upgradeBase in _upgradeBaseList)
 			{
-				if (_upgradeBase._table.TableIndex == int.Parse(dict["i"]))
-				{
-					_upgradeBase.Price = int.Parse(dict["message"]);
-					_upgradeBase.UpdatePrice();
-				}
+				upgradeBase.UpdatePrice();
 			}
 		}
-
-		// public async void UpgradeCallback(string data)
-		// {
-		// 	await UniTask.SwitchToMainThread();
-
-		// 	var dict = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
-
-		// 	foreach (var _upgradeBase in _upgradeBaseList)
-		// 	{
-		// 		if (_upgradeBase._table.TableIndex == int.Parse(dict["tableIndex"]))
-		// 		{
-		// 			_upgradeBase.Price = int.Parse(dict["message"]);
-		// 			_upgradeBase.Upgrade();
-		// 		}
-		// 	}
-		// }
 
 		public void AddUpgradeBase(UpgradeBase upgradeBase)
 		{

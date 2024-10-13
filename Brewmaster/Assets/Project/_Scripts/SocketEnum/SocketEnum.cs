@@ -38,8 +38,8 @@ public enum SocketEnum
 	#region Upgrade
 	getPriceForAddStool,
 	getPriceForAddStoolCallback,
-	upgradeTable,
-	upgradeTableCallback,
+	getPriceForAddTable,
+	getPriceForAddTableCallback,
 	getCanUpgradeTable,
 	getCanUpgradeTableCallback,
 	getCanAddTable,
