@@ -42,6 +42,10 @@ namespace Game
 				}
 			}
 		}
+		void OnDestroy()
+		{
+			GameEvent.Instance.OnEndDay -= OnEndDayHandler;
+		}
 		#endregion
 
 		#region Public Functions

@@ -77,26 +77,13 @@ namespace Game
 			UpdateDayText();
 			UpdateMoneyUI();
 			_timeBG.color = _timeOriginalColor;
-			TimeManager.Instance.OnTimeWarning += () =>
-			{
-				_timeBG.color = Color.red;
-			};
-			GameEvent.Instance.OnNextDay += () =>
-			{
-				_timeBG.color = _timeOriginalColor;
-			};
-
+			TimeManager.Instance.OnTimeWarning += WarningTimeBg;
 			TimeManager.OnTimePause += ShowPauseGameMenu;
 			TimeManager.OnTimeResume += HidePauseGameMenu;
+			GameEvent.Instance.OnNextDay += ResetTimeBg;
 			GameEvent.Instance.OnEndDay += OnEndDayHandler;
 			GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
 			GameEvent.Instance.OnStorePhase += OnStorePaseHandler;
-		}
-
-
-		void OnEnable()
-		{
-			RegisterEvent();
 		}
 
 		private void Update()
@@ -104,26 +91,17 @@ namespace Game
 			if (GameplayManager.Instance.IsEndDay) return;
 			UpdateTime();
 		}
-		void OnDisable()
-		{
-			UnRegisterEvent();
-		}
 		private void OnDestroy()
 		{
-		}
-		#endregion
-
-		private void RegisterEvent()
-		{
-		}
-		private void UnRegisterEvent()
-		{
+			TimeManager.Instance.OnTimeWarning -= WarningTimeBg;
 			TimeManager.OnTimePause -= ShowPauseGameMenu;
 			TimeManager.OnTimeResume -= HidePauseGameMenu;
+			GameEvent.Instance.OnNextDay -= ResetTimeBg;
 			GameEvent.Instance.OnEndDay -= OnEndDayHandler;
 			GameEvent.Instance.OnLoadDataSuccess -= OnLoadDataSuccessHandler;
 			GameEvent.Instance.OnStorePhase -= OnStorePaseHandler;
 		}
+		#endregion
 
 		#region Event functions
 		private void OnStorePaseHandler()
@@ -258,6 +236,17 @@ namespace Game
 		{
 			HidePauseGameMenu();
 			GameplayManager.Instance.OnPausePressed?.Invoke();
+		}
+		#endregion
+
+		#region Support
+		private void WarningTimeBg()
+		{
+			_timeBG.color = Color.red;
+		}
+		private void ResetTimeBg()
+		{
+			_timeBG.color = _timeOriginalColor;
 		}
 		#endregion
 	}

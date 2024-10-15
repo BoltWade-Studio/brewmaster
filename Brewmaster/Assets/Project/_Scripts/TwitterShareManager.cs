@@ -1,10 +1,7 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using NOOD;
-using UnityEngine;
 using Utils;
 using Debug = Game.DevelopDebug;
 
@@ -17,11 +14,17 @@ namespace Game
         private bool _isGettingData = false;
         private bool _isShowingPopup = false;
 
+        #region Unity functions
         void Start()
         {
             Utility.Socket.SubscribeEvent(SocketEnum.getTwitterMessageCallback.ToString(), this.gameObject.name, nameof(GetTwitterMessageCallback), GetTwitterMessageCallback);
             GameEvent.Instance.OnClaimSuccess += OnClaimSuccessHandler;
         }
+        void OnDestroy()
+        {
+            GameEvent.Instance.OnClaimSuccess -= OnClaimSuccessHandler;
+        }
+        #endregion
 
         private void OnClaimSuccessHandler()
         {
@@ -54,7 +57,6 @@ namespace Game
             _twitterMessage = message;
             _isGettingData = false;
         }
-
         public void ConfirmTwitterInput(string url, Action<string> callbackSuccess, Action<string> callbackError)
         {
             string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { url } });
