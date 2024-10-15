@@ -22,15 +22,8 @@ namespace Game
 		[SerializeField] private Button _claimBtn, _logOutBtn, _shareToTwitterBtn;
 		[SerializeField] private GameObject _blockXImage;
 
-#if UNITY_EDITOR
-		[ContextMenu("Reserialize")]
-		public void Reserialize()
-		{
-			var enumerable = new[] { "Assets/Project/_Prefab/UI/PlayerInfoPanel.prefab" }.AsEnumerable();
-			AssetDatabase.ForceReserializeAssets(enumerable);
-		}
-#endif
 
+		#region Unity functions
 		void OnEnable()
 		{
 			_claimBtn.onClick.AddListener(OnClaimBtnClick);
@@ -53,7 +46,11 @@ namespace Game
 			GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
 			Utility.Socket.SubscribeEvent(SocketEnum.logoutCallback.ToString(), this.gameObject.name, nameof(LogOutCallback), LogOutCallback);
 		}
-
+		void OnDestroy()
+		{
+			GameEvent.Instance.OnLoadDataSuccess -= OnLoadDataSuccessHandler;
+		}
+		#endregion
 		private void OnLoadDataSuccessHandler()
 		{
 			UpdateUI();

@@ -210,7 +210,7 @@ namespace Game
             }
             else
             {
-                NotifyManager.Instance.Show("Execute failed");
+                NotifyManager.Instance.Show("Execute failed or user abort");
                 GameEvent.Instance.OnClaimFail?.Invoke();
             }
             _isSendingData = false;
@@ -334,7 +334,9 @@ namespace Game
 
             if (IsValidTransactionHash(txHash) == false) // txHash is not valid
             {
-                NotifyManager.Instance.Show("Execute failed");
+                NotifyManager.Instance.Show("Execute failed or user abort");
+                _transactionJsonDataDic.Add(TransactionID.ADD_STOOL, "false");
+                _isSendingData = false;
                 return;
             }
 
@@ -368,9 +370,7 @@ namespace Game
                 if (_transactionJsonDataDic.ContainsKey(TransactionID.ADD_TABLE))
                     _transactionJsonDataDic.Remove(TransactionID.ADD_TABLE);
                 LoadingUIManager.Instance.ChangeLoadingMessage("Waiting for player confirmation");
-                JSInteropManager.SendTransaction(contractAddress, addTableEntry,
-                    JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { } }),
-                    this.gameObject.name, nameof(AddTableCallback));
+                JSInteropManager.SendTransaction(contractAddress, addTableEntry, JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { } }), this.gameObject.name, nameof(AddTableCallback));
                 await UniTask.WaitUntil(() => _isSendingData == false);
                 await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.ADD_TABLE));
 
@@ -392,6 +392,7 @@ namespace Game
             if (IsValidTransactionHash(txHash) == false) // txHash is not valid
             {
                 _transactionJsonDataDic.Add(TransactionID.ADD_TABLE, "false");
+                _isSendingData = false;
                 return;
             }
 

@@ -84,6 +84,7 @@ namespace Game
 		{
 			OnServerFail -= OnServerFailHandler;
 			OnServeComplete -= OnServeCompleteHandler;
+			GameEvent.Instance.OnEndDay -= OnEndDayHandler;
 		}
 		#endregion
 

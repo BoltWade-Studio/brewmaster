@@ -28,6 +28,12 @@ namespace Game
 			Utility.Socket.SubscribeEvent(SocketEnum.spawnCustomerCallback.ToString(), this.gameObject.name, nameof(SpawnCustomer), SpawnCustomer);
 		}
 
+		void OnDestroy()
+		{
+			GameEvent.Instance.OnNextDay -= OnNextDayHandler;
+			GameEvent.Instance.OnTimeUp -= TimeUp;
+		}
+
 		private void Update()
 		{
 			while (toSpawn.Count > 0)

@@ -17,6 +17,11 @@ namespace Game
 			GameEvent.Instance.OnStorePhase += OnStorePhaseHandler;
 		}
 
+		private void OnDestroy()
+		{
+			GameEvent.Instance.OnStorePhase -= OnStorePhaseHandler;
+		}
+
 
 		private void Update()
 		{

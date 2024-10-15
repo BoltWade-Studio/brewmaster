@@ -134,7 +134,7 @@ namespace Game
             {
                 // Transaction is failed, hide loading and notify
                 LoadingUIManager.Instance.Hide();
-                NotifyManager.Instance.Show("Transaction failed or user abort");
+                NotifyManager.Instance.Show("Execute failed or user abort");
             }
         }
         #endregion

@@ -81,7 +81,10 @@ namespace Game
 		}
 		void OnDestroy()
 		{
+			GameEvent.Instance.OnNextDay -= OnNextDayHandler;
+			GameplayManager.Instance.OnPausePressed -= PauseGame;
 			Utility.Socket.UnSubscribeEvent("updateTimer", this.gameObject.name, nameof(UpdateTimer), UpdateTimer);
+			Utility.Socket.UnSubscribeEvent("timeUp", this.gameObject.name, nameof(TimeUp), TimeUp);
 		}
 		#endregion
 
