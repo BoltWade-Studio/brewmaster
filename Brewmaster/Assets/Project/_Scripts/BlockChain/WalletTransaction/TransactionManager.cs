@@ -456,7 +456,7 @@ namespace Game
 
         private bool IsValidTransactionHash(string txHash)
         {
-            return !string.IsNullOrEmpty(txHash) && (txHash.Length >= 64);
+            return !string.IsNullOrEmpty(txHash) && (txHash.Length >= 60);
         }
     }
 

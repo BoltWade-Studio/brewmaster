@@ -31,7 +31,7 @@ namespace Game
         {
             base.ChildOnDisable();
             _upgradeAction.OnComplete -= OnUpgradeCompleteHandler;
-            Price = await TransactionManager.Instance.GetPriceForAddStool();
+            await FetchPrice();
             _upgradeUI.UpdateMoneyText();
         }
         #endregion
@@ -88,6 +88,12 @@ namespace Game
         protected override UniTask<bool> Execute()
         {
             return TransactionManager.Instance.AddStool(Table.TableIndex);
+        }
+
+        protected override async UniTask FetchPrice()
+        {
+            Price = await TransactionManager.Instance.GetPriceForAddStool();
+            _upgradeUI.UpdateMoneyText();
         }
 
         protected override async void PerformUpgrade()
