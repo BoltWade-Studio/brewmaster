@@ -10994,7 +10994,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ab38721cde58f44b88aea268a0616558, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _table: {fileID: 0}
+  Table: {fileID: 0}
   Price: 0
   _defaultPrice: 50
   _upgradeUI: {fileID: 6635171106445941373}
@@ -12714,7 +12714,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Don't have enough money
+  m_text: 'Transaction fail or user abort '
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 92e1b1b58b22e9e45b8f04ee0417818b, type: 2}
   m_sharedMaterial: {fileID: 1427219489298224990, guid: 92e1b1b58b22e9e45b8f04ee0417818b,
@@ -12742,7 +12742,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 39.05
+  m_fontSize: 31.8
   m_fontSizeBase: 73.4
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -12778,7 +12778,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 0, y: 9.428505, z: 0, w: 26.932388}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
