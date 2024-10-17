@@ -102,13 +102,26 @@ mergeInto(LibraryManager.library, {
             return "0x" + number.toString(16);
         };
 
+        const flattenCalldata = (calldata) => {
+            const flatCalldata = [];
+
+            calldata.forEach((item) => {
+                if (Array.isArray(item)) {
+                    flatCalldata.push(item.length);
+                    flatCalldata.push(...item);
+                } else {
+                    flatCalldata.push(item);
+                }
+            });
+
+            return flatCalldata;
+        };
+
         const calldataArray = JSON.parse(UTF8ToString(calldata));
         const contractAddressStr = UTF8ToString(contractAddress);
         const entrypointStr = UTF8ToString(entrypoint);
         const callbackObjectStr = UTF8ToString(callbackObjectName);
         const callbackMethodStr = UTF8ToString(callbackMethodName);
-        const maxQtyGasAuthorized = 1800n;
-        const maxPriceAuthorizeForOneGas = 12n * 10n ** 9n;
 
         await window.starknet_argentX.enable();
         if (window.starknet_argentX.selectedAddress) {
@@ -117,7 +130,7 @@ mergeInto(LibraryManager.library, {
                     {
                         contractAddress: contractAddressStr,
                         entrypoint: entrypointStr,
-                        calldata: calldataArray.array,
+                        calldata: flattenCalldata(calldataArray.array),
                     },
                 ])
                 .then((response) => {
