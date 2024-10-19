@@ -34,7 +34,7 @@ namespace Game
 		protected async override void ChildOnEnable()
 		{
 			_upgradeAction.OnComplete += OnUpgradeCompleteHandler;
-			Price = await TransactionManager.Instance.GetPriceForAddTable();
+			await FetchPrice();
 			_upgradeUI.UpdateMoneyText();
 		}
 		protected override void ChildOnDisable()
@@ -103,6 +103,12 @@ namespace Game
 		protected override UniTask<bool> Execute()
 		{
 			return TransactionManager.Instance.AddTable();
+		}
+
+		protected override async UniTask FetchPrice()
+		{
+			Price = await TransactionManager.Instance.GetPriceForAddTable();
+			_upgradeUI.UpdateMoneyText();
 		}
 
 		protected override async void PerformUpgrade()

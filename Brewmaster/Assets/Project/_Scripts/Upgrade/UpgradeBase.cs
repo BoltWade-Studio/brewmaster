@@ -110,6 +110,7 @@ namespace Game
         }
 
         protected abstract UniTask<bool> Execute();
+        protected abstract UniTask FetchPrice();
 
         protected async UniTask TransactionUpgrade()
         {
@@ -128,6 +129,7 @@ namespace Game
                 LoadingUIManager.Instance.ChangeLoadingMessage("Getting player data");
                 await DataSaveLoadManager.Instance.LoadData(); // Load data from blockchain an update in server
                 Upgrade(); // Upgrade in local only
+                await FetchPrice();
                 LoadingUIManager.Instance.Hide();
             }
             else

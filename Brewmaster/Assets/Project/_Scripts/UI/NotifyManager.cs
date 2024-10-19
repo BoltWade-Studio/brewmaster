@@ -24,7 +24,7 @@ namespace Game
             {
                 this.transform.DOMove(_hidePos.position, 0.8f).SetEase(Ease.InElastic);
                 _isShow = false;
-            }, 1f);
+            }, 2f);
         }
     }
 }
