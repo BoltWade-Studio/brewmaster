@@ -30,6 +30,10 @@ namespace Game
 		protected override void ChildAwake()
 		{
 			base.ChildAwake();
+			if (ConnectWalletManager.Instance != null)
+			{
+				Destroy(this.gameObject);
+			}
 #if UNITY_EDITOR
 			Debug.Log("Socket init");
 			Utility.Socket.Init();
@@ -41,11 +45,6 @@ namespace Game
 		void Start()
 		{
 			Utility.Socket.SubscribeEvent(SocketEnum.updateAnonymous.ToString(), this.gameObject.name, nameof(OnUpdateAnonymous), OnUpdateAnonymous);
-		}
-
-		void OnDestroy()
-		{
-			Utility.Socket.Disconnect();
 		}
 
 		public void StartConnectWallet(Action onSuccess)

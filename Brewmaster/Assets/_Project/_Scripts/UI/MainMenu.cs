@@ -5,19 +5,26 @@ using UnityEngine.SceneManagement;
 using EasyTransition;
 using DG.Tweening;
 using NOOD;
+using System;
 
 namespace Game
 {
     public class MainMenu : MonoBehaviour
     {
         [Header("Main menu")]
-        [SerializeField] private CustomButton _playBtn, _howToPlay, _exit;
-        [SerializeField] private Image _chooseImage;
-        [SerializeField] private TransitionSettings _transitionSetting;
+        [SerializeField] private CustomButton _playBtn, _howToPlay;
+
+        [Header("Leaderboard")]
+        [SerializeField] private CustomButton _leaderboardBtn;
+        [SerializeField] private LeaderboardUI _leaderboardUI;
 
         [Header("How to play")]
         [SerializeField] private CanvasGroup _howToPlayPanel;
         [SerializeField] private CustomButton _closeBtn;
+
+        [Header("Other")]
+        [SerializeField] private Image _chooseImage;
+        [SerializeField] private TransitionSettings _transitionSetting;
 
         void Start()
         {
@@ -29,16 +36,24 @@ namespace Game
             {
                 _chooseImage.transform.position = _chooseImage.transform.position.ChangeY(_howToPlay.transform.position.y);
             });
-            _exit.OnHover += (() =>
+            _leaderboardBtn.OnHover += (() =>
             {
-                _chooseImage.transform.position = _chooseImage.transform.position.ChangeY(_exit.transform.position.y);
+                _chooseImage.transform.position = _chooseImage.transform.position.ChangeY(_leaderboardBtn.transform.position.y);
             });
 
             _playBtn.OnClick += OnPlayBtnClick;
             _howToPlay.OnClick += OpenHowToPlay;
             _closeBtn.OnClick += CloseHowToPlay;
+            _leaderboardBtn.OnClick += OpenLeaderboard;
+
             CloseHowToPlay();
         }
+
+        private void OpenLeaderboard()
+        {
+            _leaderboardUI.ShowLeaderboard();
+        }
+
         void OnDisable()
         {
             _howToPlayPanel.transform.DOKill();

@@ -70,6 +70,11 @@ public enum SocketEnum
 	getOgPassBalanceCallback,
 	#endregion
 
+	#region Leaderboard
+	getLeaderboard,
+	getLeaderboardCallback,
+	#endregion
+
 	spawnCustomer,
 	spawnCustomerCallback,
 	customerReachDestination,

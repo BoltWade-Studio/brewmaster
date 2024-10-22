@@ -256,6 +256,12 @@ namespace Game
 				string jsonString = JsonConvert.SerializeObject(new string[] { normalString });
 				return jsonString;
 			}
+
+			internal static void SubscribeEvent(string v, object onGetLeaderboardCallback)
+			{
+				throw new NotImplementedException();
+			}
+
 		}
 	}
 }

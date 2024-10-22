@@ -16,12 +16,12 @@ namespace Game
 		[MenuItem("Tools/OpenScene/OpenMainMenu")]
 		public static void OpenMainMenu()
 		{
-			EditorSceneManager.OpenScene("Assets/Project/_Scenes/MainMenu.unity");
+			EditorSceneManager.OpenScene("Assets/_Project/_Scenes/MainMenu.unity");
 		}
 		[MenuItem("Tools/OpenScene/OpenGameScene")]
 		public static void OpenGameScene()
 		{
-			EditorSceneManager.OpenScene("Assets/Project/_Scenes/GameScene.unity");
+			EditorSceneManager.OpenScene("Assets/_Project/_Scenes/GameScene.unity");
 		}
 	}
 #endif
