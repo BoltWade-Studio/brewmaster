@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using Newtonsoft.Json;
 using NOOD;
 using NOOD.Sound;
@@ -77,7 +78,7 @@ namespace Game
             }
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString() } });
+                string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString(CultureInfo.InvariantCulture) } });
                 Utility.Socket.EmitEvent("serveBeer", json);
             }
             if (Input.GetKeyDown(KeyCode.Escape))

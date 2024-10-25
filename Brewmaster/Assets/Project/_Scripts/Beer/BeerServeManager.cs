@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using Game;
 using Newtonsoft.Json;
 using NOOD;
@@ -53,7 +54,7 @@ namespace Game
 			{
 				float time = Time.time - lastUpdate;
 				lastUpdate = Time.time;
-				string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { time.ToString() } });
+				string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { time.ToString(CultureInfo.InvariantCulture) } });
 				Utility.Socket.EmitEvent(SocketEnum.updateBeer.ToString(), json);
 			}
 			else

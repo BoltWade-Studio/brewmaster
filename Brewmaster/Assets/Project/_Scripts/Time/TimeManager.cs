@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using NOOD;
@@ -69,7 +70,7 @@ namespace Game
 			{
 				lastUpdate = Time.time;
 				// Send time to server (in minutes)
-				string json = Utility.Socket.StringToSocketJson(Time.time.ToString());
+				string json = Utility.Socket.StringToSocketJson(Time.time.ToString(CultureInfo.InvariantCulture));
 				Utility.Socket.EmitEvent("updateTimer", json);
 			}
 
@@ -95,7 +96,7 @@ namespace Game
 				await UniTask.SwitchToMainThread();
 				// object useData = JsonConvert.DeserializeObject<object[]>(data.ToString())[0];
 				// data consists of a float number
-				float timeLeft = float.Parse(data.ToString()); // in seconds
+				float timeLeft = float.Parse(data.ToString(), CultureInfo.InvariantCulture); // in seconds
 				_hour = Mathf.Floor(timeLeft / 60);
 				_minute = timeLeft % 60;
 			}
@@ -122,13 +123,13 @@ namespace Game
 			if (_isPause)
 			{
 				TimeScale = 0;
-				string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString() } });
+				string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString(CultureInfo.InvariantCulture) } });
 				Utility.Socket.EmitEvent("pauseGame", json);
 			}
 			else
 			{
 				TimeScale = 1;
-				string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString() } });
+				string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString(CultureInfo.InvariantCulture) } });
 				Utility.Socket.EmitEvent("resumeGame", json);
 			}
 		}

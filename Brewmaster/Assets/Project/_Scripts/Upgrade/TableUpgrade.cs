@@ -10,7 +10,7 @@ namespace Game
 		#region Unity functions
 		protected override void ChildAwake()
 		{
-			Table = gameObject.AddComponent<Table>();
+			Table = new Table();
 			Table.TableIndex = TableManager.Instance.GetTableList().Count;
 			Table.name = "Table " + Table.TableIndex;
 			_upgradeAction = new UpgradeAction(async () =>
@@ -46,8 +46,6 @@ namespace Game
 
 		public void OnUpgradeCompleteHandler()
 		{
-			Table.TableIndex = TableManager.Instance.GetTableList().Count;
-			Table.name = "Table " + Table.TableIndex;
 			if (CheckAllUpgradeComplete())
 			{
 				HideUI();
@@ -88,6 +86,8 @@ namespace Game
 
 		protected override bool CheckAllUpgradeComplete()
 		{
+			Table.TableIndex = TableManager.Instance.GetTableList().Count;
+			Table.name = "Table " + Table.TableIndex;
 			if (Table.TableIndex == 10)
 			{
 				return true;
