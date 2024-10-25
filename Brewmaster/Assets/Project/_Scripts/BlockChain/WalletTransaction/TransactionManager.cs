@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Cysharp.Threading.Tasks;
@@ -35,7 +36,7 @@ namespace Game
         {
             if (_transactionEntryDic.ContainsKey(transactionID) == false)
             {
-                string json = Utility.Socket.StringToSocketJson(transactionID.ToString());
+                string json = Utility.Socket.StringToSocketJson(transactionID.ToString(CultureInfo.InvariantCulture));
                 // Get transaction entry from server
                 Utility.Socket.EmitEvent(SocketEnum.getEntry.ToString(), json);
             }
@@ -77,7 +78,7 @@ namespace Game
             LoadingUIManager.Instance.ChangeLoadingMessage("Getting player pub");
             if (_transactionJsonDataDic.ContainsKey(TransactionID.GET_PLAYER_PUB))
                 _transactionJsonDataDic.Remove(TransactionID.GET_PLAYER_PUB);
-            Utility.Socket.EmitEvent(SocketEnum.getPlayerPub.ToString());
+            Utility.Socket.EmitEvent(SocketEnum.getPlayerPub.ToString(CultureInfo.InvariantCulture));
             await UniTask.WaitUntil(() => _isGettingData == false);
             await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.GET_PLAYER_PUB));
 
@@ -153,7 +154,7 @@ namespace Game
         {
             _isSendingData = true;
             LoadingUIManager.Instance.ChangeLoadingMessage("Getting claim data");
-            Utility.Socket.EmitEvent(SocketEnum.claim.ToString());
+            Utility.Socket.EmitEvent(SocketEnum.claim.ToString(CultureInfo.InvariantCulture));
             await UniTask.WaitUntil(() => _isSendingData == false);
         }
         private async void ClaimCallback(string dataArray)
@@ -224,7 +225,7 @@ namespace Game
             if (_transactionJsonDataDic.ContainsKey(TransactionID.GET_OG_PASS_BALANCE))
                 _transactionJsonDataDic.Remove(TransactionID.GET_OG_PASS_BALANCE);
             Utility.Socket.SubscribeEvent(SocketEnum.getOgPassBalanceCallback.ToString(), this.gameObject.name, nameof(GetOgPassBalanceCallback), GetOgPassBalanceCallback);
-            Utility.Socket.EmitEvent(SocketEnum.getOgPassBalance.ToString());
+            Utility.Socket.EmitEvent(SocketEnum.getOgPassBalance.ToString(CultureInfo.InvariantCulture));
             await UniTask.WaitUntil(() => _isGettingData == false);
             await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.GET_OG_PASS_BALANCE));
             return JsonConvert.DeserializeObject<int>(_transactionJsonDataDic[TransactionID.GET_OG_PASS_BALANCE].ToString());
