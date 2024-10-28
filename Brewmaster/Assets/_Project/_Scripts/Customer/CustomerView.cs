@@ -2,13 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using Game.Extension;
 using NOOD;
-using TMPro;
 using UnityEngine;
 
 namespace Game
 {
     public class CustomerView : MonoBehaviour
     {
+        [SerializeField] private bool _isUseSkinGO = false;
+
         [Header("Component")]
         [SerializeField] private Customer _customer;
 
@@ -17,11 +18,21 @@ namespace Game
         [SerializeField] private List<SkinnedMeshRenderer> _chest = new List<SkinnedMeshRenderer>();
         [SerializeField] private List<SkinnedMeshRenderer> _pant = new List<SkinnedMeshRenderer>();
         [SerializeField] private List<SkinnedMeshRenderer> _feet = new List<SkinnedMeshRenderer>();
+
+        [Header("Customer skin")]
+        [SerializeField] private List<GameObject> _customerSkins = new List<GameObject>();
+
+        [Header("Animator")]
         [SerializeField] private Animator _anim;
 
         private float _sitDownSpeed = 2;
         private float _sitStage = 0;
         private UpdateObject _sitDownUpdater, _moveUpdater;
+
+        void Awake()
+        {
+            _customerSkins.ForEach(skin => skin.SetActive(false));
+        }
 
         void Start()
         {
@@ -41,15 +52,24 @@ namespace Game
 
         private void GetRandomCloth()
         {
-            _head.ForEach(renderer => renderer.enabled = false);
-            _chest.ForEach(renderer => renderer.enabled = false);
-            _pant.ForEach(renderer => renderer.enabled = false);
-            _feet.ForEach(renderer => renderer.enabled = false);
+            if (_isUseSkinGO)
+            {
+                GameObject skin = _customerSkins.GetRandom();
+                skin.SetActive(true);
+                _anim = skin.GetComponent<Animator>();
+            }
+            else
+            {
+                _head.ForEach(renderer => renderer.enabled = false);
+                _chest.ForEach(renderer => renderer.enabled = false);
+                _pant.ForEach(renderer => renderer.enabled = false);
+                _feet.ForEach(renderer => renderer.enabled = false);
 
-            _head.GetRandom().enabled = true;
-            _chest.GetRandom().enabled = true;
-            _pant.GetRandom().enabled = true;
-            _feet.GetRandom().enabled = true;
+                _head.GetRandom().enabled = true;
+                _chest.GetRandom().enabled = true;
+                _pant.GetRandom().enabled = true;
+                _feet.GetRandom().enabled = true;
+            }
         }
 
         public void StopAllAnimation()
