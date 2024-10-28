@@ -10,7 +10,7 @@ namespace Game
 		#region Unity functions
 		protected override void ChildAwake()
 		{
-			Table = new Table();
+			Table = new GameObject().AddComponent<Table>();
 			Table.TableIndex = TableManager.Instance.GetTableList().Count;
 			Table.name = "Table " + Table.TableIndex;
 			_upgradeAction = new UpgradeAction(async () =>
@@ -33,14 +33,20 @@ namespace Game
 		}
 		protected async override void ChildOnEnable()
 		{
-			_upgradeAction.OnComplete += OnUpgradeCompleteHandler;
+			if (_upgradeAction != null)
+			{
+				_upgradeAction.OnComplete += OnUpgradeCompleteHandler;
+			}
 			await FetchPrice();
 			_upgradeUI.UpdateMoneyText();
 		}
 		protected override void ChildOnDisable()
 		{
 			base.ChildOnDisable();
-			_upgradeAction.OnComplete -= OnUpgradeCompleteHandler;
+			if (_upgradeAction != null)
+			{
+				_upgradeAction.OnComplete -= OnUpgradeCompleteHandler;
+			}
 		}
 		#endregion
 

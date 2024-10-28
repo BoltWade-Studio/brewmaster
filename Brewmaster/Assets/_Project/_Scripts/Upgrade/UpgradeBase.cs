@@ -30,8 +30,8 @@ namespace Game
         protected void Awake()
         {
             HideUI();
-            ChildAwake();
             Price = _defaultPrice;
+            ChildAwake();
         }
         protected virtual void ChildAwake() { }
         protected void OnEnable()

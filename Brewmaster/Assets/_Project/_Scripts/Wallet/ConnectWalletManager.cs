@@ -26,12 +26,14 @@ namespace Game
 
 		private ConnectWalletUI _connectWalletUI;
 		private Action _onSuccess;
+		private bool _isDisconnect = true;
 
 		protected override void ChildAwake()
 		{
 			base.ChildAwake();
 			if (ConnectWalletManager.Instance != null)
 			{
+				_isDisconnect = false;
 				Destroy(this.gameObject);
 			}
 #if UNITY_EDITOR
@@ -45,6 +47,12 @@ namespace Game
 		void Start()
 		{
 			Utility.Socket.SubscribeEvent(SocketEnum.updateAnonymous.ToString(), this.gameObject.name, nameof(OnUpdateAnonymous), OnUpdateAnonymous);
+		}
+
+		void OnDestroy()
+		{
+			if (_isDisconnect)
+				Utility.Socket.Disconnect();
 		}
 
 		public void StartConnectWallet(Action onSuccess)

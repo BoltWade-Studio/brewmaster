@@ -203,7 +203,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 23c4fe3b654976b4990e9fda0c953a5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isUseSkinGO: 0
+  _isUseSkinGO: 1
   _customer: {fileID: 1608148914274082239}
   _head: []
   _chest: []
