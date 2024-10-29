@@ -13,46 +13,121 @@ namespace Game
 {
     public class LeaderboardUI : MonoBehaviour
     {
+        private const string LEADERBOARD_ALL_TIME_DATA_KEY = "LeaderboardAllTime";
+        private const string LEADERBOARD_WEEKLY_DATA_KEY = "LeaderboardWeekly";
         [SerializeField] private PlayerRowUI _playerRowPrefab;
         [SerializeField] private Transform _playerRowsContainer;
         [SerializeField] private PlayerRowUI _mainPlayerRow;
         [SerializeField] private Transform _panelTransform, _hideTransform, _showTransform;
         [SerializeField] private Button _closeBtn;
+        [SerializeField] private LeaderboardDataController _leaderboardDataController;
+
+        [Header("FilterTabs")]
+        [SerializeField] private Button _weeklyBtn;
+        [SerializeField] private Button _allTimeBtn;
+        private bool _isWeekly = true;
         private List<PlayerRowUI> _playerRows = new List<PlayerRowUI>();
+        private float _refreshTime = 0;
 
-
+        #region Unity Functions
         void Start()
         {
             _playerRowPrefab.gameObject.SetActive(false);
             Hide();
 
             _closeBtn.onClick.AddListener(Hide);
+            _weeklyBtn.onClick.AddListener(() =>
+            {
+                ChangeFilterWeekly(true);
+                _weeklyBtn.interactable = false;
+                _allTimeBtn.interactable = true;
+            });
+            _allTimeBtn.onClick.AddListener(() =>
+            {
+                ChangeFilterWeekly(false);
+                _weeklyBtn.interactable = true;
+                _allTimeBtn.interactable = false;
+            });
+            _leaderboardDataController.GetRemoteData();
+            _refreshTime = Time.time;
         }
+
+        void OnEnable()
+        {
+            _leaderboardDataController.OnGetRemoteDataComplete += OnGetRemoteDataComplete;
+        }
+
 
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.L))
+            if (Time.time - _refreshTime >= 10)
             {
-                ShowLeaderboard();
+                _leaderboardDataController.GetRemoteData();
+                ChangeFilterWeekly(_isWeekly);
+                _refreshTime = Time.time;
             }
+        }
+
+        void OnDisable()
+        {
+            _leaderboardDataController.OnGetRemoteDataComplete -= OnGetRemoteDataComplete;
         }
 
         void OnDestroy()
         {
             _closeBtn.onClick.RemoveListener(Hide);
+            _weeklyBtn.onClick.RemoveAllListeners();
+            _allTimeBtn.onClick.RemoveAllListeners();
+        }
+        #endregion
+
+
+        private void OnGetRemoteDataComplete(OnGetRemoteDataCompleteArgs args)
+        {
+            if (args.IsWeekly && _isWeekly)
+            {
+                ShowWeeklyData();
+            }
+            else if (args.IsWeekly == false && _isWeekly == false)
+            {
+                ShowAllTimeData();
+            }
         }
 
-        public void ShowLeaderboard()
+        private void ChangeFilterWeekly(bool isWeekly)
         {
-            Show();
-            Utility.Socket.SubscribeEvent(SocketEnum.getLeaderboardCallback.ToString(), this.gameObject.name, nameof(OnGetLeaderboardCallback), OnGetLeaderboardCallback);
-            Utility.Socket.EmitEvent(SocketEnum.getLeaderboard.ToString());
+            _isWeekly = isWeekly;
+            if (_isWeekly)
+            {
+                ShowWeeklyData();
+            }
+            else
+            {
+                ShowAllTimeData();
+            }
         }
 
-        private async void OnGetLeaderboardCallback(string data)
+        private void ShowWeeklyData()
         {
-            await UniTask.SwitchToMainThread();
-            Debug.Log("OnGetLeaderboardCallback: " + data);
+            if (PlayerPrefs.HasKey(LEADERBOARD_WEEKLY_DATA_KEY))
+            {
+                var data = PlayerPrefs.GetString(LEADERBOARD_WEEKLY_DATA_KEY); // Get local leaderboard data
+                ParseLeaderboardData(data);
+            }
+        }
+
+        private void ShowAllTimeData()
+        {
+            if (PlayerPrefs.HasKey(LEADERBOARD_ALL_TIME_DATA_KEY))
+            {
+                var data = PlayerPrefs.GetString(LEADERBOARD_ALL_TIME_DATA_KEY); // Get local leaderboard data
+                ParseLeaderboardData(data);
+            }
+        }
+
+
+        private void ParseLeaderboardData(string data)
+        {
             var leaderboardResponse = JsonConvert.DeserializeObject<LeaderboardResponse>(data);
             if (leaderboardResponse.Success)
             {
@@ -60,7 +135,6 @@ namespace Game
                 CreatePlayerRows(leaderboardData.Items);
             }
             SetDataForMainPLayerRow(leaderboardResponse.Data.Items);
-            Utility.Socket.UnSubscribeEvent(SocketEnum.getLeaderboardCallback.ToString(), this.gameObject.name, nameof(OnGetLeaderboardCallback), OnGetLeaderboardCallback);
         }
 
         private void SetDataForMainPLayerRow(List<LeaderboardItem> items)
@@ -89,7 +163,6 @@ namespace Game
 
         private void CreatePlayerRows(List<LeaderboardItem> items)
         {
-            int rank = 0;
             while (_playerRows.Count != items.Count)
             {
                 if (_playerRows.Count < items.Count)
@@ -109,14 +182,17 @@ namespace Game
             for (int i = 0; i < items.Count; i++)
             {
                 var playerRow = _playerRows[i];
-                playerRow.SetPlayerRank(rank);
+                playerRow.SetPlayerRank(i);
                 playerRow.SetPlayerAddress(items[i].UserAddress);
                 playerRow.SetPlayerScore(PointDisplay.GetPointDisplayText(items[i].Point));
-                rank++;
             }
         }
 
         #region Show Hide
+        public void ShowLeaderboard()
+        {
+            Show();
+        }
         private void Show()
         {
             _panelTransform.gameObject.SetActive(true);

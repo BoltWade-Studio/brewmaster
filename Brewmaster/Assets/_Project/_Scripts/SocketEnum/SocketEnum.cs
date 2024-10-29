@@ -73,6 +73,8 @@ public enum SocketEnum
 	#region Leaderboard
 	getLeaderboard,
 	getLeaderboardCallback,
+	getWeeklyLeaderboard,
+	getWeeklyLeaderboardCallback,
 	#endregion
 
 	spawnCustomer,
