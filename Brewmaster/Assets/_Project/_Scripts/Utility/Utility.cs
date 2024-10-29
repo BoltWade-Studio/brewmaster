@@ -30,9 +30,9 @@ namespace Game
 			private static List<Action<string>> _exceptionMethodList = new List<Action<string>>();
 			private static Dictionary<string, List<SocketEventClass>> _socketEventClassDic = new Dictionary<string, List<SocketEventClass>>();
 
-#if UNITY_EDITOR
 			public static void Init()
 			{
+#if UNITY_EDITOR
 				var uri = new Uri("http://localhost:5006");
 				// var uri = new Uri("https://brewmaster-socket-test.boltwade.xyz");
 				// var uri = new Uri("https://brewmaster-socket.starkarcade.com/");
@@ -118,9 +118,11 @@ namespace Game
 				});
 
 				socket.Connect();
+#else
+				JsSocketConnect.SocketIOInit();
+#endif
 			}
 
-#endif
 			public static void Disconnect()
 			{
 #if UNITY_EDITOR

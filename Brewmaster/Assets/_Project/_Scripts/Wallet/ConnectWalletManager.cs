@@ -36,12 +36,8 @@ namespace Game
 				_isDisconnect = false;
 				Destroy(this.gameObject);
 			}
-#if UNITY_EDITOR
 			Debug.Log("Socket init");
 			Utility.Socket.Init();
-#else
-			JsSocketConnect.SocketIOInit();
-#endif
 		}
 
 		void Start()
