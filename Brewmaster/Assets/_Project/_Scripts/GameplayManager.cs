@@ -19,7 +19,6 @@ namespace Game
 		protected override void ChildAwake()
 		{
 			base.ChildAwake();
-			GameEvent.Instance.OnUpdatePosComplete += OnUpdatePosCompleteHandler;
 			Application.targetFrameRate = 60;
 		}
 
@@ -29,7 +28,7 @@ namespace Game
 			GameEvent.Instance.OnTimeUp += OnTimeUpHandler;
 			GameEvent.Instance.OnNextDay += OnNextDayHandler;
 			GameEvent.Instance.OnStorePhase += OnStorePhaseHandler;
-			// GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
+			GameEvent.Instance.OnUpdatePosComplete += OnUpdatePosCompleteHandler;
 
 			SoundManager.InitSoundManager();
 			SoundManager.PlayMusic(MusicEnum.PianoBGMusic);
@@ -44,18 +43,12 @@ namespace Game
 			GameEvent.Instance.OnNextDay -= OnNextDayHandler;
 			GameEvent.Instance.OnStorePhase -= OnStorePhaseHandler;
 			GameEvent.Instance.OnUpdatePosComplete -= OnUpdatePosCompleteHandler;
-			// GameEvent.Instance.OnLoadDataSuccess -= OnLoadDataSuccessHandler;
 		}
 
 		#region Event functions
 		private void OnStorePhaseHandler()
 		{
 			IsStorePhase = true;
-		}
-
-		private void OnLoadDataSuccessHandler()
-		{
-			InitializeGame();
 		}
 
 		private void OnUpdatePosCompleteHandler()

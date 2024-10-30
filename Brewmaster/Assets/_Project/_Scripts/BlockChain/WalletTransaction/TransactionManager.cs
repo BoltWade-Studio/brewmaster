@@ -34,9 +34,11 @@ namespace Game
         #region Private
         private async UniTask<string> GetContractEntry(TransactionID transactionID)
         {
+            if (this.gameObject == null)
+                return "";
             if (_transactionEntryDic.ContainsKey(transactionID) == false)
             {
-                string json = Utility.Socket.StringToSocketJson(transactionID.ToString(CultureInfo.InvariantCulture));
+                string json = Utility.Socket.StringToSocketJson(transactionID.ToString());
                 // Get transaction entry from server
                 Utility.Socket.EmitEvent(SocketEnum.getEntry.ToString(), json);
             }
@@ -74,11 +76,13 @@ namespace Game
         #region GetPlayerPub
         public async UniTask<string> GetPlayerPub()
         {
+            if (this.gameObject == null)
+                return "";
             _isGettingData = true;
             LoadingUIManager.Instance.ChangeLoadingMessage("Getting player pub");
             if (_transactionJsonDataDic.ContainsKey(TransactionID.GET_PLAYER_PUB))
                 _transactionJsonDataDic.Remove(TransactionID.GET_PLAYER_PUB);
-            Utility.Socket.EmitEvent(SocketEnum.getPlayerPub.ToString(CultureInfo.InvariantCulture));
+            Utility.Socket.EmitEvent(SocketEnum.getPlayerPub.ToString());
             await UniTask.WaitUntil(() => _isGettingData == false);
             await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.GET_PLAYER_PUB));
 
@@ -88,14 +92,7 @@ namespace Game
         {
             await UniTask.SwitchToMainThread();
             Debug.Log("Player data callback: " + data);
-            if (_transactionJsonDataDic.ContainsKey(TransactionID.GET_PLAYER_PUB))
-            {
-                _transactionJsonDataDic[TransactionID.GET_PLAYER_PUB] = data;
-            }
-            else
-            {
-                _transactionJsonDataDic.Add(TransactionID.GET_PLAYER_PUB, data);
-            }
+            _transactionJsonDataDic.Add(TransactionID.GET_PLAYER_PUB, data);
 
             _isGettingData = false;
         }
@@ -104,6 +101,8 @@ namespace Game
         #region CreatePlayerPub
         public async UniTask<bool> CreatePub()
         {
+            if (this.gameObject == null)
+                return false;
             // SendContract to JSInteropManager
             _isSendingData = true;
             string contractAddress = await GetContractEntry(TransactionID.CONTRACT_ADDRESS);
@@ -152,9 +151,11 @@ namespace Game
         #region Claim and ClosingUpPub
         public async UniTask Claim()
         {
+            if (this.gameObject == null)
+                return;
             _isSendingData = true;
             LoadingUIManager.Instance.ChangeLoadingMessage("Getting claim data");
-            Utility.Socket.EmitEvent(SocketEnum.claim.ToString(CultureInfo.InvariantCulture));
+            Utility.Socket.EmitEvent(SocketEnum.claim.ToString());
             await UniTask.WaitUntil(() => _isSendingData == false);
         }
         private async void ClaimCallback(string dataArray)
@@ -221,11 +222,13 @@ namespace Game
         #region Get Og Pass Balance
         public async UniTask<int> GetOgPassBalance()
         {
+            if (this.gameObject == null)
+                return 0;
             _isGettingData = true;
             if (_transactionJsonDataDic.ContainsKey(TransactionID.GET_OG_PASS_BALANCE))
                 _transactionJsonDataDic.Remove(TransactionID.GET_OG_PASS_BALANCE);
             Utility.Socket.SubscribeEvent(SocketEnum.getOgPassBalanceCallback.ToString(), this.gameObject.name, nameof(GetOgPassBalanceCallback), GetOgPassBalanceCallback);
-            Utility.Socket.EmitEvent(SocketEnum.getOgPassBalance.ToString(CultureInfo.InvariantCulture));
+            Utility.Socket.EmitEvent(SocketEnum.getOgPassBalance.ToString());
             await UniTask.WaitUntil(() => _isGettingData == false);
             await UniTask.WaitUntil(() => _transactionJsonDataDic.ContainsKey(TransactionID.GET_OG_PASS_BALANCE));
             return JsonConvert.DeserializeObject<int>(_transactionJsonDataDic[TransactionID.GET_OG_PASS_BALANCE].ToString());
@@ -242,6 +245,8 @@ namespace Game
         #region Get Price For Add Stool
         public async UniTask<int> GetPriceForAddStool()
         {
+            if (this.gameObject == null)
+                return 0;
             _isGettingData = true;
             Utility.Socket.SubscribeEvent(SocketEnum.getPriceForAddStoolCallback.ToString(), this.gameObject.name, nameof(GetStoolPriceCallback), GetStoolPriceCallback);
             if (_transactionEntryDic.ContainsKey(TransactionID.GET_PRICE_FOR_ADD_STOOL))
@@ -270,6 +275,8 @@ namespace Game
         #region Get Price For Add Table
         public async UniTask<int> GetPriceForAddTable()
         {
+            if (this.gameObject == null)
+                return 0;
             _isGettingData = true;
             Utility.Socket.SubscribeEvent(SocketEnum.getPriceForAddTableCallback.ToString(), this.gameObject.name, nameof(GetPriceForAddTableCallback), GetPriceForAddTableCallback);
             if (_transactionEntryDic.ContainsKey(TransactionID.GET_PRICE_FOR_ADD_TABLE))
@@ -303,6 +310,8 @@ namespace Game
         /// <returns></returns>
         public async UniTask<bool> AddStool(int tableIndex)
         {
+            if (this.gameObject == null)
+                return false;
             _isSendingData = true;
             if (Application.isEditor == false)
             {
@@ -360,6 +369,8 @@ namespace Game
 
         public async UniTask<bool> AddTable()
         {
+            if (this.gameObject == null)
+                return false;
             _isSendingData = true;
             if (Application.isEditor == false)
             {
@@ -418,6 +429,8 @@ namespace Game
         #region Wait Transaction
         private async UniTask<bool> WaitTransaction(string txHash)
         {
+            if (this.gameObject == null)
+                return false;
             if (IsValidTransactionHash(txHash) == false)
             {
                 Debug.LogError("Invalid transaction hash");

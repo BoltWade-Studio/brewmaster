@@ -18,7 +18,6 @@ namespace Game
 				try
 				{
 					GameEvent.Instance.OnStorePhase?.Invoke();
-					TableManager.Instance.UpdatePositionsToServer();
 				}
 				catch (System.Exception e)
 				{

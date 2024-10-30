@@ -60,7 +60,7 @@ namespace Game
 
         void Update()
         {
-            if (Time.time - _refreshTime >= 10)
+            if (Time.time - _refreshTime >= 10 && _panelTransform.gameObject.activeInHierarchy) // is open and 10s
             {
                 _leaderboardDataController.GetRemoteData();
                 ChangeFilterWeekly(_isWeekly);
