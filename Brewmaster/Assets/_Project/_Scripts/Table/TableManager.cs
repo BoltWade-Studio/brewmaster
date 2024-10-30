@@ -61,18 +61,18 @@ namespace Game
                 table.SetIsUnlockAllSeats(_unlockAllSeats);
             }
         }
-        void Start()
+        async void Start()
         {
             Utility.Socket.SubscribeEvent(SocketEnum.updateTablePositionCallback.ToString(), this.gameObject.name, nameof(UpdateTablePositionCallback), UpdateTablePositionCallback);
             Utility.Socket.SubscribeEvent(SocketEnum.updateSeatPositionsCallback.ToString(), this.gameObject.name, nameof(UpdateSeatPositionCallback), UpdateSeatPositionCallback);
 
             if (GameplayManager.Instance.IsMainMenu == false)
             {
-                LoadTableSeat();
-                GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler;
+                LoadTableAndSeat(); // When start game from main menu
+                GameEvent.Instance.OnLoadDataSuccess += OnLoadDataSuccessHandler; // When start game from next day
+                await UniTask.WaitUntil(() => _tableList.Count == PlayerData.PlayerScale.Count());
             }
             UpdatePositionsToServer();
-
         }
         void OnEnable()
         {
@@ -91,7 +91,6 @@ namespace Game
         #region Update pos to server
         public void UpdatePositionsToServer()
         {
-            Debug.Log("AAA Update position to server");
             string[] tablePosStrings = new string[_tableList.Count];
             string[] totalSeatPosArray = new string[_tableList.Count];
             for (int i = 0; i < _tableList.Count; i++)
@@ -142,13 +141,12 @@ namespace Game
 
         private void OnLoadDataSuccessHandler()
         {
-            LoadTableSeat();
+            LoadTableAndSeat();
+            UpdatePositionsToServer();
         }
-        private void LoadTableSeat()
+        private void LoadTableAndSeat()
         {
             BuildTables(PlayerData.PlayerScale.Count());
-            // Debug.Log("client table count: " + _tableList.Count);
-            // Debug.Log("server table count: " + PlayerData.PlayerScale.Count());
             for (int i = 0; i < PlayerData.PlayerScale.Count(); i++)
             {
                 int index = i;
@@ -158,14 +156,13 @@ namespace Game
                 {
                     table.TableIndex = scale.TableIndex;
                     table.AvailableSeatNumber = scale.Stools;
-                    // Debug.Log("index: " + scale.TableIndex + " number: " + scale.Stools);
                 }
                 table.LoadSeat();
             }
-            foreach (Scale scale in PlayerData.PlayerScale)
-            {
-                Debug.Log("Scale: " + scale);
-            }
+            // foreach (Scale scale in PlayerData.PlayerScale)
+            // {
+            //     Debug.Log("Scale: " + scale);
+            // }
         }
         private void OnPlayerChangePositionHandler(int index)
         {

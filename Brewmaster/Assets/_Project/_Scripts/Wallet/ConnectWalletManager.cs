@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
+using System.Globalization;
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using NOOD;
 using UnityEngine;
+using Utils;
 using Debug = Game.DevelopDebug;
 
 namespace Game
@@ -26,17 +28,15 @@ namespace Game
 
 		private ConnectWalletUI _connectWalletUI;
 		private Action _onSuccess;
-		private bool _isDisconnect = true;
 
 		protected override void ChildAwake()
 		{
 			base.ChildAwake();
-			if (ConnectWalletManager.Instance != null)
+			if (ConnectWalletManager.Instance != null && ConnectWalletManager.Instance != this)
 			{
-				_isDisconnect = false;
 				Destroy(this.gameObject);
+				return;
 			}
-			Debug.Log("Socket init");
 			Utility.Socket.Init();
 		}
 
@@ -45,15 +45,12 @@ namespace Game
 			Utility.Socket.SubscribeEvent(SocketEnum.updateAnonymous.ToString(), this.gameObject.name, nameof(OnUpdateAnonymous), OnUpdateAnonymous);
 		}
 
-		void OnDestroy()
-		{
-			if (_isDisconnect)
-				Utility.Socket.Disconnect();
-		}
-
 		public void StartConnectWallet(Action onSuccess)
 		{
 			Debug.Log("StartConnectWallet");
+			TimeManager.Instance.PauseGame();
+			string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString(CultureInfo.InvariantCulture) } });
+			Utility.Socket.EmitEvent(SocketEnum.pauseGame.ToString(), json);
 			_onSuccess = onSuccess;
 			_gameUITransform = GameObject.FindGameObjectWithTag("MainMenuCanvas").transform;
 			_connectWalletUI = Instantiate<ConnectWalletUI>(_connectWalletUIPref, _gameUITransform);

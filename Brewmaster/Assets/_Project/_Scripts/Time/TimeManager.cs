@@ -117,20 +117,20 @@ namespace Game
 			SoundManager.PlaySound(SoundEnum.EndLevel);
 		}
 
-		private void PauseGame()
+		public void PauseGame()
 		{
 			_isPause = !_isPause;
 			if (_isPause)
 			{
 				TimeScale = 0;
 				string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString(CultureInfo.InvariantCulture) } });
-				Utility.Socket.EmitEvent("pauseGame", json);
+				Utility.Socket.EmitEvent(SocketEnum.pauseGame.ToString(), json);
 			}
 			else
 			{
 				TimeScale = 1;
 				string json = JsonConvert.SerializeObject(new ArrayWrapper { array = new string[] { Time.time.ToString(CultureInfo.InvariantCulture) } });
-				Utility.Socket.EmitEvent("resumeGame", json);
+				Utility.Socket.EmitEvent(SocketEnum.resumeGame.ToString(), json);
 			}
 		}
 		private void ResetTimeScale()

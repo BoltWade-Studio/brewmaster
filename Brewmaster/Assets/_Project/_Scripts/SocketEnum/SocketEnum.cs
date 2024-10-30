@@ -77,6 +77,8 @@ public enum SocketEnum
 	getWeeklyLeaderboardCallback,
 	#endregion
 
+	pauseGame,
+	resumeGame,
 	spawnCustomer,
 	spawnCustomerCallback,
 	customerReachDestination,
