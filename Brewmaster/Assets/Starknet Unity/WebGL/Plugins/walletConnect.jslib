@@ -68,7 +68,6 @@ mergeInto(LibraryManager.library, {
     },
 
     GetAccount: function () {
-        console.log("GetAccount");
         const walletType = window.sessionStorage.getItem("walletType");
         let address = "";
         if (walletType == "argentX") {

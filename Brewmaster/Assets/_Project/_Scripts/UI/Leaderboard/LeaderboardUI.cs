@@ -36,20 +36,11 @@ namespace Game
             Hide();
 
             _closeBtn.onClick.AddListener(Hide);
-            _weeklyBtn.onClick.AddListener(() =>
-            {
-                ChangeFilterWeekly(true);
-                _weeklyBtn.interactable = false;
-                _allTimeBtn.interactable = true;
-            });
-            _allTimeBtn.onClick.AddListener(() =>
-            {
-                ChangeFilterWeekly(false);
-                _weeklyBtn.interactable = true;
-                _allTimeBtn.interactable = false;
-            });
+            _weeklyBtn.onClick.AddListener(OnWeeklyBtnClick);
+            _allTimeBtn.onClick.AddListener(OnAllTimeBtnClick);
             _leaderboardDataController.GetRemoteData();
             _refreshTime = Time.time;
+            OnWeeklyBtnClick();
         }
 
         void OnEnable()
@@ -76,11 +67,23 @@ namespace Game
         void OnDestroy()
         {
             _closeBtn.onClick.RemoveListener(Hide);
-            _weeklyBtn.onClick.RemoveAllListeners();
-            _allTimeBtn.onClick.RemoveAllListeners();
+            _weeklyBtn.onClick.RemoveListener(OnWeeklyBtnClick);
+            _allTimeBtn.onClick.RemoveListener(OnAllTimeBtnClick);
         }
         #endregion
 
+        private void OnWeeklyBtnClick()
+        {
+            ChangeFilterWeekly(true);
+            _weeklyBtn.interactable = false;
+            _allTimeBtn.interactable = true;
+        }
+        private void OnAllTimeBtnClick()
+        {
+            ChangeFilterWeekly(false);
+            _weeklyBtn.interactable = true;
+            _allTimeBtn.interactable = false;
+        }
 
         private void OnGetRemoteDataComplete(OnGetRemoteDataCompleteArgs args)
         {

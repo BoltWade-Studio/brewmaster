@@ -99,7 +99,7 @@ namespace Game
 			try
 			{
 				// Debug.Log("WalletConnectAsync: IsConnected: " + JSInteropManager.IsConnected());
-				string playerAddress;
+				string playerAddress = null;
 				if (Application.isEditor)
 				{
 					playerAddress =
@@ -115,10 +115,14 @@ namespace Game
 
 					walletAction?.Invoke();
 					await UniTask.WaitUntil(() => JSInteropManager.IsConnected());
-					playerAddress = JSInteropManager.GetAccount();
+					while (playerAddress == null)
+					{
+						playerAddress = JSInteropManager.GetAccount();
+						await UniTask.DelayFrame(1);
+					}
 				}
 
-				playerAddress = Utility.Socket.StringToSocketJson(playerAddress);
+				playerAddress = Utility.Socket.StringToSocketJson(playerAddress.ToLower());
 				Utility.Socket.EmitEvent(SocketEnum.updatePlayerAddress.ToString(), playerAddress);
 				GameEvent.Instance.OnLoadDataSuccess += OnLoadDatasSuccessHandler;
 				await DataSaveLoadManager.Instance.LoadData();
