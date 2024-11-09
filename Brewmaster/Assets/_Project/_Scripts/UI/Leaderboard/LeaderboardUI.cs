@@ -150,16 +150,17 @@ namespace Game
                 playerPoint = PlayerData.PlayerPoint;
             }
 
-            _mainPlayerRow.SetPlayerAddress(playerAddress);
-            _mainPlayerRow.SetPlayerScore(PointDisplay.GetPointDisplayText(playerPoint));
-
-            bool isInTop = items.Any(x => x.UserAddress == playerAddress);
+            bool isInTop = items.Any(x => x.UserAddress.Equals(playerAddress));
             int index = -1;
             Debug.Log("isInTop: " + isInTop);
             if (isInTop)
             {
-                index = items.FindIndex(item => item.UserAddress == PlayerData.PlayerAddress);
+                index = items.FindIndex(item => item.UserAddress.Equals(playerAddress));
+                playerPoint = items[index].Point;
             }
+
+            _mainPlayerRow.SetPlayerAddress(playerAddress);
+            _mainPlayerRow.SetPlayerScore(PointDisplay.GetPointDisplayText(playerPoint));
 
             _mainPlayerRow.SetPlayerRank(index);
         }
