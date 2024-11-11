@@ -32,7 +32,7 @@ mergeInto(LibraryManager.library, {
     },
 
     // Example function to set data in Firestore
-    setData: function (collection, doc, data) {
+    setFirestoreData: function (collection, doc, data) {
         const db = firebase.firestore();
         db.collection(collection).doc(doc).set(JSON.parse(data))
             .then(() => {
@@ -44,7 +44,7 @@ mergeInto(LibraryManager.library, {
     },
 
     // Example function to get data from Firestore
-    getData: function (collection, doc, callbackName, functionName) {
+    getFirestoreData: function (collection, doc, callbackName, functionName) {
         const db = firebase.firestore();
         let collectionName = UTF8ToString(collection);
         let docName = UTF8ToString(doc);
@@ -63,4 +63,20 @@ mergeInto(LibraryManager.library, {
                 console.log("Error getting document:", error);
             });
     },
+
+    getDownloadUrl: function (path, callbackName, functionName) {
+        const path = UTF8ToString(path);
+        const callbackObjectName = UTF8ToString(callbackName);
+        const callbackMethodName = UTF8ToString(functionName);
+        const storage = firebase.storage();
+        const storageRef = storage.ref(path);
+        storageRef.getDownloadURL()
+            .then((url) => {
+                SendMessage(callbackObjectName, callbackMethodName, url);
+            })
+            .catch((error) => {
+                console.log("Error getting download URL:", error);
+                SendMessage(callbackObjectName, callbackMethodName, "");
+            });
+    }
 });
