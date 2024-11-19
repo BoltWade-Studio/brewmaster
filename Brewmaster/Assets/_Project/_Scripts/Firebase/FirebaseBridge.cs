@@ -25,10 +25,12 @@ public class FirebaseBridge : MonoBehaviour
 
     private void Start()
     {
+#if UNITY_WEBGL && !UNITY_EDITOR
         // Initialize Firebase
         initializeFirebase();
 
         LoadFirebaseData("server", "serverLink");
+#endif
     }
 
     #region Cloud Firestore

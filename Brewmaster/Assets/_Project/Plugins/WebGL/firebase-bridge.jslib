@@ -65,11 +65,11 @@ mergeInto(LibraryManager.library, {
     },
 
     getDownloadUrl: function (path, callbackName, functionName) {
-        const path = UTF8ToString(path);
+        const pathUrl = UTF8ToString(path);
         const callbackObjectName = UTF8ToString(callbackName);
         const callbackMethodName = UTF8ToString(functionName);
         const storage = firebase.storage();
-        const storageRef = storage.ref(path);
+        const storageRef = storage.ref(pathUrl);
         storageRef.getDownloadURL()
             .then((url) => {
                 SendMessage(callbackObjectName, callbackMethodName, url);

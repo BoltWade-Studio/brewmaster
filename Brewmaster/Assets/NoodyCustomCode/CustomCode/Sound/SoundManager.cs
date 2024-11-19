@@ -1,25 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 
 namespace NOOD.Sound
 {
     public class SoundManager
     {
-#region Object Init
+        #region Object Init
         private static SoundDataSO soundData;
         private static GameObject soundManagerGlobal;
-#endregion
+        #endregion
 
-#region List
+        #region List
         private static List<MusicPlayer> enableMusicPlayers;
         private static List<SoundPlayer> enableSoundPlayers;
         private static List<MusicPlayer> disableMusicPlayers;
         private static List<SoundPlayer> disableSoundPlayers;
-#endregion
+        #endregion
 
-#region Parameter
+        #region Parameter
         private static float globalSoundVolume;
         private static float globalMusicVolume;
         public static float GlobalSoundVolume
@@ -46,15 +47,15 @@ namespace NOOD.Sound
                 AppliedVolume();
             }
         }
-#endregion
+        #endregion
 
-#region Init
+        #region Init
         public static void FindSoundData()
         {
             SoundDataSO[] soundDataSOs = Resources.LoadAll<SoundDataSO>("");
-            if(soundDataSOs.Length > 0)
+            if (soundDataSOs.Length > 0)
                 soundData = Resources.FindObjectsOfTypeAll<SoundDataSO>()[0];
-            if(soundData == null)
+            if (soundData == null)
                 Debug.LogError("Can't find SoundData, please create one in Resources folder using Create -> SoundData");
             else
                 Debug.Log("Load SoundData success");
@@ -62,7 +63,7 @@ namespace NOOD.Sound
 
         private static void InitIfNeed()
         {
-            if(soundManagerGlobal == null)
+            if (soundManagerGlobal == null)
             {
                 Debug.Log("SoundManager Init");
                 soundManagerGlobal = new GameObject("SoundManagerGlobal");
@@ -79,18 +80,18 @@ namespace NOOD.Sound
         {
             InitIfNeed();
         }
-#endregion
+        #endregion
 
-#region SoundRegion
+        #region SoundRegion
         /// <summary>
         /// Play sound with your volume
         /// </summary>
         /// <param name="soundEnum"></param>
         /// <param name="volume"></param>
-        public static void PlaySound(SoundEnum soundEnum, Vector3 position, float volume = 1)
+        public static async void PlaySound(SoundEnum soundEnum, Vector3 position, float volume = 1)
         {
             InitIfNeed();
-            if(soundData == null)
+            if (soundData == null)
             {
                 FindSoundData();
             }
@@ -114,7 +115,7 @@ namespace NOOD.Sound
                 soundPlayer.soundType = soundEnum;
                 soundAudioPayer = newObj.AddComponent<AudioSource>();
             }
-            AudioClip audioClip = soundData.soundDic.Dictionary[soundEnum.ToString()];
+            AudioClip audioClip = await soundData.GetSound(soundEnum);
 
             soundPlayer.transform.position = position;
             soundAudioPayer.playOnAwake = false;
@@ -127,7 +128,7 @@ namespace NOOD.Sound
             // Add to list when end sound
             NoodyCustomCode.StartDelayFunction(() =>
             {
-                if(soundAudioPayer != null)
+                if (soundAudioPayer != null)
                 {
                     Fade(soundAudioPayer, audioClip.length * 0.2f, 0, onComplete: () =>
                     {
@@ -157,15 +158,15 @@ namespace NOOD.Sound
         public static void StopSound(SoundEnum soundEnum)
         {
             InitIfNeed();
-            if(soundData == null)
+            if (soundData == null)
             {
                 FindSoundData();
             }
             SoundPlayer[] soundPlayerArray = GameObject.FindObjectsByType<SoundPlayer>(sortMode: FindObjectsSortMode.None).Where(x => x.soundType == soundEnum).ToArray();
 
-            foreach(var soundPlayer in soundPlayerArray)
+            foreach (var soundPlayer in soundPlayerArray)
             {
-                if(soundPlayer.isActiveAndEnabled)
+                if (soundPlayer.isActiveAndEnabled)
                 {
                     AudioSource soundAudioPlayer = soundPlayer.GetComponent<AudioSource>();
                     Fade(soundAudioPlayer, 0.2f, 0, onComplete: () =>
@@ -183,14 +184,14 @@ namespace NOOD.Sound
         public static void StopAllSound()
         {
             InitIfNeed();
-            if(soundData == null)
+            if (soundData == null)
             {
                 FindSoundData();
             }
 
-            foreach(var soundPlayer in GameObject.FindObjectsOfType<SoundPlayer>())
+            foreach (var soundPlayer in GameObject.FindObjectsOfType<SoundPlayer>())
             {
-                if(soundPlayer.isActiveAndEnabled)
+                if (soundPlayer.isActiveAndEnabled)
                 {
                     soundPlayer.gameObject.SetActive(false);
 
@@ -204,25 +205,26 @@ namespace NOOD.Sound
         /// </summary>
         /// <param name="soundEnum"></param>
         /// <returns></returns>
-        public static float GetSoundLength(SoundEnum soundEnum)
+        public static async UniTask<float> GetSoundLength(SoundEnum soundEnum)
         {
-            if(soundData == null)
+            if (soundData == null)
             {
                 FindSoundData();
             }
-            return soundData.soundDic.Dictionary[soundEnum.ToString()].length;
+            AudioClip audioClip = await soundData.GetSound(soundEnum);
+            return audioClip.length;
         }
-#endregion
+        #endregion
 
-#region MusicRegion
+        #region MusicRegion
         /// <summary>
         /// Play music with new MusicPlayer gameObject and with your volume
         /// </summary>
         /// <param name="musicEnum"></param>
-        public static void PlayMusic(MusicEnum musicEnum, float volume = 1, bool alwaysPlay = false)
+        public static async void PlayMusic(MusicEnum musicEnum, float volume = 1, bool alwaysPlay = false)
         {
             InitIfNeed();
-            if(soundData == null)
+            if (soundData == null)
             {
                 FindSoundData();
             }
@@ -230,7 +232,7 @@ namespace NOOD.Sound
             if (enableMusicPlayers.Any(x => x.musicType == musicEnum)) return;
 
             MusicPlayer musicPlayer;
-            if(disableMusicPlayers.Any(x => x.musicType == musicEnum))
+            if (disableMusicPlayers.Any(x => x.musicType == musicEnum))
             {
                 musicPlayer = disableMusicPlayers.First(x => x.musicType == musicEnum);
                 musicPlayer.gameObject.SetActive(true);
@@ -249,7 +251,7 @@ namespace NOOD.Sound
 
             AudioSource musicAudioSource;
             musicAudioSource = musicPlayer.gameObject.AddComponent<AudioSource>();
-            AudioClip audioClip = musicAudioSource.clip = soundData.musicDic.Dictionary[musicEnum.ToString()];
+            AudioClip audioClip = musicAudioSource.clip = await soundData.GetMusic(musicEnum);
 
             musicAudioSource.volume = volume;
 
@@ -274,9 +276,9 @@ namespace NOOD.Sound
         public static void ChangeMusicVolume(MusicEnum musicEnum, float volume)
         {
             InitIfNeed();
-            foreach(var musicPlayer in enableMusicPlayers)
+            foreach (var musicPlayer in enableMusicPlayers)
             {
-                if(musicPlayer.musicType == musicEnum)
+                if (musicPlayer.musicType == musicEnum)
                 {
                     AudioSource audioSource = musicPlayer.GetComponent<AudioSource>();
                     audioSource.volume = volume;
@@ -289,24 +291,23 @@ namespace NOOD.Sound
         /// <param name="sourceMusicEnum"></param>
         /// <param name="toMusicEnum"></param>
         public static void ChangeMusic(MusicEnum sourceMusicEnum, MusicEnum toMusicEnum)
-
         {
             InitIfNeed();
-            if(soundData == null)
+            if (soundData == null)
             {
                 FindSoundData();
             }
 
             MusicPlayer musicPlayer;
             AudioSource musicAudioSource;
-            if(enableMusicPlayers.Any(x => x.musicType == sourceMusicEnum))
+            if (enableMusicPlayers.Any(x => x.musicType == sourceMusicEnum))
             {
                 musicPlayer = enableMusicPlayers.First(x => x.musicType == sourceMusicEnum);
                 musicAudioSource = musicPlayer.GetComponent<AudioSource>();
-                Fade(musicAudioSource, 0.2f, 0, onComplete: () =>
+                Fade(musicAudioSource, 0.2f, 0, onComplete: async () =>
                 {
                     musicPlayer.musicType = toMusicEnum;
-                    musicAudioSource.clip = soundData.musicDic.Dictionary[toMusicEnum.ToString()];
+                    musicAudioSource.clip = await soundData.GetMusic(toMusicEnum);
                     Fade(musicAudioSource, 0.2f, 1);
                 });
             }
@@ -330,9 +331,9 @@ namespace NOOD.Sound
         public static void StopMusic(MusicEnum musicEnum)
         {
             InitIfNeed();
-            if(enableMusicPlayers.Any(x => x.musicType == musicEnum))
+            if (enableMusicPlayers.Any(x => x.musicType == musicEnum))
             {
-                MusicPlayer musicPlayer =  enableMusicPlayers.First(x => x.musicType == musicEnum);
+                MusicPlayer musicPlayer = enableMusicPlayers.First(x => x.musicType == musicEnum);
 
                 AudioSource musicAudioSource = musicPlayer.GetComponent<AudioSource>();
                 Fade(musicAudioSource, 0.5f, 0, onComplete: () =>
@@ -342,7 +343,7 @@ namespace NOOD.Sound
                     enableMusicPlayers.Remove(musicPlayer);
                     disableMusicPlayers.Add(musicPlayer);
                 });
-            } 
+            }
         }
         /// <summary>
         /// Resume MusicPlayer with the same musicEnum
@@ -351,9 +352,9 @@ namespace NOOD.Sound
         public static void ResumeMusic(MusicEnum musicEnum)
         {
             InitIfNeed();
-            if(enableMusicPlayers.Any(x => x.musicType == musicEnum))
+            if (enableMusicPlayers.Any(x => x.musicType == musicEnum))
             {
-                MusicPlayer musicPlayer =  disableMusicPlayers.First(x => x.musicType == musicEnum);
+                MusicPlayer musicPlayer = disableMusicPlayers.First(x => x.musicType == musicEnum);
 
                 musicPlayer.gameObject.SetActive(true);
                 musicPlayer.TryGetComponent<AudioSource>(out AudioSource audioSource);
@@ -362,7 +363,7 @@ namespace NOOD.Sound
                 Fade(audioSource, 0.5f, GlobalMusicVolume);
                 enableMusicPlayers.Add(musicPlayer);
                 disableMusicPlayers.Remove(musicPlayer);
-            } 
+            }
         }
         /// <summary>
         /// Stop all MusicPlayers found
@@ -370,11 +371,11 @@ namespace NOOD.Sound
         public static void StopAllMusic()
         {
             InitIfNeed();
-            if(soundData == null)
+            if (soundData == null)
             {
                 FindSoundData();
             }
-            foreach(var musicPlayer in enableMusicPlayers)
+            foreach (var musicPlayer in enableMusicPlayers)
             {
                 musicPlayer.GetComponent<AudioSource>().Stop();
                 musicPlayer.gameObject.SetActive(false);
@@ -388,11 +389,11 @@ namespace NOOD.Sound
         public static void ResumeAllMusic()
         {
             InitIfNeed();
-            if(soundData == null)
+            if (soundData == null)
             {
                 FindSoundData();
             }
-            foreach(var musicPlayer in disableMusicPlayers)
+            foreach (var musicPlayer in disableMusicPlayers)
             {
                 musicPlayer.TryGetComponent<AudioSource>(out AudioSource audioSource);
 
@@ -405,9 +406,9 @@ namespace NOOD.Sound
             }
         }
         #endregion
-#endregion
+        #endregion
 
-#region Support functions
+        #region Support functions
         /// <summary>
         /// Fade in or out base on target volume
         /// </summary>
@@ -438,13 +439,14 @@ namespace NOOD.Sound
         /// </summary>
         /// <param name="musicEnum"></param>
         /// <returns></returns>
-        public static float GetMusicLength(MusicEnum musicEnum)
+        public static async UniTask<float> GetMusicLength(MusicEnum musicEnum)
         {
-            if(soundData == null)
+            if (soundData == null)
             {
                 FindSoundData();
             }
-            return soundData.musicDic.Dictionary[musicEnum.ToString()].length;
+            AudioClip audioClip = await soundData.GetMusic(musicEnum);
+            return audioClip.length;
         }
         public static bool IsMusicPlaying(MusicEnum musicEnum)
         {
@@ -455,16 +457,16 @@ namespace NOOD.Sound
         {
             // To sound
             SoundPlayer[] soundPlayers = GameObject.FindObjectsByType<SoundPlayer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach(var sound in soundPlayers)
+            foreach (var sound in soundPlayers)
             {
-                if(sound.TryGetComponent<AudioSource>(out AudioSource audioSource))
+                if (sound.TryGetComponent<AudioSource>(out AudioSource audioSource))
                 {
                     audioSource.volume = globalSoundVolume;
                 }
             }
             // To music
             MusicPlayer[] musicPlayers = GameObject.FindObjectsByType<MusicPlayer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach(var musicPlayer in musicPlayers)
+            foreach (var musicPlayer in musicPlayers)
             {
                 AudioSource audioSource = musicPlayer.GetComponent<AudioSource>();
                 audioSource.volume = globalMusicVolume;
@@ -484,10 +486,10 @@ namespace NOOD.Sound
             if (disableSoundPlayers.Contains(soundPlayer))
                 disableSoundPlayers.Remove(soundPlayer);
         }
-#endregion
+        #endregion
     }
 
-    public class SoundPlayer : MonoBehaviour 
+    public class SoundPlayer : MonoBehaviour
     {
         public SoundEnum soundType;
         private void OnDestroy()
@@ -495,7 +497,7 @@ namespace NOOD.Sound
             SoundManager.RemoveSoundPlayer(this);
         }
     }
-    public class MusicPlayer : MonoBehaviour 
+    public class MusicPlayer : MonoBehaviour
     {
         public MusicEnum musicType;
         public bool isAlwaysPlay;

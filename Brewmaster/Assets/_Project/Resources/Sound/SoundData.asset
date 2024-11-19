@@ -33,8 +33,20 @@ MonoBehaviour:
     - _key: ServeBeer
       _value: {fileID: 8300000, guid: 871fb5cdb4756ed4195dd6b4caf5d39f, type: 3}
   musicDic:
+    _pairs: []
+  addressableSoundDic:
+    _pairs: []
+  addressableMusicDic:
     _pairs:
     - _key: CrowdBGSound
-      _value: {fileID: 8300000, guid: 00526aa622097e841ace9dbd7c0d4086, type: 3}
+      _value:
+        m_AssetGUID: 00526aa622097e841ace9dbd7c0d4086
+        m_SubObjectName: 
+        m_SubObjectType: 
+        m_EditorAssetChanged: 0
     - _key: PianoBGMusic
-      _value: {fileID: 8300000, guid: 7731cf2636465524caa57ebfe30d3258, type: 3}
+      _value:
+        m_AssetGUID: 7731cf2636465524caa57ebfe30d3258
+        m_SubObjectName: 
+        m_SubObjectType: 
+        m_EditorAssetChanged: 0

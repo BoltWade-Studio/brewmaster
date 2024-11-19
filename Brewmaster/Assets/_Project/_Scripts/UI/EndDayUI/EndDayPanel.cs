@@ -239,7 +239,8 @@ namespace Game
             {
                 await UniTask.Yield();
                 time += Time.unscaledDeltaTime * _moneyIncreaseSpeed;
-                lerpValue = time / SoundManager.GetSoundLength(SoundEnum.MoneySound);
+                float soundLength = await SoundManager.GetSoundLength(SoundEnum.MoneySound);
+                lerpValue = time / soundLength;
                 treasuryTemp = Mathf.Lerp(0, PlayerData.InDayTreasury, lerpValue);
                 _treasuryText.text = treasuryTemp.ToString();
                 pointTemp = Mathf.Lerp(0, _tempPoint, lerpValue);
